@@ -62,10 +62,6 @@ INSERT INTO roles VALUES('U','Usuario');
 INSERT INTO usuarios(nombre_usuario,clave_hash) VALUES('admin','ALiah/YdxclgLLhWoIw11aa8F4RcCP1b6f0l12wyENzsRmxPWYPn7I+v4pF93Bc8qg==');
 INSERT INTO usuarios_roles SELECT usuario_id,'A' FROM usuarios WHERE nombre_usuario='admin'; 
 
---Usuario 'demo' con clave "12345"
-INSERT INTO usuarios(nombre_usuario,clave_hash) VALUES('demo','AAhNSN2Xs3kSkWj4C40kxzqu8/0lWBrcOs017+xxZ/rBFHLf+fhgXjo192hEEvA6Sg==');
-INSERT INTO usuarios_roles SELECT usuario_id,'U' FROM usuarios WHERE nombre_usuario='demo'; 
-
 
 INSERT INTO tipos_configuraciones VALUES
 ('jwtConfig','La configuración de la autentificación JWT');
@@ -78,4 +74,25 @@ CREATE TABLE areas (
     fecha_registro timestamp with time zone NOT NULL DEFAULT now(),
     CONSTRAINT areas_pk PRIMARY KEY(area_id),
     CONSTRAINT areas_unq UNIQUE(nombre)
+);
+
+-- Tabla para almacenar información personal de un único usuario y su área asociada
+CREATE TABLE usuarios_perfiles
+(
+	usuario_id uuid NOT NULL,
+	nombres text NOT NULL,
+	apellidos text NOT NULL,
+	tipo_documento text NOT NULL,
+	numero_documento text NOT NULL,
+	area_id uuid NOT NULL,
+	fecha_registro timestamp with time zone NOT NULL DEFAULT now(),--fecha interna del sistema
+	fecha_actualizacion timestamp with time zone NOT NULL DEFAULT now(),
+	CONSTRAINT usuarios_perfiles_pk PRIMARY KEY(usuario_id),
+	CONSTRAINT usuarios_perfiles_usuario_fkey FOREIGN KEY(usuario_id)
+	REFERENCES usuarios(usuario_id) MATCH SIMPLE
+	ON UPDATE RESTRICT ON DELETE CASCADE,
+	CONSTRAINT usuarios_perfiles_area_fkey FOREIGN KEY(area_id)
+	REFERENCES areas(area_id) MATCH SIMPLE
+	ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT numero_documento_unq UNIQUE(numero_documento)
 );

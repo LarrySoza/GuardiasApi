@@ -1,5 +1,7 @@
+using App.WebApi.Entities;
 using App.WebApi.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.SignalR;
 using NLog;
 using NLog.Web;
 namespace App.WebApi
@@ -30,7 +32,14 @@ namespace App.WebApi
 
                 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
                 builder.Services.AddEndpointsApiExplorer();
-                builder.Services.AddSwaggerGen();
+
+                builder.Services.AddSignalR(options =>
+                {
+                    options.EnableDetailedErrors = true;
+                });
+
+                //Registrar el servicio singleton para rastrear usuarios conectados
+                builder.Services.AddSingleton<ConnectedUsersTracker>();
 
                 var app = builder.Build();
 
@@ -39,7 +48,7 @@ namespace App.WebApi
                 {
                     app.UseDeveloperExceptionPage();
                     app.UseSwagger();
-                    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "EduTrack.WebApi v1"));
+                    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Guardias.WebApi v1"));
                 }
 
                 //Usar el manejador de error

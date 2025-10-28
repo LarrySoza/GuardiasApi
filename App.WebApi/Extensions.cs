@@ -53,9 +53,27 @@ namespace App.WebApi
                     //Si desea permitir una cierta cantidad de desviación del reloj, configúrelo aquí
                     ClockSkew = TimeSpan.Zero,
                 };
+                
                 obj.UseSecurityTokenValidators = true;
+
                 obj.Events = new JwtBearerEvents()
                 {
+                    OnMessageReceived = context =>
+                    {
+                        // Solo aplica para conexiones WebSocket como SignalR
+                        var accessToken = context.Request.Query["access_token"];
+
+                        // Aquí verifica si la solicitud es al Hub
+                        var path = context.HttpContext.Request.Path;
+                        if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs/tracker"))
+                        {
+                            context.Token = accessToken;
+                        }
+
+                        return Task.CompletedTask;
+                    },
+
+
                     OnTokenValidated = context =>
                     {
                         //Debe existir el claim usuarioId
@@ -180,8 +198,7 @@ namespace App.WebApi
 
         public static void ConfigureHubs(this IEndpointRouteBuilder app)
         {
-            app.MapHub<LocationHub>("/hubs/location");
-            app.MapHub<NotificationHub>("/hubs/notification");
+            app.MapHub<TrackerHub>("/hubs/tracker");
         }
 
         public static Guid Id(this ClaimsPrincipal user)

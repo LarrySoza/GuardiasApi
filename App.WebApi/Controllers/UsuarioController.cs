@@ -48,5 +48,47 @@ namespace App.WebApi.Controllers
                 throw;
             }
         }
+
+        [ProducesResponseType(typeof(VwUsuarioPerfil), (int)HttpStatusCode.OK)]
+        [HttpGet("perfil",Name = "ObtenerPerfil")]
+        public async Task<IActionResult> ObtenerPerfil()
+        {
+            try
+            {
+                var _usuarioClass = new UsuarioClass(_config);
+                var perfil = await _usuarioClass.ConsultarPerfilPorIdAsync(User.Id());
+                return Ok(perfil);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        [ProducesResponseType(typeof(Area), (int)HttpStatusCode.OK)]
+        [HttpGet("area", Name = "ObtenerAreaUsuario")]
+        public async Task<IActionResult> ObtenerAreaUsuario()
+        {
+            try
+            {
+                var _usuarioClass = new UsuarioClass(_config);
+                var area = await _usuarioClass.ConsultarArea(User.Id());
+
+                if (area == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(area);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
     }
 }

@@ -365,5 +365,49 @@ namespace App.WebApi.Infrastructure
                 };
             }
         }
+
+        public async Task<VwUsuarioPerfil?> ConsultarPerfilPorIdAsync(Guid usuarioId)
+        {
+            string _query = @"
+                             SELECT
+                                u.usuario_id,
+                                u.nombre_usuario,
+                                up.nombres,
+                                up.apellidos,
+                                up.tipo_documento,
+                                up.numero_documento,
+                                up.area_id,
+                                up.fecha_actualizacion,
+                                a.nombre AS nombre_area
+                             FROM usuarios u
+                             JOIN usuarios_perfiles up ON u.usuario_id = up.usuario_id
+                             LEFT JOIN areas a ON up.area_id = a.area_id
+                             WHERE u.usuario_id = @usuario_id";
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@usuario_id", usuarioId);
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString()))
+            {
+                return await connection.QueryFirstOrDefaultAsync<VwUsuarioPerfil>(_query, _parametros);
+            }
+        }
+
+        public async Task<Area?> ConsultarArea(Guid usuarioId)
+        {
+            string _query = "SELECT area_id FROM usuarios_perfiles WHERE usuario_id = @usuario_id";
+
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@usuario_id", usuarioId);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString()))
+            {
+                var areaId = await connection.QueryFirstOrDefaultAsync<Guid?>(new CommandDefinition(_query, _parametros));
+                if (areaId.HasValue)
+                {
+                    var areaClass = new AreaClass(_config);
+                    return await areaClass.ConsultarAsync(areaId.Value);
+                }
+                return null;
+            }
+        }
     }
 }

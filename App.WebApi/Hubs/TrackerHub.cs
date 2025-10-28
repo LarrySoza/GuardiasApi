@@ -15,6 +15,7 @@ namespace App.WebApi.Hubs
         private readonly ILogger<TrackerHub> _logger;
         private readonly IConfiguration _config;
         private const string AdministratorsGroup = "Administradores";
+        private const string UsersGroup = "UsersGroup";
 
         public TrackerHub(IConfiguration config, ILogger<TrackerHub> logger, ConnectedUsersTracker tracker)
         {
@@ -37,10 +38,14 @@ namespace App.WebApi.Hubs
                     await Groups.AddToGroupAsync(Context.ConnectionId, AdministratorsGroup);
                     _logger.LogInformation("ConnectionId {ConnectionId} añadido al grupo {Group}.", Context.ConnectionId, AdministratorsGroup);
                 }
-
-                // Notificar a administradores que un usuario se ha conectado solo si NO es administrador
-                if (!Context.User.IsInRole("Administrador"))
+                else
                 {
+                    // Usuario no administrador: añadir al UsersGroup y marcar en el tracker
+                    await Groups.AddToGroupAsync(Context.ConnectionId, UsersGroup);
+                    _tracker.AddUserToUsersGroup(userId);
+                    _logger.LogInformation("ConnectionId {ConnectionId} añadido al grupo {Group}.", Context.ConnectionId, UsersGroup);
+
+                    // Notificar a administradores que un usuario (no administrador) se ha conectado
                     await Clients.Group(AdministratorsGroup).SendAsync("ReceiveUserConnected", userId);
                 }
             }
@@ -60,7 +65,7 @@ namespace App.WebApi.Hubs
                 var userId = Context.User!.Id();
                 _tracker.RemoveConnection(userId, Context.ConnectionId);
 
-                // Quitar conexión del grupo si estaba en él
+                // Quitar conexión de ambos grupos por seguridad
                 try
                 {
                     await Groups.RemoveFromGroupAsync(Context.ConnectionId, AdministratorsGroup);
@@ -68,10 +73,20 @@ namespace App.WebApi.Hubs
                 }
                 catch (Exception exGroup)
                 {
-                    // No fatal si no se puede quitar del grupo
                     _logger.LogDebug(exGroup, "Error al quitar ConnectionId {ConnectionId} del grupo {Group}.", Context.ConnectionId, AdministratorsGroup);
                 }
 
+                try
+                {
+                    await Groups.RemoveFromGroupAsync(Context.ConnectionId, UsersGroup);
+                    _logger.LogInformation("ConnectionId {ConnectionId} eliminado del grupo {Group}.", Context.ConnectionId, UsersGroup);
+                }
+                catch (Exception exGroup)
+                {
+                    _logger.LogDebug(exGroup, "Error al quitar ConnectionId {ConnectionId} del grupo {Group}.", Context.ConnectionId, UsersGroup);
+                }
+
+                // Si ya no tiene conexiones, el tracker habrá quitado al usuario de usersGroup en RemoveConnection.
                 if (exception is null)
                 {
                     _logger.LogInformation("Usuario {UserId} desconectado (ConnectionId: {ConnectionId}).", userId, Context.ConnectionId);
@@ -81,9 +96,19 @@ namespace App.WebApi.Hubs
                     _logger.LogInformation(exception, "Usuario {UserId} desconectado con excepción (ConnectionId: {ConnectionId}).", userId, Context.ConnectionId);
                 }
 
-                // Notificar a administradores que un usuario se ha desconectado solo si NO es administrador
-                if (!Context.User!.IsInRole("Administrador"))
+                // Notificar a administradores que un usuario (no administrador) se ha desconectado
+                // Solo enviar si el usuario estaba marcado en UsersGroup (y por tanto es usuario no admin)
+                var nonAdmins = _tracker.GetOnlineUsersNonAdmins();
+                if (!nonAdmins.Contains(userId))
                 {
+                    // Si no está en la colección de nonAdmins significa que o bien nunca fue marcado
+                    // o ya quedó desconectado (en ese caso notificamos la desconexión)
+                    await Clients.Group(AdministratorsGroup).SendAsync("ReceiveUserDisconnected", userId);
+                }
+                else
+                {
+                    // Si sigue en nonAdmins (es inusual) no enviamos; normalmente RemoveConnection habrá quitado
+                    // la marca cuando se quedó sin conexiones.
                     await Clients.Group(AdministratorsGroup).SendAsync("ReceiveUserDisconnected", userId);
                 }
             }
@@ -97,36 +122,10 @@ namespace App.WebApi.Hubs
         }
 
         [Authorize(Roles = "Administrador")]
-        public async Task<IReadOnlyCollection<Guid>> GetConnectedUsers()
+        public Task<IReadOnlyCollection<Guid>> GetConnectedUsers()
         {
-            var online = _tracker.GetOnlineUsers();
-            var usuarioClass = new UsuarioClass(_config);
-            var result = new List<Guid>();
-
-            // Consultar roles en paralelo
-            var tasks = online.Select(async userId =>
-            {
-                try
-                {
-                    var roles = await usuarioClass.ListarRolesAsync(userId);
-                    if (!roles.Any(r => string.Equals(r.nombre, "Administrador", StringComparison.OrdinalIgnoreCase)))
-                    {
-                        lock (result)
-                        {
-                            result.Add(userId);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogWarning(ex, "GetConnectedUsers: error al obtener roles del usuario {UserId}.", userId);
-                    // En caso de error al obtener roles se omite al usuario para evitar incluir administradores por error
-                }
-            });
-
-            await Task.WhenAll(tasks);
-
-            return result.AsReadOnly();
+            // Devuelve solo los usuarios conectados que pertenecen al UsersGroup (no administradores)
+            return Task.FromResult(_tracker.GetOnlineUsersNonAdmins());
         }
 
         [Authorize(Roles = "Administrador")]

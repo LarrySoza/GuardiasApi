@@ -228,7 +228,7 @@ namespace App.WebApi.Infrastructure
 
             var _parametros = new DynamicParameters();
             _parametros.Add("@clave_hash", Crypto.HashPassword(clave));
-            _parametros.Add("@sello_seguridad", Guid.NewGuid().ToString());
+            _parametros.Add("@sello_seguridad", Guid.NewGuid());
             _parametros.Add("@usuario_id", usuarioId);
 
             using (var connection = new NpgsqlConnection(_config.GetConnectionString()))
@@ -246,7 +246,6 @@ namespace App.WebApi.Infrastructure
 
             var _parametros = new DynamicParameters();
             _parametros.Add("@usuario_id", usuarioId);
-            _parametros.Add("@sello_seguridad", Guid.NewGuid().ToString());
 
             using (var connection = new NpgsqlConnection(_config.GetConnectionString()))
             {

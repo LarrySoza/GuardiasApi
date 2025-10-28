@@ -55,6 +55,8 @@ namespace App.WebApi
 
                 app.MapControllers();
 
+                app.ConfigureHubs();
+
                 app.Run();
             }
             catch (Exception ex)

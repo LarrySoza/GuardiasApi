@@ -2,11 +2,7 @@
 using App.WebApi.Infrastructure;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
-using System.Security.Claims;
-using System.Text;
 
 namespace App.WebApi.Controllers
 {
@@ -57,8 +53,8 @@ namespace App.WebApi.Controllers
             {
                 var _areaClass = new AreaClass(_config);
 
-                var _areas = string.IsNullOrWhiteSpace(nombre) ? await _areaClass.ListarAsync() : await _areaClass.BuscarAsync(nombre); 
-                
+                var _areas = string.IsNullOrWhiteSpace(nombre) ? await _areaClass.ListarAsync() : await _areaClass.BuscarAsync(nombre);
+
                 return Ok(_areas);
             }
             catch (Exception ex)
@@ -88,5 +84,47 @@ namespace App.WebApi.Controllers
                 throw;
             }
         }
+
+        [ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
+        [HttpPut("usuario", Name = "AsignarUsuarioArea")]
+        public async Task<IActionResult> AsignarUsuarioArea([FromBody] UsuarioAreaDto usuarioArea)
+        {
+            try
+            {
+                var _areaClass = new AreaClass(_config);
+
+                await _areaClass.AsignarUsuario(usuarioArea.area_id, usuarioArea.usuario_id);
+                return Ok(new ResponseDto
+                {
+                    success = true,
+                    message = "Usuario asignado correctamente al área"
+                });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        [ProducesResponseType(typeof(PaginaDatosModel<VwUsuarioPerfil>), (int)HttpStatusCode.OK)]
+        [HttpGet("usuario/lista", Name = "ListarUsuarioArea")]
+        public async Task<IActionResult> ListarUsuarioArea([FromQuery] Guid areaId,
+                                                      [FromQuery] int page = 1,
+                                                      [FromQuery] int pageSize = 20)
+        {
+            try
+            {
+                var _clsPasajero = new UsuarioClass(_config);
+                var _result = await _clsPasajero.ListarPorAreaAsync(areaId, page, pageSize);
+                return Ok(_result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
     }
 }

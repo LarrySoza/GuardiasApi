@@ -6,6 +6,6 @@
         public required string apellidos { get; set; }
         public required string tipo_documento { get; set; }
         public required string numero_documento { get; set; }
-        public Guid area_id { get; set; }
+        public Guid? area_id { get; set; }
     }
 }

@@ -162,5 +162,22 @@ namespace App.WebApi.Infrastructure
                 return await RegistrarAsync(area);
             }
         }
+
+        public async Task AsignarUsuario(Guid? areaId, Guid usuarioId)
+        {
+            string _query = @"UPDATE usuarios_perfiles SET
+                                    area_id=@area_id,
+                                    fecha_actualizacion=now()
+                              WHERE 
+                                    usuario_id=@usuario_id";
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@area_id", areaId);
+            _parametros.Add("@usuario_id", usuarioId);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString()))
+            {
+                await connection.ExecuteAsync(_query, _parametros);
+            }
+        }
     }
 }

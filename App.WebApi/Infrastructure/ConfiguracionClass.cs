@@ -1,5 +1,5 @@
-﻿using Dapper;
-using App.WebApi.Entities;
+﻿using App.WebApi.Entities;
+using Dapper;
 using Npgsql;
 
 namespace App.WebApi.Infrastructure

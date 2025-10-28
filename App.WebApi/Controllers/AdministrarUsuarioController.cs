@@ -44,8 +44,14 @@ namespace App.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Cambiar la clave de un usuario
+        /// </summary>
+        /// <param name="usuarioId"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPut("cambiar_clave",Name = "CambiarClaveUsuario")]
+        [HttpPut("cambiar_clave", Name = "CambiarClaveUsuario")]
         public async Task<IActionResult> CambiarClaveUsuario([FromQuery] Guid usuarioId, CambiarClaveUsuarioDto model)
         {
             try
@@ -67,6 +73,13 @@ namespace App.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Listar usuarios con paginacion y filtro de busqueda
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
         [ProducesResponseType(typeof(PaginaDatosModel<VwUsuarioPerfil>), (int)HttpStatusCode.OK)]
         [HttpGet(Name = "BuscarUsuario")]
         public async Task<IActionResult> BuscarUsuario([FromQuery] string? search,
@@ -86,8 +99,14 @@ namespace App.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Actualizar el perfil de un usuario
+        /// </summary>
+        /// <param name="usuarioId"></param>
+        /// <param name="usuarioActualizaPerfil"></param>
+        /// <returns></returns>
         [ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPut("perfil",Name = "ActualizarPerfil")]
+        [HttpPut("perfil", Name = "ActualizarPerfil")]
         public async Task<IActionResult> ActualizarPerfil([FromQuery] Guid usuarioId, [FromBody] UsuarioActualizaPerfilDto usuarioActualizaPerfil)
         {
             try

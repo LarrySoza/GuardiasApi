@@ -1,4 +1,5 @@
 ﻿using App.WebApi.Entities;
+using App.WebApi.Hubs;
 using App.WebApi.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
@@ -175,6 +176,12 @@ namespace App.WebApi
                     await context.Response.WriteAsync(new ApiException(error?.Error?.Message ?? "Error desconocido").ToString());
                 }
             }));
+        }
+
+        public static void ConfigureHubs(this IEndpointRouteBuilder app)
+        {
+            app.MapHub<LocationHub>("/hubs/location");
+            app.MapHub<NotificationHub>("/hubs/notification");
         }
 
         public static Guid Id(this ClaimsPrincipal user)

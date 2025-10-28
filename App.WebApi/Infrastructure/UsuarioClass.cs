@@ -1,7 +1,6 @@
-﻿using Dapper;
-using App.WebApi.Entities;
+﻿using App.WebApi.Entities;
+using Dapper;
 using Npgsql;
-using System.Text.Json;
 
 namespace App.WebApi.Infrastructure
 {
@@ -37,51 +36,51 @@ namespace App.WebApi.Infrastructure
         }
 
         /// <summary>
-        /// Registrar un usuario y devuelve el id asignado
+        /// Registra un nuevo usuario
         /// </summary>
-        /// <param name="usuario">Informacion del usuario</param>
+        /// <param name="usuario"></param>
         /// <returns></returns>
-        public async Task<string?> RegistrarAsync(UsuarioRegistroDto usuario)
+        /// <exception cref="Exception"></exception>
+        public async Task<Guid> RegistrarAsync(UsuarioRegistroDto usuario)
         {
             try
             {
                 string _queryUsuario = @"INSERT INTO usuarios
-	                                (nombre_usuario, 
-	                                 clave_hash, 
-	                                 correo,
-                                     correo_confirmado,
-                                     sello_seguridad)
-                              VALUES
-	                                (@nombre_usuario, 
-	                                 @clave_hash, 
-	                                 @correo,
-                                     @correo_confirmado,
-                                     @sello_seguridad)
-                              RETURNING usuario_id";
+	                                            (nombre_usuario, 
+	                                            clave_hash, 
+	                                            correo,
+                                                correo_confirmado,
+                                                sello_seguridad)
+                                        VALUES
+	                                            (@nombre_usuario, 
+	                                            @clave_hash, 
+	                                            @correo,
+                                                @correo_confirmado,
+                                                uuid_generate_v4())
+                                        RETURNING usuario_id";
 
                 string _queryPerfil = @"INSERT INTO usuarios_perfiles
-                                    (usuario_id, 
-                                     nombres, 
-                                     apellidos, 
-                                     tipo_documento, 
-                                     numero_documento, 
-                                     area_id)
-                              VALUES
-                                    (@usuario_id, 
-                                     @nombres, 
-                                     @apellidos, 
-                                     @tipo_documento, 
-                                     @numero_documento, 
-                                     @area_id)";
+                                                (usuario_id, 
+                                                 nombres, 
+                                                 apellidos, 
+                                                 tipo_documento, 
+                                                 numero_documento, 
+                                                 area_id)
+                                          VALUES
+                                                (@usuario_id, 
+                                                 @nombres, 
+                                                 @apellidos, 
+                                                 @tipo_documento, 
+                                                 @numero_documento, 
+                                                 @area_id)";
 
                 var _queryRol = "INSERT INTO usuarios_roles(usuario_id,rol_id) VALUES(@usuario_id,@rol_id)";
 
                 var _parametros = new DynamicParameters();
                 _parametros.Add("@nombre_usuario", usuario.nombre_usuario);
                 _parametros.Add("@clave_hash", Crypto.HashPassword(usuario.clave!));
-                _parametros.Add("@correo");
+                _parametros.Add("@correo", null);
                 _parametros.Add("@correo_confirmado", false);
-                _parametros.Add("@sello_seguridad", Guid.NewGuid().ToString());
 
                 using (var connection = new NpgsqlConnection(_config.GetConnectionString()))
                 {
@@ -89,7 +88,7 @@ namespace App.WebApi.Infrastructure
 
                     using (var sqlTran = connection.BeginTransaction())
                     {
-                        var _usuarioId = await connection.ExecuteScalarAsync<string>(new CommandDefinition(_queryUsuario, _parametros, transaction: sqlTran));
+                        var _usuarioId = await connection.ExecuteScalarAsync<Guid>(new CommandDefinition(_queryUsuario, _parametros, transaction: sqlTran));
 
                         _parametros = new DynamicParameters();
                         _parametros.Add("@usuario_id", _usuarioId);
@@ -130,6 +129,12 @@ namespace App.WebApi.Infrastructure
             }
         }
 
+        /// <summary>
+        /// Actualiza el perfil del usuario
+        /// </summary>
+        /// <param name="usuarioId"></param>
+        /// <param name="perfil"></param>
+        /// <returns></returns>
         public async Task ActualizarPerfilAsync(Guid usuarioId, UsuarioActualizaPerfilDto perfil)
         {
             string _query = @"UPDATE usuarios_perfiles SET
@@ -138,7 +143,7 @@ namespace App.WebApi.Infrastructure
                                     tipo_documento=@tipo_documento,
                                     numero_documento=@numero_documento,
                                     area_id=@area_id,
-                                    fecha_actualizacion=NOW()
+                                    fecha_actualizacion=now()
                               WHERE 
                                     usuario_id=@usuario_id";
             var _parametros = new DynamicParameters();
@@ -155,6 +160,12 @@ namespace App.WebApi.Infrastructure
             }
         }
 
+        /// <summary>
+        /// Valida la clave de un usuario
+        /// </summary>
+        /// <param name="usuarioId"></param>
+        /// <param name="clave"></param>
+        /// <returns></returns>
         public async Task<bool> ValidarClave(Guid usuarioId, string clave)
         {
             var _usuario = await ConsultarPorIdAsync(usuarioId);
@@ -166,6 +177,11 @@ namespace App.WebApi.Infrastructure
             return false;
         }
 
+        /// <summary>
+        /// Consulta un usuario por su Id   
+        /// </summary>
+        /// <param name="usuarioId"></param>
+        /// <returns></returns>
         public async Task<Usuario?> ConsultarPorIdAsync(Guid usuarioId)
         {
             string _query = "SELECT * FROM usuarios WHERE usuario_id=@usuario_id";
@@ -277,6 +293,59 @@ namespace App.WebApi.Infrastructure
                 var parametros = new
                 {
                     search = string.IsNullOrWhiteSpace(search) ? null : search,
+                    offset,
+                    pageSize
+                };
+
+                using var multi = await dbClientes.QueryMultipleAsync(_sql, parametros);
+
+                var total = await multi.ReadSingleAsync<int>();
+                var data = await multi.ReadAsync<VwUsuarioPerfil>();
+
+                return new PaginaDatosModel<VwUsuarioPerfil>()
+                {
+                    total = total,
+                    page = page,
+                    pageSize = pageSize,
+                    totalPages = (int)Math.Ceiling(total / (double)pageSize),
+                    data = data.ToList()
+                };
+            }
+        }
+
+        public async Task<PaginaDatosModel<VwUsuarioPerfil>> ListarPorAreaAsync(Guid areaId, int page = 1, int pageSize = 20)
+        {
+            using (var dbClientes = new NpgsqlConnection(_config.GetConnectionString()))
+            {
+                var _sql = @"
+                             SELECT count(*)
+                             FROM usuarios u
+                             JOIN usuarios_perfiles up ON u.usuario_id = up.usuario_id
+                             LEFT JOIN areas a ON up.area_id = a.area_id
+                             WHERE up.area_id = @areaId;
+
+                             SELECT
+                                u.usuario_id,
+                                u.nombre_usuario,
+                                up.nombres,
+                                up.apellidos,
+                                up.tipo_documento,
+                                up.numero_documento,
+                                up.area_id,
+                                up.fecha_actualizacion,
+                                a.nombre AS nombre_area
+                             FROM usuarios u
+                             JOIN usuarios_perfiles up ON u.usuario_id = up.usuario_id
+                             LEFT JOIN areas a ON up.area_id = a.area_id
+                             WHERE up.area_id = @areaId
+                                ORDER BY up.apellidos
+                                LIMIT @pageSize OFFSET @offset;";
+
+                var offset = (page - 1) * pageSize;
+
+                var parametros = new
+                {
+                    areaId,
                     offset,
                     pageSize
                 };

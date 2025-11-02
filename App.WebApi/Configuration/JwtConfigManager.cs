@@ -1,8 +1,7 @@
-﻿using App.WebApi.Models.Shared;
-using System.Text.Json;
+﻿using System.Text.Json;
 using System.Text.Json.Nodes;
 
-namespace App.WebApi
+namespace App.WebApi.Configuration
 {
     public class JwtConfigManager
     {
@@ -16,13 +15,13 @@ namespace App.WebApi
             _config = config;
         }
 
-        public JwtConfig LoadConfig()
+        public JwtOptions LoadConfig()
         {
             var _defaultKey = "n`h}G01K{I{#B[4S$_^m=ISiC:7wy[?1";
 
             // Leer la configuración de JWT directamente desde IConfiguration (appsettings / env)
             var jwtSection = _config.GetSection("Jwt");
-            var _configJwt = jwtSection.Get<JwtConfig>() ?? new JwtConfig
+            var _configJwt = jwtSection.Get<JwtOptions>() ?? new JwtOptions
             {
                 Issuer = _config["Jwt:Issuer"] ?? "Api",
                 Audience = _config["Jwt:Audience"] ?? "https://gaspersoft.com",
@@ -38,7 +37,7 @@ namespace App.WebApi
             return _configJwt;
         }
 
-        public void UpdateConfig(JwtConfig config)
+        public void UpdateConfig(JwtOptions config)
         {
             if (config == null)
             {

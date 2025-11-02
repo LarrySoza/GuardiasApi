@@ -1,15 +1,14 @@
-using App.WebApi.Models.Shared;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace App.WebApi
+namespace App.WebApi.Configuration
 {
     public class TokenValidationParametersProvider
     {
         public TokenValidationParameters Parameters { get; }
 
-        public TokenValidationParametersProvider(IOptionsMonitor<JwtConfig> jwtMonitor)
+        public TokenValidationParametersProvider(IOptionsMonitor<JwtOptions> jwtMonitor)
         {
             var cfg = jwtMonitor.CurrentValue;
             Parameters = Create(cfg);
@@ -29,7 +28,7 @@ namespace App.WebApi
             });
         }
 
-        private static TokenValidationParameters Create(JwtConfig cfg) => new TokenValidationParameters
+        private static TokenValidationParameters Create(JwtOptions cfg) => new TokenValidationParameters
         {
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg.SecretKey)),

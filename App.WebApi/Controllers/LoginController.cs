@@ -1,6 +1,7 @@
 ﻿using App.Application.Interfaces;
 using App.Core.Entities.Core;
 using App.Infrastructure;
+using App.WebApi.Configuration;
 using App.WebApi.Models.Auth;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;

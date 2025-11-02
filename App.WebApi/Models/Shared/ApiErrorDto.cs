@@ -1,13 +1,13 @@
 ﻿namespace App.WebApi.Models.Shared
 {
-    public class ApiError
+    public class ApiErrorDto
     {
         public string code { get; private set; }
 
         //[JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
         public string message { get; private set; }
 
-        public ApiError(string code, string message = "")
+        public ApiErrorDto(string code, string message = "")
         {
             this.code = code;
             this.message = message;

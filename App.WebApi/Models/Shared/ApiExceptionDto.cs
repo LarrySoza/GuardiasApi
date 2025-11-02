@@ -2,13 +2,13 @@
 
 namespace App.WebApi.Models.Shared
 {
-    public class ApiException : Exception
+    public class ApiExceptionDto : Exception
     {
         public string message { get { return base.Message; } }
 
-        public ApiError[] Errors { get; private set; }
+        public ApiErrorDto[] Errors { get; private set; }
 
-        public ApiException(string message, params ApiError[] errors) : base(message)
+        public ApiExceptionDto(string message, params ApiErrorDto[] errors) : base(message)
         {
             Errors = errors;
         }

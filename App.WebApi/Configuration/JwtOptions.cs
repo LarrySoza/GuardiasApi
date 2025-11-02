@@ -1,6 +1,6 @@
-﻿namespace App.WebApi.Models.Shared
+﻿namespace App.WebApi.Configuration
 {
-    public class JwtConfig
+    public class JwtOptions
     {
         public required string SecretKey { get; set; }
         public required string Issuer { get; set; }

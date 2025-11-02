@@ -1,4 +1,5 @@
 ﻿using App.Application.Interfaces;
+using App.WebApi.Configuration;
 using App.WebApi.Hubs;
 using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -28,7 +29,7 @@ namespace App.WebApi
         public static void ConfigureAuthJwt(this IServiceCollection services, IConfiguration config)
         {
             // Registrar configuracion Jwt para reloadOnChange
-            services.Configure<JwtConfig>(config.GetSection("Jwt"));
+            services.Configure<JwtOptions>(config.GetSection("Jwt"));
 
             // Registrar el provider que crea y muta TokenValidationParameters
             services.AddSingleton<TokenValidationParametersProvider>();
@@ -167,14 +168,14 @@ namespace App.WebApi
 
                 var error = context.Features.Get<IExceptionHandlerPathFeature>();
 
-                if (error?.Error is ApiException)
+                if (error?.Error is ApiExceptionDto)
                 {
-                    var ex = error.Error as ApiException;
+                    var ex = error.Error as ApiExceptionDto;
                     await context.Response.WriteAsync(ex?.ToString() ?? "Error desconocido");
                 }
                 else
                 {
-                    await context.Response.WriteAsync(new ApiException(error?.Error?.Message ?? "Error desconocido").ToString());
+                    await context.Response.WriteAsync(new ApiExceptionDto(error?.Error?.Message ?? "Error desconocido").ToString());
                 }
             }));
         }

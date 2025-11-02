@@ -1,4 +1,5 @@
-﻿using App.WebApi.Models.Shared;
+﻿using App.WebApi.Configuration;
+using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -25,7 +26,7 @@ namespace App.WebApi.Controllers
         /// Leer la configuracion JWT
         /// </summary>
         /// <returns></returns>
-        [ProducesResponseType(typeof(JwtConfig), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(JwtOptions), (int)HttpStatusCode.OK)]
         [HttpGet(Name = "LeerConfiguracionJwt")]
         public ActionResult LeerConfiguracionJwt()
         {
@@ -49,9 +50,9 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        [ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
         [HttpPut(Name = "GuardarJwtConfig")]
-        public IActionResult GuardarJwtConfig([FromBody] JwtConfig config)
+        public IActionResult GuardarJwtConfig([FromBody] JwtOptions config)
         {
             try
             {
@@ -59,7 +60,7 @@ namespace App.WebApi.Controllers
 
                 _jwtClass.UpdateConfig(config);
 
-                return Ok(new ResponseDto
+                return Ok(new GenericResponseDto
                 {
                     success = true,
                     message = "Configuración actualizada correctamente"

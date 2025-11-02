@@ -3,6 +3,7 @@ using App.WebApi.Hubs;
 using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
@@ -26,9 +27,19 @@ namespace App.WebApi
 
         public static void ConfigureAuthJwt(this IServiceCollection services, IConfiguration config)
         {
-            var _jwtClass = new JwtClass(config);
-            var _configJwt = _jwtClass.LeerConfig();
-            var _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configJwt.SecretKey));
+            // Registrar configuracion Jwt para reloadOnChange
+            services.Configure<JwtConfig>(config.GetSection("Jwt"));
+
+            // Registrar el provider que crea y muta TokenValidationParameters
+            services.AddSingleton<TokenValidationParametersProvider>();
+
+            // Registrar configurador de JwtBearerOptions para asignar los TokenValidationParameters desde el provider
+            services.AddSingleton<IConfigureOptions<JwtBearerOptions>, ConfigureJwtBearerOptions>();
+
+            // Registrar autenticacion (no asignar TokenValidationParameters aquí)
+            var jwtClass = new JwtConfigManager(config);
+            var cfg = jwtClass.LoadConfig();
+            var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(cfg.SecretKey));
 
             services.AddAuthentication(options =>
             {
@@ -36,18 +47,7 @@ namespace App.WebApi
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer((obj) =>
             {
-                obj.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = _signingKey,
-                    ValidIssuer = _configJwt.Issuer,
-                    ValidAudience = _configJwt.Audience,
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ClockSkew = TimeSpan.Zero
-                };
-
+                // No asignar obj.TokenValidationParameters aquí porque lo hace ConfigureJwtBearerOptions
                 obj.UseSecurityTokenValidators = true;
 
                 obj.Events = new JwtBearerEvents()
@@ -71,26 +71,26 @@ namespace App.WebApi
                     OnTokenValidated = async context =>
                     {
                         //Debe existir el claim usuarioId
-                        if (!context.Principal!.HasClaim(c => c.Type == JwtClass.ClaimUsuarioId))
+                        if (!context.Principal!.HasClaim(c => c.Type == JwtConfigManager.ClaimUsuarioId))
                         {
-                            context.Fail($"No se encontró '{JwtClass.ClaimUsuarioId}' en la sesión");
+                            context.Fail($"No se encontró '{JwtConfigManager.ClaimUsuarioId}' en la sesión");
                         }
 
                         //Debe existir el ClaimSecurity
-                        if (!context.Principal.HasClaim(c => c.Type == JwtClass.ClaimSecurity))
+                        if (!context.Principal.HasClaim(c => c.Type == JwtConfigManager.ClaimSecurity))
                         {
-                            context.Fail($"No se encontró '{JwtClass.ClaimSecurity}' en la sesión");
+                            context.Fail($"No se encontró '{JwtConfigManager.ClaimSecurity}' en la sesión");
                         }
 
                         //Valida que el sello de seguridad sea el mismo del usuario
-                        var _usuarioId = context.Principal.Claims.First(c => c.Type == JwtClass.ClaimUsuarioId).Value;
-                        var _stampSecurity = context.Principal.Claims.First(c => c.Type == JwtClass.ClaimSecurity).Value;
+                        var _usuarioId = context.Principal.Claims.First(c => c.Type == JwtConfigManager.ClaimUsuarioId).Value;
+                        var _stampSecurity = context.Principal.Claims.First(c => c.Type == JwtConfigManager.ClaimSecurity).Value;
 
                         if (!Guid.TryParse(_stampSecurity, out var stampSecurityGuid))
-                            throw new Exception($"{JwtClass.ClaimSecurity} no es un UUID válido");
+                            throw new Exception($"{JwtConfigManager.ClaimSecurity} no es un UUID válido");
 
                         if (!Guid.TryParse(_usuarioId, out var usuarioGuid))
-                            throw new Exception($"{JwtClass.ClaimUsuarioId} no es un UUID válido");
+                            throw new Exception($"{JwtConfigManager.ClaimUsuarioId} no es un UUID válido");
 
                         // --- RESOLVER IUnitOfWork DESDE DI ---
                         var unitOfWork = context.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
@@ -186,7 +186,7 @@ namespace App.WebApi
 
         public static Guid Id(this ClaimsPrincipal user)
         {
-            var _usuarioId = user?.Claims?.FirstOrDefault(c => c.Type.Equals(JwtClass.ClaimUsuarioId, StringComparison.OrdinalIgnoreCase))?.Value;
+            var _usuarioId = user?.Claims?.FirstOrDefault(c => c.Type.Equals(JwtConfigManager.ClaimUsuarioId, StringComparison.OrdinalIgnoreCase))?.Value;
 
             if (_usuarioId != null)
             {

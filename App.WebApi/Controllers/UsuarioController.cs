@@ -1,26 +1,26 @@
-﻿using App.WebApi.Models.Shared;
-using App.WebApi.Models.Usuario;
+﻿using App.Application.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace App.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class UsuarioController : ControllerBase
     {
         private readonly ILogger<UsuarioController> _logger;
         private readonly IConfiguration _config;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public UsuarioController(IConfiguration config, ILogger<UsuarioController> logger)
+        public UsuarioController(IConfiguration config, ILogger<UsuarioController> logger, IUnitOfWork unitOfWork)
         {
             _config = config;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
-        [ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
+        /*[ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
         [HttpPut("clave", Name = "CambiarClave")]
         public async Task<IActionResult> ActualizarClave([FromBody] CambiarClaveDto claves)
         {
@@ -46,23 +46,6 @@ namespace App.WebApi.Controllers
                 _logger.LogError(ex.Message);
                 throw;
             }
-        }
-
-        [ProducesResponseType(typeof(VwUsuarioPerfil), (int)HttpStatusCode.OK)]
-        [HttpGet("perfil", Name = "ObtenerPerfil")]
-        public async Task<IActionResult> ObtenerPerfil()
-        {
-            try
-            {
-                var _usuarioClass = new UsuarioClass(_config);
-                var perfil = await _usuarioClass.ConsultarPerfilPorIdAsync(User.Id());
-                return Ok(perfil);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                throw;
-            }
-        }
+        }*/
     }
 }

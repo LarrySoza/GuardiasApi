@@ -1,23 +1,22 @@
 ﻿using App.WebApi.Models.Shared;
-using System.IO;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace App.WebApi
 {
-    public class JwtClass
+    public class JwtConfigManager
     {
         public const string ClaimSecurity = "stampSecurity";
         public const string ClaimUsuarioId = "usuarioId";
 
         private readonly IConfiguration _config;
 
-        public JwtClass(IConfiguration config)
+        public JwtConfigManager(IConfiguration config)
         {
             _config = config;
         }
 
-        public JwtConfig LeerConfig()
+        public JwtConfig LoadConfig()
         {
             var _defaultKey = "n`h}G01K{I{#B[4S$_^m=ISiC:7wy[?1";
 
@@ -39,7 +38,7 @@ namespace App.WebApi
             return _configJwt;
         }
 
-        public void ActualizarConfig(JwtConfig config)
+        public void UpdateConfig(JwtConfig config)
         {
             if (config == null)
             {

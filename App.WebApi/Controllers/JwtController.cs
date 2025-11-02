@@ -1,5 +1,4 @@
-﻿using App.Application.Interfaces;
-using App.WebApi.Models.Shared;
+﻿using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -7,20 +6,19 @@ using System.Net;
 namespace App.WebApi.Controllers
 {
     //[ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(Roles = "Administrador")]
+    [Authorize(Roles = "ADMIN")]
     [ApiController]
-    [Route("admin/[controller]")]
+    [Route("api/[controller]")]
     public class JwtController : ControllerBase
     {
         private readonly ILogger<JwtController> _logger;
         private readonly IConfiguration _config;
-        private readonly IUnitOfWork _unitOfWork;
 
-        public JwtController(IConfiguration config, ILogger<JwtController> logger, IUnitOfWork unitOfWork)
+
+        public JwtController(IConfiguration config, ILogger<JwtController> logger)
         {
             _config = config;
             _logger = logger;
-            _unitOfWork = unitOfWork;
         }
 
         /// <summary>
@@ -28,14 +26,14 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns></returns>
         [ProducesResponseType(typeof(JwtConfig), (int)HttpStatusCode.OK)]
-        [HttpGet(Name = "LeerConfiguracionTokenJwt")]
-        public async Task<ActionResult> LeerConfiguracionJwt()
+        [HttpGet(Name = "LeerConfiguracionJwt")]
+        public ActionResult LeerConfiguracionJwt()
         {
             try
             {
-                var _jwtClass = new JwtClass(_config);
+                var _jwtClass = new JwtConfigManager(_config);
 
-                var _configJwt = await _jwtClass.LeerConfig();
+                var _configJwt = _jwtClass.LoadConfig();
 
                 return Ok(_configJwt);
             }
@@ -52,14 +50,14 @@ namespace App.WebApi.Controllers
         /// <param name="config"></param>
         /// <returns></returns>
         [ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPut(Name = "GuardarConfiguracionTokenJwt")]
-        public async Task<IActionResult> GuardarJwtConfig([FromBody] JwtConfig config)
+        [HttpPut(Name = "GuardarJwtConfig")]
+        public IActionResult GuardarJwtConfig([FromBody] JwtConfig config)
         {
             try
             {
-                var _jwtClass = new JwtClass(_config);
+                var _jwtClass = new JwtConfigManager(_config);
 
-                await _jwtClass.ActualizarConfig(config);
+                _jwtClass.UpdateConfig(config);
 
                 return Ok(new ResponseDto
                 {

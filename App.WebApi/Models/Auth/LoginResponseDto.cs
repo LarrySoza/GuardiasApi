@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace App.WebApi.Models.Usuario
+namespace App.WebApi.Models.Auth
 {
-    public class TokenDto
+    public class LoginResponseDto
     {
         /// <summary>
         /// Token JWT

@@ -1,6 +1,6 @@
-﻿namespace App.WebApi.Models.Usuario
+﻿namespace App.WebApi.Models.Auth
 {
-    public class LoginDto
+    public class LoginRequestDto
     {
         /// <summary>
         /// Por lo general se usa un correo electronico

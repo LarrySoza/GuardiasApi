@@ -1,4 +1,4 @@
-﻿namespace App.WebApi.Entities
+﻿namespace App.WebApi.Models.Shared
 {
     public class ResponseDto
     {

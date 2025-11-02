@@ -5,16 +5,16 @@ using Microsoft.Extensions.Configuration;
 
 namespace App.Infrastructure.Repository.Core
 {
-    public class RondaAdjuntoRepository : IRondaAdjuntoRepository
+    public class OcurrenciaTipoRepository : IOcurrenciaTipoRepository
     {
         private readonly IConfiguration _config;
 
-        public RondaAdjuntoRepository(IConfiguration configuration)
+        public OcurrenciaTipoRepository(IConfiguration configuration)
         {
             _config = configuration;
         }
 
-        public async Task<Guid> AddAsync(RondaAdjunto entity)
+        public async Task<Guid> AddAsync(OcurrenciaTipo entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
@@ -26,25 +26,25 @@ namespace App.Infrastructure.Repository.Core
             throw new NotImplementedException();
         }
 
-        public async Task<PaginaDatos<RondaAdjunto>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<OcurrenciaTipo>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task<IReadOnlyList<RondaAdjunto>> GetAllAsync()
+        public async Task<IReadOnlyList<OcurrenciaTipo>> GetAllAsync()
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task<RondaAdjunto?> GetByIdAsync(Guid id)
+        public async Task<OcurrenciaTipo?> GetByIdAsync(Guid id)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task UpdateAsync(RondaAdjunto entity)
+        public async Task UpdateAsync(OcurrenciaTipo entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

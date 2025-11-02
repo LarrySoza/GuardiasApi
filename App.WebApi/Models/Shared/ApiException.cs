@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace App.WebApi.Entities
+namespace App.WebApi.Models.Shared
 {
     public class ApiException : Exception
     {
@@ -13,7 +13,7 @@ namespace App.WebApi.Entities
             Errors = errors;
         }
 
-        public override string ToString() => JsonSerializer.Serialize(new { message = message, errors = Errors });
+        public override string ToString() => JsonSerializer.Serialize(new { message, errors = Errors });
 
     }
 }

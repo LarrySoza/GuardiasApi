@@ -14,33 +14,39 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public Task<Guid> AddAsync(PanicAlert entity)
+        public async Task<Guid> AddAsync(PanicAlert entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PaginaDatos<PanicAlert>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<PanicAlert>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<PanicAlert>> GetAllAsync()
+        public async Task<IReadOnlyList<PanicAlert>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PanicAlert?> GetByIdAsync(Guid id)
+        public async Task<PanicAlert?> GetByIdAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(PanicAlert entity)
+        public async Task UpdateAsync(PanicAlert entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

@@ -14,33 +14,39 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public Task<Guid> AddAsync(ControlPoint entity)
+        public async Task<Guid> AddAsync(ControlPoint entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PaginaDatos<ControlPoint>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<ControlPoint>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<ControlPoint>> GetAllAsync()
+        public async Task<IReadOnlyList<ControlPoint>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<ControlPoint?> GetByIdAsync(Guid id)
+        public async Task<ControlPoint?> GetByIdAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(ControlPoint entity)
+        public async Task UpdateAsync(ControlPoint entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

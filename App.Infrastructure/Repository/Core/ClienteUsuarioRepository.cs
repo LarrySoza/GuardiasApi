@@ -14,33 +14,39 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public Task<(Guid cliente_id, Guid usuario_id)> AddAsync(ClienteUsuario entity)
+        public async Task<(Guid cliente_id, Guid usuario_id)> AddAsync(ClienteUsuario entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync((Guid cliente_id, Guid usuario_id) id)
+        public async Task DeleteAsync((Guid cliente_id, Guid usuario_id) id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PaginaDatos<ClienteUsuario>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<ClienteUsuario>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<ClienteUsuario>> GetAllAsync()
+        public async Task<IReadOnlyList<ClienteUsuario>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<ClienteUsuario?> GetByIdAsync((Guid cliente_id, Guid usuario_id) id)
+        public async Task<ClienteUsuario?> GetByIdAsync((Guid cliente_id, Guid usuario_id) id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(ClienteUsuario entity)
+        public async Task UpdateAsync(ClienteUsuario entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

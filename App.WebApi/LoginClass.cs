@@ -1,5 +1,4 @@
-﻿using App.WebApi.Entities;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace App.WebApi.Infrastructure
 {

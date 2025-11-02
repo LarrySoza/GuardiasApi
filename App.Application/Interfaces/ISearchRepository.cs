@@ -2,10 +2,12 @@
 
 namespace App.Application.Interfaces
 {
-    public interface IReadOnlyRepository<T, TKey> where T : class
+    /// <summary>
+    /// Repositorio de solo lectura orientado a búsquedas y paginación para tablas con muchos registros.
+    /// </summary>
+    public interface ISearchRepository<T, TKey> where T : class
     {
         Task<T?> GetByIdAsync(TKey id);
-        Task<IReadOnlyList<T>> GetAllAsync();
         Task<PaginaDatos<T>> FindAsync(string? search, int page = 1, int pageSize = 20);
     }
 }

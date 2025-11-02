@@ -14,33 +14,39 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public Task<Guid> AddAsync(AliveCheck entity)
+        public async Task<Guid> AddAsync(AliveCheck entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PaginaDatos<AliveCheck>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<AliveCheck>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<AliveCheck>> GetAllAsync()
+        public async Task<IReadOnlyList<AliveCheck>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<AliveCheck?> GetByIdAsync(Guid id)
+        public async Task<AliveCheck?> GetByIdAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(AliveCheck entity)
+        public async Task UpdateAsync(AliveCheck entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

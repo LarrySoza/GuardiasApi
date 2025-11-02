@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace App.WebApi.Infrastructure
+namespace App.WebApi.Routing
 {
     public class LowercaseUrls : IOutboundParameterTransformer
     {

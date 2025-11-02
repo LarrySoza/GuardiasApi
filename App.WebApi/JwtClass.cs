@@ -1,4 +1,4 @@
-﻿using App.WebApi.Entities;
+﻿using App.WebApi.Models.Shared;
 using System.Text.Json;
 
 namespace App.WebApi.Infrastructure

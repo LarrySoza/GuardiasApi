@@ -1,5 +1,7 @@
 ﻿using App.WebApi.Entities;
 using App.WebApi.Infrastructure;
+using App.WebApi.Models.Shared;
+using App.WebApi.Models.Usuario;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -8,7 +10,7 @@ namespace App.WebApi.Controllers
 {
     [Authorize(Roles = "Administrador")]
     [ApiController]
-    [Route("admin/[controller]")]
+    [Route("[controller]")]
     public class AdministrarUsuarioController : ControllerBase
     {
         private readonly ILogger<AdministrarUsuarioController> _logger;

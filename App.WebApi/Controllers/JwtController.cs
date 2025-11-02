@@ -1,5 +1,6 @@
-﻿using App.WebApi.Entities;
+﻿using App.Application.Interfaces;
 using App.WebApi.Infrastructure;
+using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -14,11 +15,13 @@ namespace App.WebApi.Controllers
     {
         private readonly ILogger<JwtController> _logger;
         private readonly IConfiguration _config;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public JwtController(IConfiguration config, ILogger<JwtController> logger)
+        public JwtController(IConfiguration config, ILogger<JwtController> logger, IUnitOfWork unitOfWork)
         {
             _config = config;
             _logger = logger;
+            _unitOfWork = unitOfWork;
         }
 
         /// <summary>

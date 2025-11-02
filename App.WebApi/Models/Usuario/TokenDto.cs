@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace App.WebApi.Entities
+namespace App.WebApi.Models.Usuario
 {
     public class TokenDto
     {

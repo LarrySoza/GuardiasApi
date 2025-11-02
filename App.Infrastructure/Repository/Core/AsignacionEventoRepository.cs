@@ -14,33 +14,39 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public Task<Guid> AddAsync(AsignacionEvento entity)
+        public async Task<Guid> AddAsync(AsignacionEvento entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PaginaDatos<AsignacionEvento>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<AsignacionEvento>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<AsignacionEvento>> GetAllAsync()
+        public async Task<IReadOnlyList<AsignacionEvento>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<AsignacionEvento?> GetByIdAsync(Guid id)
+        public async Task<AsignacionEvento?> GetByIdAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(AsignacionEvento entity)
+        public async Task UpdateAsync(AsignacionEvento entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

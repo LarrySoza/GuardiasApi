@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace App.WebApi.Entities
+namespace App.WebApi.Models.Usuario
 {
     public class CambiarClaveUsuarioDto
     {

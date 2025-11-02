@@ -1,6 +1,8 @@
-﻿using App.WebApi.Entities;
+﻿using App.Application.Interfaces.Core;
+using App.Infrastructure.Repository.Core;
 using App.WebApi.Hubs;
 using App.WebApi.Infrastructure;
+using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.IdentityModel.Tokens;
@@ -118,6 +120,54 @@ namespace App.WebApi
                     }
                 };
             });
+        }
+
+        public static void AddInfrastructure(this IServiceCollection services)
+        {
+            services.AddTransient<IAliveCheckEstadoRepository, AliveCheckEstadoRepository>();
+            services.AddTransient<IAliveCheckRepository, AliveCheckRepository>();
+            services.AddTransient<IAliveCheckRespuestaRepository, AliveCheckRespuestaRepository>();
+
+            services.AddTransient<IAsignacionEventoRepository, AsignacionEventoRepository>();
+            services.AddTransient<IAsignacionEventoTipoRepository, AsignacionEventoTipoRepository>();
+            services.AddTransient<IAsignacionRepository, AsignacionRepository>();
+
+            services.AddTransient<IClienteRepository, ClienteRepository>();
+            services.AddTransient<IClienteUsuarioRepository, ClienteUsuarioRepository>();
+
+            services.AddTransient<IConfiguracionRepository, ConfiguracionRepository>();
+
+            services.AddTransient<IControlPointRepository, ControlPointRepository>();
+
+            services.AddTransient<IIncidenciaAdjuntoRepository, IncidenciaAdjuntoRepository>();
+            services.AddTransient<IIncidenciaRepository, IncidenciaRepository>();
+            services.AddTransient<IIncidenteTipoRepository, IncidenteTipoRepository>();
+
+            services.AddTransient<IOcurrenciaAdjuntoRepository, OcurrenciaAdjuntoRepository>();
+            services.AddTransient<IOcurrenciaRepository, OcurrenciaRepository>();
+            services.AddTransient<IOcurrenciaTipoRepository, OcurrenciaTipoRepository>();
+
+            services.AddTransient<IPanicAlertAdjuntoRepository, PanicAlertAdjuntoRepository>();
+            services.AddTransient<IPanicAlertAdjuntoTipoRepository, PanicAlertAdjuntoTipoRepository>();
+            services.AddTransient<IPanicAlertEstadoRepository, PanicAlertEstadoRepository>();
+            services.AddTransient<IPanicAlertRecepcionRepository, PanicAlertRecepcionRepository>();
+            services.AddTransient<IPanicAlertRepository, PanicAlertRepository>();
+
+            services.AddTransient<IPuestoRepository, PuestoRepository>();
+            services.AddTransient<IRolRepository, RolRepository>();
+            services.AddTransient<IRondaAdjuntoRepository, RondaAdjuntoRepository>();
+            services.AddTransient<IRondaRepository, RondaRepository>();
+
+            services.AddTransient<ISesionUsuarioEvidenciaRepository, SesionUsuarioEvidenciaRepository>();
+            services.AddTransient<ISesionUsuarioRepository, SesionUsuarioRepository>();
+
+            services.AddTransient<ITipoConfiguracionRepository, TipoConfiguracionRepository>();
+            services.AddTransient<IUnidadRepository, UnidadRepository>();
+
+            services.AddTransient<IUsuarioEstadoRepository, UsuarioEstadoRepository>();
+            services.AddTransient<IUsuarioRepository, UsuarioRepository>();
+            services.AddTransient<IUsuarioRolRepository, UsuarioRolRepository>();
+            services.AddTransient<IUsuarioUnidadRepository, UsuarioUnidadRepository>();
         }
 
         public static void ConfigureSwagger(this IServiceCollection services)

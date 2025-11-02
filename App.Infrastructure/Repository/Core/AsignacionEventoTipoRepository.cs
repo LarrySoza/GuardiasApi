@@ -14,18 +14,21 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public Task<PaginaDatos<AsignacionEventoTipo>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<AsignacionEventoTipo>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<AsignacionEventoTipo>> GetAllAsync()
+        public async Task<IReadOnlyList<AsignacionEventoTipo>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<AsignacionEventoTipo?> GetByIdAsync(string id)
+        public async Task<AsignacionEventoTipo?> GetByIdAsync(string id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

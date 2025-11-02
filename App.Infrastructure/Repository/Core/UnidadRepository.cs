@@ -14,33 +14,39 @@ namespace App.Infrastructure.Repository.Core
             _config = config;
         }
 
-        public Task<Guid> AddAsync(Unidad entity)
+        public async Task<Guid> AddAsync(Unidad entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PaginaDatos<Unidad>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<Unidad>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<Unidad>> GetAllAsync()
+        public async Task<IReadOnlyList<Unidad>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<Unidad?> GetByIdAsync(Guid id)
+        public async Task<Unidad?> GetByIdAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(Unidad entity)
+        public async Task UpdateAsync(Unidad entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

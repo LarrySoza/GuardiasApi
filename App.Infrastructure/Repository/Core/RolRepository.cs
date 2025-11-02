@@ -1,7 +1,9 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities;
 using App.Core.Entities.Core;
+using Dapper;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
@@ -14,19 +16,28 @@ namespace App.Infrastructure.Repository.Core
             _config = config;
         }
 
-        public Task<PaginaDatos<Rol>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<IReadOnlyList<Rol>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            const string sql = "SELECT id, codigo FROM rol ORDER BY id";
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                var items = await connection.QueryAsync<Rol>(sql);
+                return items.AsList();
+            }
         }
 
-        public Task<IReadOnlyList<Rol>> GetAllAsync()
+        public async Task<Rol?> GetByIdAsync(string id)
         {
-            throw new NotImplementedException();
-        }
+            const string sql = "SELECT id, codigo FROM rol WHERE id = @id";
 
-        public Task<Rol?> GetByIdAsync(string id)
-        {
-            throw new NotImplementedException();
+            var p = new DynamicParameters();
+            p.Add("@id", id);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                return (await connection.QueryAsync<Rol>(sql, p)).FirstOrDefault();
+            }
         }
     }
 }

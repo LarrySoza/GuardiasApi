@@ -15,48 +15,57 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public Task<Guid> AddAsync(UsuarioRol entity)
+        public async Task<Guid> AddAsync(UsuarioRol entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync(Guid id)
+        public async Task DeleteAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task DeleteAsync((Guid usuario_id, string rol_id) id)
+        public async Task DeleteAsync((Guid usuario_id, string rol_id) id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PaginaDatos<UsuarioRol>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<UsuarioRol>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<UsuarioRol>> GetAllAsync()
+        public async Task<IReadOnlyList<UsuarioRol>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<UsuarioRol?> GetByIdAsync(Guid id)
+        public async Task<UsuarioRol?> GetByIdAsync(Guid id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<UsuarioRol?> GetByIdAsync((Guid usuario_id, string rol_id) id)
+        public async Task<UsuarioRol?> GetByIdAsync((Guid usuario_id, string rol_id) id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task UpdateAsync(UsuarioRol entity)
+        public async Task UpdateAsync(UsuarioRol entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        Task<(Guid usuario_id, string rol_id)> IGenericRepository<UsuarioRol, (Guid usuario_id, string rol_id)>.AddAsync(UsuarioRol entity)
+        async Task<(Guid usuario_id, string rol_id)> IGenericRepository<UsuarioRol, (Guid usuario_id, string rol_id)>.AddAsync(UsuarioRol entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

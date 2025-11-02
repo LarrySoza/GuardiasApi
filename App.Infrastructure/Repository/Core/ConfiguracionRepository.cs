@@ -1,7 +1,8 @@
 using App.Application.Interfaces.Core;
-using App.Core.Entities;
 using App.Core.Entities.Core;
+using Dapper;
 using Microsoft.Extensions.Configuration;
+using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
@@ -14,34 +15,86 @@ namespace App.Infrastructure.Repository.Core
             _config = config;
         }
 
-        public Task<string> AddAsync(Configuracion entity)
+        public async Task AddAsync(Configuracion entity)
         {
-            throw new NotImplementedException();
+            string _query = "INSERT INTO configuracion (id, valor) VALUES(@id, @valor)";
+
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@id", entity.id);
+            _parametros.Add("@valor", entity.valor);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                await connection.ExecuteAsync(_query, _parametros);
+            }
         }
 
-        public Task DeleteAsync(string id)
+        public async Task AddOrUpdateAsync(Configuracion entity)
         {
-            throw new NotImplementedException();
+            const string upsert = @"INSERT INTO configuracion (id, valor)
+                                        VALUES (@id, @valor)
+                                    ON CONFLICT (id) DO UPDATE
+                                    SET valor = EXCLUDED.valor;";
+
+            var p = new DynamicParameters();
+            p.Add("@id", entity.id);
+            p.Add("@valor", entity.valor);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                await connection.ExecuteAsync(upsert, p);
+            }
         }
 
-        public Task<PaginaDatos<Configuracion>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task DeleteAsync(string id)
         {
-            throw new NotImplementedException();
+            string _query = "DELETE FROM configuracion WHERE id=@id";
+
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@id", id);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                await connection.ExecuteAsync(_query, _parametros);
+            }
         }
 
-        public Task<IReadOnlyList<Configuracion>> GetAllAsync()
+        public async Task<IReadOnlyList<Configuracion>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            string _query = "SELECT * FROM configuracion";
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                var items = await connection.QueryAsync<Configuracion>(_query);
+                return items.AsList();
+            }
         }
 
-        public Task<Configuracion?> GetByIdAsync(string id)
+        public async Task<Configuracion?> GetByIdAsync(string id)
         {
-            throw new NotImplementedException();
+            string _query = "SELECT * FROM configuracion WHERE id=@id";
+
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@id", id);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                return (await connection.QueryAsync<Configuracion>(_query, _parametros)).FirstOrDefault();
+            }
         }
 
-        public Task UpdateAsync(Configuracion entity)
+        public async Task UpdateAsync(Configuracion entity)
         {
-            throw new NotImplementedException();
+            string _query = "UPDATE configuracion SET valor = @valor WHERE id=@id";
+
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@id", entity.id);
+            _parametros.Add("@valor", entity.valor);
+
+            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            {
+                await connection.ExecuteAsync(_query, _parametros);
+            }
         }
     }
 }

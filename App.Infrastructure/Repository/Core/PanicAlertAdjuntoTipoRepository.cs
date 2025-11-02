@@ -14,18 +14,21 @@ namespace App.Infrastructure.Repository.Core
             _config = config;
         }
 
-        public Task<PaginaDatos<PanicAlertAdjuntoTipo>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<PanicAlertAdjuntoTipo>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<PanicAlertAdjuntoTipo>> GetAllAsync()
+        public async Task<IReadOnlyList<PanicAlertAdjuntoTipo>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<PanicAlertAdjuntoTipo?> GetByIdAsync(string id)
+        public async Task<PanicAlertAdjuntoTipo?> GetByIdAsync(string id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

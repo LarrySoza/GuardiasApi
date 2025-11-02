@@ -18,6 +18,7 @@ namespace App.WebApi
                 var builder = WebApplication.CreateBuilder(args);
 
                 builder.Services.ConfigureCors();
+                builder.Services.AddInfrastructure();
                 builder.Services.ConfigureAuthJwt(builder.Configuration);
                 builder.Services.AddControllers(options =>
                 {

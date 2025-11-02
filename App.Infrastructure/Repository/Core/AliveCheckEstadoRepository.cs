@@ -14,18 +14,21 @@ namespace App.Infrastructure.Repository.Core
             _config = config;
         }
 
-        public Task<PaginaDatos<AliveCheckEstado>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<AliveCheckEstado>> FindAsync(string? search, int page = 1, int pageSize = 20)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<IReadOnlyList<AliveCheckEstado>> GetAllAsync()
+        public async Task<IReadOnlyList<AliveCheckEstado>> GetAllAsync()
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public Task<AliveCheckEstado?> GetByIdAsync(string id)
+        public async Task<AliveCheckEstado?> GetByIdAsync(string id)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
         }
     }

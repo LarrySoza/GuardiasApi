@@ -2,7 +2,7 @@
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace App.WebApi.Infrastructure
+namespace App.Infrastructure
 {
     public class Util
     {

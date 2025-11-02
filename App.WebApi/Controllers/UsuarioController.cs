@@ -1,13 +1,15 @@
 ﻿
 using App.WebApi.Entities;
 using App.WebApi.Infrastructure;
+using App.WebApi.Models.Shared;
+using App.WebApi.Models.Usuario;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
 namespace App.WebApi.Controllers
 {
-    [Authorize(Roles = "Administrador,Usuario")]
+    [Authorize]
     [ApiController]
     [Route("[controller]")]
     public class UsuarioController : ControllerBase
@@ -58,31 +60,6 @@ namespace App.WebApi.Controllers
                 var _usuarioClass = new UsuarioClass(_config);
                 var perfil = await _usuarioClass.ConsultarPerfilPorIdAsync(User.Id());
                 return Ok(perfil);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                throw;
-            }
-        }
-
-        [ProducesResponseType(typeof(Area), (int)HttpStatusCode.OK)]
-        [HttpGet("area", Name = "ObtenerAreaUsuario")]
-        public async Task<IActionResult> ObtenerAreaUsuario()
-        {
-            try
-            {
-                var _usuarioClass = new UsuarioClass(_config);
-                var area = await _usuarioClass.ConsultarArea(User.Id());
-
-                if (area == null)
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    return Ok(area);
-                }
             }
             catch (Exception ex)
             {

@@ -3,6 +3,7 @@ using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
 using Dapper;
+using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
@@ -13,6 +14,25 @@ namespace App.Infrastructure.Repository.Core
         public UsuarioRepository(IDbConnectionFactory dbFactory)
         {
             _dbFactory = dbFactory;
+        }
+
+        public async Task UpdatePasswordAsync(Guid id, string password)
+        {
+            string _query = @"UPDATE usuario SET
+                                    contrasena_hash=@contrasena_hash,
+                                    sello_seguridad=@sello_seguridad
+                              WHERE 
+                                    id=@id";
+
+            var _parametros = new DynamicParameters();
+            _parametros.Add("@contrasena_hash", Crypto.HashPassword(password));
+            _parametros.Add("@sello_seguridad", Guid.NewGuid());
+            _parametros.Add("@id", id);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                await connection.ExecuteAsync(_query, _parametros);
+            }
         }
 
         public async Task<Guid> AddAsync(Usuario entity)
@@ -42,9 +62,29 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
-        public Task AddOrUpdateAsync(Usuario entity)
+        public async Task AddOrUpdateAsync(Usuario entity)
         {
+            await Task.CompletedTask;
             throw new NotImplementedException();
+        }
+
+        public async Task<Usuario?> GetByNameAsync(string name)
+        {
+            const string sql = @"
+                SELECT *
+                FROM usuario
+                WHERE deleted_at IS NULL
+                  AND lower(nombre_usuario) = lower(@name)
+                LIMIT 1;";
+
+            var p = new DynamicParameters();
+            p.Add("@name", name);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                return await connection.QueryFirstOrDefaultAsync<Usuario>(sql, p);
+            }
         }
 
         public async Task DeleteAsync(Guid id)
@@ -152,6 +192,17 @@ namespace App.Infrastructure.Repository.Core
                 connection.Open();
                 await connection.ExecuteAsync(sql, p);
             }
+        }
+
+        public async Task<bool> ValidatePasswordAsync(Guid id, string password)
+        {
+            var _usuario = await GetByIdAsync(id);
+            if (_usuario != null)
+            {
+                return Crypto.VerifyHashedPassword(_usuario.contrasena_hash, password);
+            }
+
+            return false;
         }
     }
 }

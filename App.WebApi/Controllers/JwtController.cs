@@ -35,7 +35,7 @@ namespace App.WebApi.Controllers
             {
                 var _jwtClass = new JwtClass(_config);
 
-                var _configJwt = await _jwtClass.LeerConfigAsync();
+                var _configJwt = await _jwtClass.LeerConfig();
 
                 return Ok(_configJwt);
             }
@@ -59,7 +59,7 @@ namespace App.WebApi.Controllers
             {
                 var _jwtClass = new JwtClass(_config);
 
-                await _jwtClass.ActualizarConfigAsync(config);
+                await _jwtClass.ActualizarConfig(config);
 
                 return Ok(new ResponseDto
                 {

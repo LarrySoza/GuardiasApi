@@ -1,4 +1,5 @@
-﻿using App.WebApi.Hubs;
+﻿using App.Application.Interfaces;
+using App.WebApi.Hubs;
 using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Diagnostics;
@@ -25,6 +26,10 @@ namespace App.WebApi
 
         public static void ConfigureAuthJwt(this IServiceCollection services, IConfiguration config)
         {
+            var _jwtClass = new JwtClass(config);
+            var _configJwt = _jwtClass.LeerConfig();
+            var _signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configJwt.SecretKey));
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -34,23 +39,13 @@ namespace App.WebApi
                 obj.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKeyResolver = (token, securityToken, kid, validationParameters) =>
-                    {
-                        var _jwtClass = new JwtClass(config);
-                        var _configJwt = _jwtClass.LeerConfig();
-                        validationParameters.ValidIssuer = _configJwt.Issuer;
-                        validationParameters.ValidAudience = _configJwt.Audience;
-                        var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configJwt.SecretKey));
-                        return new List<SecurityKey>() { key };
-                    },
-                    //Validar la reclamación del emisor JWT (iss)
+                    IssuerSigningKey = _signingKey,
+                    ValidIssuer = _configJwt.Issuer,
+                    ValidAudience = _configJwt.Audience,
                     ValidateIssuer = true,
-                    //Validar la reclamación de audiencia JWT (aud)
                     ValidateAudience = true,
-                    //Validar la caducidad del token
                     ValidateLifetime = true,
-                    //Si desea permitir una cierta cantidad de desviación del reloj, configúrelo aquí
-                    ClockSkew = TimeSpan.Zero,
+                    ClockSkew = TimeSpan.Zero
                 };
 
                 obj.UseSecurityTokenValidators = true;
@@ -73,7 +68,7 @@ namespace App.WebApi
                     },
 
 
-                    OnTokenValidated = context =>
+                    OnTokenValidated = async context =>
                     {
                         //Debe existir el claim usuarioId
                         if (!context.Principal!.HasClaim(c => c.Type == JwtClass.ClaimUsuarioId))
@@ -91,29 +86,26 @@ namespace App.WebApi
                         var _usuarioId = context.Principal.Claims.First(c => c.Type == JwtClass.ClaimUsuarioId).Value;
                         var _stampSecurity = context.Principal.Claims.First(c => c.Type == JwtClass.ClaimSecurity).Value;
 
-                        var _usuarioClass = new UsuarioClass(config);
-
                         if (!Guid.TryParse(_stampSecurity, out var stampSecurityGuid))
                             throw new Exception($"{JwtClass.ClaimSecurity} no es un UUID válido");
 
                         if (!Guid.TryParse(_usuarioId, out var usuarioGuid))
                             throw new Exception($"{JwtClass.ClaimUsuarioId} no es un UUID válido");
 
-                        var _usuario = _usuarioClass.ConsultarPorId(usuarioGuid);
+                        // --- RESOLVER IUnitOfWork DESDE DI ---
+                        var unitOfWork = context.HttpContext.RequestServices.GetRequiredService<IUnitOfWork>();
+                        var _usuario = await unitOfWork.Usuarios.GetByIdAsync(usuarioGuid);
 
                         if (_usuario == null)
                         {
                             context.Fail("Usuario no encontrado");
-                        }
-                        else
-                        {
-                            if (_usuario.sello_seguridad != stampSecurityGuid || !_usuario.activo)
-                            {
-                                context.Fail("No Autorizado");
-                            }
+                            return;
                         }
 
-                        return Task.CompletedTask;
+                        if (_usuario.sello_seguridad != stampSecurityGuid || _usuario.deleted_at != null)
+                        {
+                            context.Fail("No Autorizado");
+                        }
                     }
                 };
             });
@@ -139,14 +131,6 @@ namespace App.WebApi
                 }
 
                 c.MapType<decimal>(() => new OpenApiSchema { Type = "number", Format = "decimal" });
-
-                //c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-                //{
-                //    In = ParameterLocation.Header,
-                //    Description = "Please insert JWT with Bearer into field",
-                //    Name = "Authorization",
-                //    Type = SecuritySchemeType.ApiKey
-                //});
 
                 c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
                 {
@@ -211,11 +195,6 @@ namespace App.WebApi
             }
 
             throw new Exception("No se encontró el ID de usuario en la sesión");
-        }
-
-        public static string? GetConnectionString(this IConfiguration configuration)
-        {
-            return configuration?.GetSection("ConnectionStrings")["GuardiasDb"];
         }
     }
 }

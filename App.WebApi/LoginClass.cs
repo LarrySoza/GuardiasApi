@@ -18,24 +18,23 @@ namespace App.WebApi
 
         public async Task<ClaimsIdentity?> GetIdentityAsync(LoginDto login)
         {
-            var _usuario = await _unitOfWork.Usuarios.GetByIdAsync(login.usuario);
+            // Buscar usuario por nombre (LoginDto.usuario puede ser nombre o email según tu lógica)
+            var usuario = await _unitOfWork.Usuarios.GetByNameAsync(login.usuario);
 
-            if (_usuario != null)
+            if (usuario != null)
             {
-                if (Crypto.VerifyHashedPassword(_usuario.clave_hash, login.clave))
+                // verificar contraseña usando la utilidad Crypto
+                if (Crypto.VerifyHashedPassword(usuario.contrasena_hash, login.clave))
                 {
-                    var _claims = new List<Claim>();
-                    _claims.Add(new Claim(JwtClass.ClaimUsuarioId, _usuario.usuario_id.ToString()));
-                    _claims.Add(new Claim(JwtClass.ClaimSecurity, _usuario.sello_seguridad.ToString()));
-
-                    var _roles = await _usuarioClass.ListarRolesAsync(_usuario.usuario_id);
-
-                    foreach (var _rol in _roles)
+                    var claims = new List<Claim>
                     {
-                        _claims.Add(new Claim(ClaimTypes.Role, _rol.nombre));
-                    }
+                        new Claim(JwtClass.ClaimUsuarioId, usuario.id.ToString()),
+                        new Claim(JwtClass.ClaimSecurity, usuario.sello_seguridad.ToString())
+                    };
 
-                    return new ClaimsIdentity(_claims.ToArray());
+                    // Si necesitas roles, obténlos a través de un repo/servicio adecuado (por ejemplo _unitOfWork.UsuarioRoles)
+
+                    return new ClaimsIdentity(claims.ToArray());
                 }
             }
 

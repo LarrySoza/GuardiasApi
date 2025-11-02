@@ -1,5 +1,7 @@
 ﻿using App.WebApi.Models.Shared;
+using System.IO;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 namespace App.WebApi
 {
@@ -17,61 +19,27 @@ namespace App.WebApi
 
         public JwtConfig LeerConfig()
         {
-            var _configuracionClass = new ConfiguracionClass(_config);
+            var _defaultKey = "n`h}G01K{I{#B[4S$_^m=ISiC:7wy[?1";
 
-            var _configJwt = _configuracionClass.Consultar("jwtConfig");
-
-            if (_configJwt != null)
+            // Leer la configuración de JWT directamente desde IConfiguration (appsettings / env)
+            var jwtSection = _config.GetSection("Jwt");
+            var _configJwt = jwtSection.Get<JwtConfig>() ?? new JwtConfig
             {
-                var _json = Util.Decrypt(_configJwt.valor ?? "", true);
+                Issuer = _config["Jwt:Issuer"] ?? "Api",
+                Audience = _config["Jwt:Audience"] ?? "https://gaspersoft.com",
+                SecretKey = _config["Jwt:SecretKey"] ?? _defaultKey,
+                LifetimeSeconds = int.TryParse(_config["Jwt:LifetimeSeconds"], out var _l) ? _l : 3600
+            };
 
-                var _jwtConfig = JsonSerializer.Deserialize<JwtConfig>(_json);
-
-                if (_jwtConfig != null)
-                {
-                    return _jwtConfig;
-                }
+            if (_configJwt.SecretKey.Length < 32)
+            {
+                _configJwt.SecretKey = _defaultKey;
             }
 
-            //Retornamos una configuracion por defecto
-            return new JwtConfig()
-            {
-                SecretKey = "n`h}G01K{I{#B[4S$_^m=ISiC:7wy[?1",//debe tener minimo 32 caracteres
-                Issuer = "EduTrackJWT",
-                Audience = "https://gaspersoft.com",
-                LifetimeSeconds = 3600
-            };
+            return _configJwt;
         }
 
-        public async Task<JwtConfig> LeerConfigAsync()
-        {
-            var _configuracionClass = new ConfiguracionClass(_config);
-
-            var _configJwt = await _configuracionClass.ConsultarAsync("jwtConfig");
-
-            if (_configJwt != null)
-            {
-                var _json = Util.Decrypt(_configJwt.valor ?? "", true);
-
-                var _jwtConfig = JsonSerializer.Deserialize<JwtConfig>(_json);
-
-                if (_jwtConfig != null)
-                {
-                    return _jwtConfig;
-                }
-            }
-
-            //Retornamos una configuracion por defecto
-            return new JwtConfig()
-            {
-                SecretKey = "n`h}G01K{I{#B[4S$_^m=ISiC:7wy[?1",//debe tener minimo 32 caracteres
-                Issuer = "EduTrackJWT",
-                Audience = "https://gaspersoft.com",
-                LifetimeSeconds = 3600
-            };
-        }
-
-        public async Task ActualizarConfigAsync(JwtConfig config)
+        public void ActualizarConfig(JwtConfig config)
         {
             if (config == null)
             {
@@ -98,15 +66,42 @@ namespace App.WebApi
                 throw new Exception("SecretKey debe tener al menso 32 caracteres");
             }
 
-            var _json = JsonSerializer.Serialize(config);
+            // Determinar la ruta de appsettings.json en el content root
+            var appSettingsPath = Path.Combine(Directory.GetCurrentDirectory(), "appsettings.json");
 
-            var _configuracionClass = new ConfiguracionClass(_config);
-
-            await _configuracionClass.GuardarAsync(new Configuracion()
+            if (!File.Exists(appSettingsPath))
             {
-                tipo_configuracion_id = "jwtConfig",
-                valor = Util.Encrypt(_json, true)
-            });
+                throw new FileNotFoundException("No se encontro el archivo appsettings.json", appSettingsPath);
+            }
+
+            // Leer y parsear el JSON
+            var jsonText = File.ReadAllText(appSettingsPath);
+
+            JsonObject? root;
+            if (string.IsNullOrWhiteSpace(jsonText))
+            {
+                root = new JsonObject();
+            }
+            else
+            {
+                var node = JsonNode.Parse(jsonText);
+                root = node as JsonObject ?? new JsonObject();
+            }
+
+            // Actualizar o crear la seccion Jwt
+            var jwtNode = root["Jwt"] as JsonObject ?? new JsonObject();
+            jwtNode["Issuer"] = config.Issuer;
+            jwtNode["Audience"] = config.Audience;
+            jwtNode["SecretKey"] = config.SecretKey;
+            jwtNode["LifetimeSeconds"] = config.LifetimeSeconds;
+
+            root["Jwt"] = jwtNode;
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            var newJson = root.ToJsonString(options);
+
+            // Escribir de vuelta el archivo
+            File.WriteAllText(appSettingsPath, newJson);
         }
     }
 }

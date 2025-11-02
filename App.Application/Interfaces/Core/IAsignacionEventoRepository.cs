@@ -3,7 +3,7 @@ using App.Core.Entities.Core;
 namespace App.Application.Interfaces.Core
 {
     // Repositorio para asignacion_evento
-    public interface IAsignacionEventoRepository : IGenericRepository<AsignacionEvento, Guid>
+    public interface IAsignacionEventoRepository : IGenericAutoIdRepository<AsignacionEvento, Guid>
     {
     }
 }

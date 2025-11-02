@@ -2,7 +2,7 @@
 
 namespace App.Application.Interfaces.Core
 {
-    public interface IClienteRepository : IGenericRepository<Cliente, Guid>
+    public interface IClienteRepository : IGenericAutoIdRepository<Cliente, Guid>
     {
     }
 }

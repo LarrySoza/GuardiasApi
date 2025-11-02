@@ -3,7 +3,6 @@ using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
 using Dapper;
-using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {

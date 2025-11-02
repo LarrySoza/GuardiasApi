@@ -21,7 +21,7 @@ namespace App.Infrastructure.Repository.Core
             throw new NotImplementedException();
         }
 
-        async Task<(Guid usuario_id, Guid unidad_id)> IGenericRepository<UsuarioUnidad, (Guid usuario_id, Guid unidad_id)>.AddAsync(UsuarioUnidad entity)
+        async Task<(Guid usuario_id, Guid unidad_id)> IGenericAutoIdRepository<UsuarioUnidad, (Guid usuario_id, Guid unidad_id)>.AddAsync(UsuarioUnidad entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

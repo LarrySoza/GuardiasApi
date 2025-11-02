@@ -1,8 +1,7 @@
-using App.Application.Interfaces;
 using App.Application.Interfaces.Core;
-using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
+using Dapper;
 
 namespace App.Infrastructure.Repository.Core
 {
@@ -15,46 +14,57 @@ namespace App.Infrastructure.Repository.Core
             _dbFactory = dbFactory;
         }
 
-        public async Task<(Guid usuario_id, string rol_id)> AddAsync(UsuarioRol entity)
+        public async Task AddAsync(Guid usuario_id, string rol_id)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            const string sql = @"INSERT INTO usuario_rol (usuario_id, rol_id, created_at)
+                                 VALUES (@usuario_id, @rol_id, now())
+                                 ON CONFLICT (usuario_id, rol_id) DO UPDATE
+                                 SET deleted_at = NULL, updated_at = now();";
+
+            var p = new DynamicParameters();
+            p.Add("@usuario_id", usuario_id);
+            p.Add("@rol_id", rol_id);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                await connection.ExecuteAsync(sql, p);
+            }
         }
 
-        async Task<(Guid usuario_id, string rol_id)> IGenericRepository<UsuarioRol, (Guid usuario_id, string rol_id)>.AddAsync(UsuarioRol entity)
+        public async Task DeleteAsync(Guid usuario_id, string rol_id)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            const string sql = "UPDATE usuario_rol SET deleted_at = now() WHERE usuario_id = @usuario_id AND rol_id = @rol_id";
+
+            var p = new DynamicParameters();
+            p.Add("@usuario_id", usuario_id);
+            p.Add("@rol_id", rol_id);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                await connection.ExecuteAsync(sql, p);
+            }
         }
 
-        public async Task AddOrUpdateAsync(UsuarioRol entity)
+        public async Task<IReadOnlyList<Rol>> GetAllAsync(Guid usuario_id)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
+            const string sql = @"SELECT r.id, r.codigo
+                                 FROM rol r
+                                 JOIN usuario_rol ur ON ur.rol_id = r.id
+                                 WHERE ur.usuario_id = @usuario_id
+                                 AND ur.deleted_at IS NULL
+                                 ORDER BY r.id";
 
-        public async Task UpdateAsync(UsuarioRol entity)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
+            var p = new DynamicParameters();
+            p.Add("@usuario_id", usuario_id);
 
-        public async Task DeleteAsync((Guid usuario_id, string rol_id) id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<PaginaDatos<UsuarioRol>> FindAsync(string? search, int page = 1, int pageSize = 20)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<UsuarioRol?> GetByIdAsync((Guid usuario_id, string rol_id) id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<Rol>(sql, p);
+                return items.AsList();
+            }
         }
     }
 }

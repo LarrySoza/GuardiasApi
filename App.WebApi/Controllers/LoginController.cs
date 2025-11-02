@@ -1,4 +1,5 @@
 ﻿using App.Application.Interfaces;
+using App.Core.Entities.Core;
 using App.Infrastructure;
 using App.WebApi.Models.Auth;
 using Microsoft.AspNetCore.Mvc;
@@ -52,15 +53,20 @@ namespace App.WebApi.Controllers
                 // verificar contraseña usando la utilidad Crypto
                 if (Crypto.VerifyHashedPassword(usuario.contrasena_hash, loginRequest.clave))
                 {
-                    var claims = new List<Claim>
+                    var _claims = new List<Claim>
                     {
                         new Claim(JwtConfigManager.ClaimUsuarioId, usuario.id.ToString()),
                         new Claim(JwtConfigManager.ClaimSecurity, usuario.sello_seguridad.ToString())
                     };
 
-                    // Si necesitas roles, obténlos a través de un repo/servicio adecuado (por ejemplo _unitOfWork.UsuarioRoles)
+                    var _roles = await _unitOfWork.UsuarioRoles.GetAllAsync(usuario.id);
 
-                    _claimsUser = new ClaimsIdentity(claims.ToArray());
+                    foreach (var _rol in _roles)
+                    {
+                        _claims.Add(new Claim(ClaimTypes.Role, _rol.codigo!));
+                    }
+
+                    _claimsUser = new ClaimsIdentity(_claims.ToArray());
                 }
             }
 

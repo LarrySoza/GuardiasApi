@@ -3,7 +3,7 @@ using App.Core.Entities.Core;
 namespace App.Application.Interfaces.Core
 {
     // Repositorio para `usuario` (operaciones completas), clave Guid
-    public interface IUsuarioRepository : IGenericRepository<Usuario, Guid>
+    public interface IUsuarioRepository : IGenericAutoIdRepository<Usuario, Guid>
     {
         /// <summary>
         /// Obtener usuario por su nombre de usuario (login).

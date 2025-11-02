@@ -1,7 +1,7 @@
 ﻿using App.WebApi.Models.Shared;
 using System.Text.Json;
 
-namespace App.WebApi.Infrastructure
+namespace App.WebApi
 {
     public class JwtClass
     {

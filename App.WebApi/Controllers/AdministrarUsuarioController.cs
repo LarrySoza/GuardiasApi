@@ -1,6 +1,4 @@
-﻿using App.WebApi.Entities;
-using App.WebApi.Infrastructure;
-using App.WebApi.Models.Shared;
+﻿using App.WebApi.Models.Shared;
 using App.WebApi.Models.Usuario;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

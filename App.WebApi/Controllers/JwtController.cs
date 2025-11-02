@@ -1,5 +1,4 @@
 ﻿using App.Application.Interfaces;
-using App.WebApi.Infrastructure;
 using App.WebApi.Models.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

@@ -1,5 +1,4 @@
-﻿using App.WebApi.Infrastructure;
-using App.WebApi.Models.Usuario;
+﻿using App.WebApi.Models.Usuario;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;

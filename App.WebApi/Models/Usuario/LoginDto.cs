@@ -1,19 +1,15 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace App.WebApi.Models.Usuario
+﻿namespace App.WebApi.Models.Usuario
 {
-    public class Login
+    public class LoginDto
     {
         /// <summary>
         /// Por lo general se usa un correo electronico
         /// </summary>
-        [Required]
         public required string usuario { get; set; }
 
         /// <summary>
         /// La clave de usuario sin encriptar
         /// </summary>
-        [Required]
         public required string clave { get; set; }
     }
 }

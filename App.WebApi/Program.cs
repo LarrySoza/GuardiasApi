@@ -1,9 +1,10 @@
-using App.WebApi.Entities;
-using App.WebApi.Infrastructure;
+using App.Infrastructure;
+using App.WebApi.Models;
+using App.WebApi.Routing;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
-using Microsoft.AspNetCore.SignalR;
 using NLog;
 using NLog.Web;
+
 namespace App.WebApi
 {
     public class Program
@@ -18,7 +19,7 @@ namespace App.WebApi
                 var builder = WebApplication.CreateBuilder(args);
 
                 builder.Services.ConfigureCors();
-                builder.Services.AddInfrastructure();
+                builder.Services.AddInfrastructure(builder.Configuration);
                 builder.Services.ConfigureAuthJwt(builder.Configuration);
                 builder.Services.AddControllers(options =>
                 {

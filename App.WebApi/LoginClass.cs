@@ -1,21 +1,24 @@
-﻿using System.Security.Claims;
+﻿using App.Application.Interfaces;
+using App.Infrastructure;
+using App.WebApi.Models.Usuario;
+using System.Security.Claims;
 
-namespace App.WebApi.Infrastructure
+namespace App.WebApi
 {
     public class LoginClass
     {
         private readonly IConfiguration _config;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public LoginClass(IConfiguration config)
+        public LoginClass(IConfiguration config, IUnitOfWork unitOfWork)
         {
             _config = config;
+            _unitOfWork = unitOfWork;
         }
 
-        public async Task<ClaimsIdentity?> GetIdentityAsync(Login login)
+        public async Task<ClaimsIdentity?> GetIdentityAsync(LoginDto login)
         {
-            var _usuarioClass = new UsuarioClass(_config);
-
-            var _usuario = await _usuarioClass.ConsultarPorNombreUsuarioAsync(login.usuario);
+            var _usuario = await _unitOfWork.Usuarios.GetByIdAsync(login.usuario);
 
             if (_usuario != null)
             {

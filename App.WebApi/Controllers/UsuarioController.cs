@@ -1,7 +1,4 @@
-﻿
-using App.WebApi.Entities;
-using App.WebApi.Infrastructure;
-using App.WebApi.Models.Shared;
+﻿using App.WebApi.Models.Shared;
 using App.WebApi.Models.Usuario;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -52,7 +49,7 @@ namespace App.WebApi.Controllers
         }
 
         [ProducesResponseType(typeof(VwUsuarioPerfil), (int)HttpStatusCode.OK)]
-        [HttpGet("perfil",Name = "ObtenerPerfil")]
+        [HttpGet("perfil", Name = "ObtenerPerfil")]
         public async Task<IActionResult> ObtenerPerfil()
         {
             try

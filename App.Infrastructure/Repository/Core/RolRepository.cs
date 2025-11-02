@@ -1,5 +1,4 @@
 using App.Application.Interfaces.Core;
-using App.Core.Entities;
 using App.Core.Entities.Core;
 using Dapper;
 using Microsoft.Extensions.Configuration;

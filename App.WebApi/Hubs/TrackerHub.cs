@@ -1,10 +1,5 @@
-﻿using App.WebApi.Controllers;
-using App.WebApi.Entities;
-using App.WebApi.Infrastructure;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Configuration;
-using System.Linq;
 
 namespace App.WebApi.Hubs
 {

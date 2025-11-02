@@ -5,7 +5,7 @@ namespace App.Infrastructure.Repository
 {
     public class UnitOfWork : IUnitOfWork
     {
-        public const string DefaultConnection = "GuardiasDb";
+        public const string DefaultConnection = "DefaultConnection";
 
         public UnitOfWork(
             IAliveCheckEstadoRepository aliveCheckEstados,

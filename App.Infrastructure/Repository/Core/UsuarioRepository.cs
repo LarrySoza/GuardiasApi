@@ -1,19 +1,18 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities;
 using App.Core.Entities.Core;
+using App.Infrastructure.Database;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class UsuarioRepository : IUsuarioRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public UsuarioRepository(IConfiguration configuration)
+        public UsuarioRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<Guid> AddAsync(Usuario entity)
@@ -36,9 +35,9 @@ namespace App.Infrastructure.Repository.Core
             p.Add("@created_at", entity.created_at == null ? DateTimeOffset.UtcNow : entity.created_at);
             p.Add("@created_by", entity.created_by);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
-                await connection.OpenAsync();
+                connection.Open();
                 return await connection.ExecuteScalarAsync<Guid>(sql, p);
             }
         }
@@ -54,8 +53,9 @@ namespace App.Infrastructure.Repository.Core
             var p = new DynamicParameters();
             p.Add("@id", id);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 await connection.ExecuteAsync(sql, p);
             }
         }
@@ -89,8 +89,9 @@ namespace App.Infrastructure.Repository.Core
                 pageSize
             };
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 using var multi = await connection.QueryMultipleAsync(sql, parametros);
                 var total = await multi.ReadSingleAsync<int>();
                 var data = (await multi.ReadAsync<Usuario>()).AsList();
@@ -112,8 +113,9 @@ namespace App.Infrastructure.Repository.Core
             var p = new DynamicParameters();
             p.Add("@id", id);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 return await connection.QueryFirstOrDefaultAsync<Usuario>(sql, p);
             }
         }
@@ -145,8 +147,9 @@ namespace App.Infrastructure.Repository.Core
             p.Add("@estado", entity.estado);
             p.Add("@updated_by", entity.updated_by);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 await connection.ExecuteAsync(sql, p);
             }
         }

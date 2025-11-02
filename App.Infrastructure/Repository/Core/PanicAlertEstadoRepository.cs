@@ -1,42 +1,28 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities.Core;
-using Dapper;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
+using App.Infrastructure.Database;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class PanicAlertEstadoRepository : IPanicAlertEstadoRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public PanicAlertEstadoRepository(IConfiguration configuration)
+        public PanicAlertEstadoRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<IReadOnlyList<PanicAlertEstado>> GetAllAsync()
         {
-            const string sql = "SELECT id, nombre FROM panic_alert_estado ORDER BY id";
-
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
-            {
-                var items = await connection.QueryAsync<PanicAlertEstado>(sql);
-                return items.AsList();
-            }
+            await Task.CompletedTask;
+            throw new NotImplementedException();
         }
 
         public async Task<PanicAlertEstado?> GetByIdAsync(string id)
         {
-            const string sql = "SELECT id, nombre FROM panic_alert_estado WHERE id = @id";
-
-            var p = new DynamicParameters();
-            p.Add("@id", id);
-
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
-            {
-                return (await connection.QueryAsync<PanicAlertEstado>(sql, p)).FirstOrDefault();
-            }
+            await Task.CompletedTask;
+            throw new NotImplementedException();
         }
     }
 }

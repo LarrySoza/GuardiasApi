@@ -1,25 +1,24 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities.Core;
+using App.Infrastructure.Database;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class AsignacionEventoTipoRepository : IAsignacionEventoTipoRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public AsignacionEventoTipoRepository(IConfiguration configuration)
+        public AsignacionEventoTipoRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<IReadOnlyList<AsignacionEventoTipo>> GetAllAsync()
         {
             const string sql = "SELECT id, nombre FROM asignacion_evento_tipo ORDER BY id";
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
                 var items = await connection.QueryAsync<AsignacionEventoTipo>(sql);
                 return items.AsList();
@@ -33,7 +32,7 @@ namespace App.Infrastructure.Repository.Core
             var p = new DynamicParameters();
             p.Add("@id", id);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
                 return (await connection.QueryAsync<AsignacionEventoTipo>(sql, p)).FirstOrDefault();
             }

@@ -1,17 +1,17 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities;
 using App.Core.Entities.Core;
-using Microsoft.Extensions.Configuration;
+using App.Infrastructure.Database;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class ControlPointRepository : IControlPointRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public ControlPointRepository(IConfiguration configuration)
+        public ControlPointRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<Guid> AddAsync(ControlPoint entity)

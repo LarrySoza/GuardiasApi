@@ -1,4 +1,7 @@
-﻿using App.Application.Interfaces.Core;
+﻿using App.Application.Interfaces;
+using App.Application.Interfaces.Core;
+using App.Infrastructure.Database;
+using App.Infrastructure.Repository;
 using App.Infrastructure.Repository.Core;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +12,9 @@ namespace App.Infrastructure
     {
         public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
+            // Registrar fábrica de conexiones (una instancia lee la cadena y la guarda)
+            services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
+
             services.AddTransient<IAliveCheckEstadoRepository, AliveCheckEstadoRepository>();
             services.AddTransient<IAliveCheckRepository, AliveCheckRepository>();
             services.AddTransient<IAliveCheckRespuestaRepository, AliveCheckRespuestaRepository>();
@@ -53,6 +59,9 @@ namespace App.Infrastructure
             services.AddTransient<IUsuarioRepository, UsuarioRepository>();
             services.AddTransient<IUsuarioRolRepository, UsuarioRolRepository>();
             services.AddTransient<IUsuarioUnidadRepository, UsuarioUnidadRepository>();
+
+            // Registrar UnitOfWork como Scoped
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             return services;
         }

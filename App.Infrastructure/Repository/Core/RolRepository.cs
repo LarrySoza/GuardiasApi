@@ -1,26 +1,26 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities.Core;
+using App.Infrastructure.Database;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class RolRepository : IRolRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public RolRepository(IConfiguration config)
+        public RolRepository(IDbConnectionFactory dbFactory)
         {
-            _config = config;
+            _dbFactory = dbFactory;
         }
 
         public async Task<IReadOnlyList<Rol>> GetAllAsync()
         {
             const string sql = "SELECT id, codigo FROM rol ORDER BY id";
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 var items = await connection.QueryAsync<Rol>(sql);
                 return items.AsList();
             }
@@ -33,8 +33,9 @@ namespace App.Infrastructure.Repository.Core
             var p = new DynamicParameters();
             p.Add("@id", id);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 return (await connection.QueryAsync<Rol>(sql, p)).FirstOrDefault();
             }
         }

@@ -1,25 +1,24 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities.Core;
+using App.Infrastructure.Database;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class UsuarioEstadoRepository : IUsuarioEstadoRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public UsuarioEstadoRepository(IConfiguration configuration)
+        public UsuarioEstadoRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<IReadOnlyList<UsuarioEstado>> GetAllAsync()
         {
             const string sql = "SELECT id, nombre FROM usuario_estado ORDER BY id";
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
                 var items = await connection.QueryAsync<UsuarioEstado>(sql);
                 return items.AsList();
@@ -33,7 +32,7 @@ namespace App.Infrastructure.Repository.Core
             var p = new DynamicParameters();
             p.Add("@id", id);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
                 return (await connection.QueryAsync<UsuarioEstado>(sql, p)).FirstOrDefault();
             }

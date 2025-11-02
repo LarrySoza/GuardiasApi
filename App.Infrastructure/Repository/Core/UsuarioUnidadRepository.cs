@@ -2,17 +2,17 @@ using App.Application.Interfaces;
 using App.Application.Interfaces.Core;
 using App.Core.Entities;
 using App.Core.Entities.Core;
-using Microsoft.Extensions.Configuration;
+using App.Infrastructure.Database;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class UsuarioUnidadRepository : IUsuarioUnidadRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public UsuarioUnidadRepository(IConfiguration configuration)
+        public UsuarioUnidadRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<(Guid usuario_id, Guid unidad_id)> AddAsync(UsuarioUnidad entity)

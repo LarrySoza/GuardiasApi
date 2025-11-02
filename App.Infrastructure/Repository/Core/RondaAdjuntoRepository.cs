@@ -1,17 +1,17 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities;
 using App.Core.Entities.Core;
-using Microsoft.Extensions.Configuration;
+using App.Infrastructure.Database;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class RondaAdjuntoRepository : IRondaAdjuntoRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public RondaAdjuntoRepository(IConfiguration configuration)
+        public RondaAdjuntoRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<Guid> AddAsync(RondaAdjunto entity)

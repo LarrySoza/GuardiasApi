@@ -1,18 +1,17 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities.Core;
+using App.Infrastructure.Database;
 using Dapper;
-using Microsoft.Extensions.Configuration;
-using Npgsql;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class ConfiguracionRepository : IConfiguracionRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public ConfiguracionRepository(IConfiguration config)
+        public ConfiguracionRepository(IDbConnectionFactory dbFactory)
         {
-            _config = config;
+            _dbFactory = dbFactory;
         }
 
         public async Task AddAsync(Configuracion entity)
@@ -23,8 +22,9 @@ namespace App.Infrastructure.Repository.Core
             _parametros.Add("@id", entity.id);
             _parametros.Add("@valor", entity.valor);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 await connection.ExecuteAsync(_query, _parametros);
             }
         }
@@ -40,8 +40,9 @@ namespace App.Infrastructure.Repository.Core
             p.Add("@id", entity.id);
             p.Add("@valor", entity.valor);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 await connection.ExecuteAsync(upsert, p);
             }
         }
@@ -53,8 +54,9 @@ namespace App.Infrastructure.Repository.Core
             var _parametros = new DynamicParameters();
             _parametros.Add("@id", id);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 await connection.ExecuteAsync(_query, _parametros);
             }
         }
@@ -63,8 +65,9 @@ namespace App.Infrastructure.Repository.Core
         {
             string _query = "SELECT * FROM configuracion";
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 var items = await connection.QueryAsync<Configuracion>(_query);
                 return items.AsList();
             }
@@ -77,8 +80,9 @@ namespace App.Infrastructure.Repository.Core
             var _parametros = new DynamicParameters();
             _parametros.Add("@id", id);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 return (await connection.QueryAsync<Configuracion>(_query, _parametros)).FirstOrDefault();
             }
         }
@@ -91,8 +95,9 @@ namespace App.Infrastructure.Repository.Core
             _parametros.Add("@id", entity.id);
             _parametros.Add("@valor", entity.valor);
 
-            using (var connection = new NpgsqlConnection(_config.GetConnectionString(UnitOfWork.DefaultConnection)))
+            using (var connection = _dbFactory.CreateConnection())
             {
+                connection.Open();
                 await connection.ExecuteAsync(_query, _parametros);
             }
         }

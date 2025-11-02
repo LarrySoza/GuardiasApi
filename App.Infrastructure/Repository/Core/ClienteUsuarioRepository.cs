@@ -1,17 +1,17 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities;
 using App.Core.Entities.Core;
-using Microsoft.Extensions.Configuration;
+using App.Infrastructure.Database;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class ClienteUsuarioRepository : IClienteUsuarioRepository
     {
-        private readonly IConfiguration _config;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public ClienteUsuarioRepository(IConfiguration configuration)
+        public ClienteUsuarioRepository(IDbConnectionFactory dbFactory)
         {
-            _config = configuration;
+            _dbFactory = dbFactory;
         }
 
         public async Task<(Guid cliente_id, Guid usuario_id)> AddAsync(ClienteUsuario entity)

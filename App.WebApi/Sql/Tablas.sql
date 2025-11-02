@@ -209,9 +209,17 @@ CREATE TABLE unidad (
 CREATE TABLE usuario_unidad (
  usuario_id uuid NOT NULL,
  unidad_id uuid NOT NULL,
+ -- auditoría
+ created_at timestamp with time zone DEFAULT now(),
+ created_by uuid,
+ updated_at timestamp with time zone,
+ updated_by uuid,
+ deleted_at timestamp with time zone,
  CONSTRAINT usuario_unidad_pk PRIMARY KEY (usuario_id, unidad_id),
  CONSTRAINT usuario_unidad_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT usuario_unidad_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+ CONSTRAINT usuario_unidad_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT cliente_usuario_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT cliente_usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- =====================
@@ -324,7 +332,6 @@ CREATE TABLE panic_alert_adjunto (
  panic_alert_id uuid NOT NULL, -- FK a panic_alert.id
  tipo_id text NOT NULL, -- FK a panic_alert_adjunto_tipo.id
  ruta text, -- ruta o URL del archivo
-
  -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,

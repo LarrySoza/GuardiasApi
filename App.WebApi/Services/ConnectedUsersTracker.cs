@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace App.WebApi.Models
+namespace App.WebApi.Services
 {
     // Servicio singleton: mantiene userId -> set de connectionIds
     public class ConnectedUsersTracker

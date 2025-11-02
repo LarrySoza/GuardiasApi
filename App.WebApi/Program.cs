@@ -1,6 +1,6 @@
 using App.Infrastructure;
-using App.WebApi.Models;
-using App.WebApi.Routing;
+using App.WebApi.Configuration;
+using App.WebApi.Services;
 using Microsoft.AspNetCore.Mvc.ApplicationModels;
 using NLog;
 using NLog.Web;
@@ -20,6 +20,10 @@ namespace App.WebApi
 
                 builder.Services.ConfigureCors();
                 builder.Services.AddInfrastructure(builder.Configuration);
+
+                // Registrar servicio de autenticacion
+                builder.Services.AddScoped<IAuthService, AuthService>();
+
                 builder.Services.ConfigureAuthJwt(builder.Configuration);
                 builder.Services.AddControllers(options =>
                 {

@@ -1,4 +1,4 @@
-﻿using App.WebApi.Models;
+﻿using App.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 

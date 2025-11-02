@@ -15,13 +15,25 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public async Task<Guid> AddAsync(UsuarioRol entity)
+        public async Task<(Guid usuario_id, string rol_id)> AddAsync(UsuarioRol entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task DeleteAsync(Guid id)
+        async Task<(Guid usuario_id, string rol_id)> IGenericRepository<UsuarioRol, (Guid usuario_id, string rol_id)>.AddAsync(UsuarioRol entity)
+        {
+            await Task.CompletedTask;
+            throw new NotImplementedException();
+        }
+
+        public async Task AddOrUpdateAsync(UsuarioRol entity)
+        {
+            await Task.CompletedTask;
+            throw new NotImplementedException();
+        }
+
+        public async Task UpdateAsync(UsuarioRol entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
@@ -39,31 +51,7 @@ namespace App.Infrastructure.Repository.Core
             throw new NotImplementedException();
         }
 
-        public async Task<IReadOnlyList<UsuarioRol>> GetAllAsync()
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<UsuarioRol?> GetByIdAsync(Guid id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
         public async Task<UsuarioRol?> GetByIdAsync((Guid usuario_id, string rol_id) id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task UpdateAsync(UsuarioRol entity)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        async Task<(Guid usuario_id, string rol_id)> IGenericRepository<UsuarioRol, (Guid usuario_id, string rol_id)>.AddAsync(UsuarioRol entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

@@ -14,15 +14,8 @@ namespace App.Infrastructure.Repository.Core
             _config = config;
         }
 
-        public async Task<PaginaDatos<AliveCheckEstado>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public Task<IReadOnlyList<AliveCheckEstado>> GetAllAsync()
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<IReadOnlyList<AliveCheckEstado>> GetAllAsync()
-        {
-            await Task.CompletedTask;
             throw new NotImplementedException();
         }
 

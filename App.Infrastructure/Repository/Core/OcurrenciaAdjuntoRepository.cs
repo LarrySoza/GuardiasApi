@@ -20,6 +20,12 @@ namespace App.Infrastructure.Repository.Core
             throw new NotImplementedException();
         }
 
+        public async Task AddOrUpdateAsync(OcurrenciaAdjunto entity)
+        {
+            await Task.CompletedTask;
+            throw new NotImplementedException();
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             await Task.CompletedTask;
@@ -27,12 +33,6 @@ namespace App.Infrastructure.Repository.Core
         }
 
         public async Task<PaginaDatos<OcurrenciaAdjunto>> FindAsync(string? search, int page = 1, int pageSize = 20)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<IReadOnlyList<OcurrenciaAdjunto>> GetAllAsync()
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

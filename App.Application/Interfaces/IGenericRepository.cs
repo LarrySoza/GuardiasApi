@@ -6,6 +6,7 @@
     public interface IGenericRepository<T, TKey> : ISearchRepository<T, TKey> where T : class
     {
         Task<TKey> AddAsync(T entity);
+        Task AddOrUpdateAsync(T entity);
         Task UpdateAsync(T entity);
         Task DeleteAsync(TKey id);
     }

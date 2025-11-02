@@ -15,13 +15,25 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public async Task<Guid> AddAsync(UsuarioUnidad entity)
+        public async Task<(Guid usuario_id, Guid unidad_id)> AddAsync(UsuarioUnidad entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task DeleteAsync(Guid id)
+        async Task<(Guid usuario_id, Guid unidad_id)> IGenericRepository<UsuarioUnidad, (Guid usuario_id, Guid unidad_id)>.AddAsync(UsuarioUnidad entity)
+        {
+            await Task.CompletedTask;
+            throw new NotImplementedException();
+        }
+
+        public async Task AddOrUpdateAsync(UsuarioUnidad entity)
+        {
+            await Task.CompletedTask;
+            throw new NotImplementedException();
+        }
+
+        public async Task UpdateAsync(UsuarioUnidad entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
@@ -39,31 +51,7 @@ namespace App.Infrastructure.Repository.Core
             throw new NotImplementedException();
         }
 
-        public async Task<IReadOnlyList<UsuarioUnidad>> GetAllAsync()
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<UsuarioUnidad?> GetByIdAsync(Guid id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
         public async Task<UsuarioUnidad?> GetByIdAsync((Guid usuario_id, Guid unidad_id) id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task UpdateAsync(UsuarioUnidad entity)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        async Task<(Guid usuario_id, Guid unidad_id)> IGenericRepository<UsuarioUnidad, (Guid usuario_id, Guid unidad_id)>.AddAsync(UsuarioUnidad entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

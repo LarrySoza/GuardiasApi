@@ -14,37 +14,13 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public async Task<Guid> AddAsync(IncidenteTipo entity)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task DeleteAsync(Guid id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<PaginaDatos<IncidenteTipo>> FindAsync(string? search, int page = 1, int pageSize = 20)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
         public async Task<IReadOnlyList<IncidenteTipo>> GetAllAsync()
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task<IncidenteTipo?> GetByIdAsync(Guid id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task UpdateAsync(IncidenteTipo entity)
+        public async Task<IncidenteTipo?> GetByIdAsync(string id)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

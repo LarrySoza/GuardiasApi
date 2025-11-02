@@ -43,6 +43,11 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
+        public Task AddOrUpdateAsync(Usuario entity)
+        {
+            throw new NotImplementedException();
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             const string sql = "UPDATE usuario SET deleted_at = now() WHERE id = @id";

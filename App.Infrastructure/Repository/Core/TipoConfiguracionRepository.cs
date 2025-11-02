@@ -14,12 +14,6 @@ namespace App.Infrastructure.Repository.Core
             _config = configuration;
         }
 
-        public async Task<PaginaDatos<TipoConfiguracion>> FindAsync(string? search, int page = 1, int pageSize = 20)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
         public async Task<IReadOnlyList<TipoConfiguracion>> GetAllAsync()
         {
             await Task.CompletedTask;

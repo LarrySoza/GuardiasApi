@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-
 namespace App.Core.Entities.Core
 {
     /// <summary>

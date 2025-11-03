@@ -4,10 +4,10 @@ using App.Core.Entities.Core;
 namespace App.Application.Interfaces.Core
 {
     // Repositorio para `usuario` (operaciones completas), clave Guid
-    public interface IUsuarioRepository : ISearchRepository<Usuario, Guid> 
+    public interface IUsuarioRepository : ISearchRepository<Usuario, Guid>
     {
         Task UpdateAsync(Usuario entity);
-        
+
         Task DeleteAsync(Guid id);
 
         /// <summary>
@@ -38,6 +38,6 @@ namespace App.Application.Interfaces.Core
         /// Evita el problema N+1 cuando `includeRoles` es true cargando los roles para todos los usuarios retornados
         /// en una única consulta adicional.
         /// </summary>
-        Task<PaginaDatos<Usuario>> FindAsync(string? search, int page =1, int pageSize =20, bool includeRoles = false);
+        Task<PaginaDatos<Usuario>> FindAsync(string? search, int page = 1, int pageSize = 20, bool includeRoles = false);
     }
 }

@@ -98,7 +98,7 @@ namespace App.WebApi.Controllers.Admin
             {
                 // Normalizar parámetros de paginación: asegurar página >=1 y pageSize dentro de un rango razonable.
                 page = Math.Max(1, page);
-                pageSize = Math.Clamp(pageSize,1,100);
+                pageSize = Math.Clamp(pageSize, 1, 100);
 
                 // Delegar la búsqueda paginada al repositorio de usuarios.
                 var resultado = await _unitOfWork.Usuarios.FindAsync(search, page, pageSize, true);

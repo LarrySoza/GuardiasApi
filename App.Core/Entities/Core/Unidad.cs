@@ -18,7 +18,5 @@ namespace App.Core.Entities.Core
         {
             unidad_id_padre = parentId;
         }
-
-        // Otros setters/constructores pueden existir en la clase original
     }
 }

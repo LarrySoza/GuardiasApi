@@ -136,7 +136,7 @@ namespace App.Infrastructure.Repository.Core
  SELECT id, unidad_id_padre FROM unidad WHERE id = @unidadId
  UNION ALL
  SELECT u.id, u.unidad_id_padre FROM unidad u JOIN descendants d ON u.unidad_id_padre = d.id
- ) SELECT1 FROM descendants WHERE id = @possibleId LIMIT1";
+ ) SELECT 1 FROM descendants WHERE id = @possibleId LIMIT 1";
 
             var p = new DynamicParameters();
             p.Add("@unidadId", unidadId);

@@ -53,6 +53,52 @@ namespace App.WebApi.Controllers.Admin
         }
 
         /// <summary>
+        /// Devuelve las unidades de un cliente en forma de árbol (basado en unidad_id_padre)
+        /// </summary>
+        /// <param name="clienteId">Identificador del cliente</param>
+        /// <returns>200 OK con lista de unidades en estructura de árbol.</returns>
+        [ProducesResponseType(typeof(List<UnidadDto>), (int)HttpStatusCode.OK)]
+        [HttpGet("cliente/{clienteId:guid}/tree", Name = "Admin_Unidades_GetTreeByCliente")]
+        public async Task<IActionResult> GetUnidadesTreeByCliente(Guid clienteId)
+        {
+            try
+            {
+                // obtener todas las unidades del cliente
+                var unidades = await _unitOfWork.Unidades.GetAllByClienteIdAsync(clienteId);
+                if (unidades == null || unidades.Count == 0) return Ok(new List<UnidadDto>());
+
+                // mapear a DTOs
+                var dtos = unidades.Select(u => _mapper.Map<UnidadDto>(u)).ToList();
+
+                // diccionario para acceso por id
+                var dict = dtos.ToDictionary(d => d.id);
+
+                var roots = new List<UnidadDto>();
+
+                // construir árbol
+                foreach (var dto in dtos)
+                {
+                    if (dto.unidad_id_padre.HasValue && dict.TryGetValue(dto.unidad_id_padre.Value, out var parent))
+                    {
+                        parent.children.Add(dto);
+                    }
+                    else
+                    {
+                        // sin padre => raíz
+                        roots.Add(dto);
+                    }
+                }
+
+                return Ok(roots);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Crea una nueva unidad.
         /// </summary>
         /// <param name="dto">Datos de la unidad a crear.</param>
@@ -65,6 +111,15 @@ namespace App.WebApi.Controllers.Admin
             try
             {
                 if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                // si se especifica padre, validar existencia y mismo cliente
+                if (dto.unidad_id_padre.HasValue)
+                {
+                    var parent = await _unitOfWork.Unidades.GetByIdAsync(dto.unidad_id_padre.Value);
+                    if (parent == null) return BadRequest("El padre especificado no existe");
+                    if (parent.cliente_id != dto.cliente_id) return BadRequest("El padre debe pertenecer al mismo cliente");
+                    // No es necesario validar ciclos al crear una nueva unidad (aún no existe en DB)
+                }
 
                 var entity = _mapper.Map<Unidad>(dto);
                 entity.SetCreationAudit(DateTimeOffset.UtcNow, User.Id());

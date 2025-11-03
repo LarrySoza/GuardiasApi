@@ -11,5 +11,8 @@ namespace App.WebApi.Models.Unidad
         public string? direccion { get; set; }
         public decimal? lat { get; set; }
         public decimal? lng { get; set; }
+
+        // hijos para representar el árbol
+        public List<UnidadDto> children { get; set; } = new();
     }
 }

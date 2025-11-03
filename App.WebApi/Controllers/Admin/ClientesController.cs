@@ -13,14 +13,14 @@ namespace App.WebApi.Controllers.Admin
     [Authorize(Roles = "ADMIN")]
     [ApiController]
     [Route("api/admin/[controller]")]
-    public class ClienteController : ControllerBase
+    public class ClientesController : ControllerBase
     {
-        private readonly ILogger<ClienteController> _logger;
+        private readonly ILogger<ClientesController> _logger;
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
-        public ClienteController(IConfiguration config, ILogger<ClienteController> logger, IUnitOfWork unitOfWork, IMapper mapper)
+        public ClientesController(IConfiguration config, ILogger<ClientesController> logger, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _config = config;
             _logger = logger;
@@ -149,6 +149,32 @@ namespace App.WebApi.Controllers.Admin
                 await _unitOfWork.Clientes.UpdateAsync(cliente);
 
                 return Ok(new GenericResponseDto { success = true, message = "Cliente actualizado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Elimina (soft delete) un cliente por su identificador.
+        /// </summary>
+        /// <param name="id">Identificador (GUID) del cliente a eliminar.</param>
+        /// <returns>200 OK si se eliminó correctamente,404 si no existe.</returns>
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpDelete("{id:guid}", Name = "Admin_Clientes_Eliminar")]
+        public async Task<IActionResult> EliminarCliente(Guid id)
+        {
+            try
+            {
+                var cliente = await _unitOfWork.Clientes.GetByIdAsync(id);
+                if (cliente == null) return NotFound();
+
+                await _unitOfWork.Clientes.DeleteAsync(id);
+
+                return Ok(new GenericResponseDto { success = true, message = "Cliente eliminado correctamente" });
             }
             catch (Exception ex)
             {

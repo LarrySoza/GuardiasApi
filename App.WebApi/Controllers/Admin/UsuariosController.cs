@@ -240,5 +240,31 @@ namespace App.WebApi.Controllers.Admin
                 throw;
             }
         }
+
+        /// <summary>
+        /// Elimina (soft delete) un usuario por su identificador.
+        /// </summary>
+        /// <param name="id">Identificador (GUID) del usuario a eliminar.</param>
+        /// <returns>200 OK si se eliminó correctamente,404 si no existe.</returns>
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpDelete("{id:guid}", Name = "Admin_Usuarios_Eliminar")]
+        public async Task<IActionResult> EliminarUsuario(Guid id)
+        {
+            try
+            {
+                var usuario = await _unitOfWork.Usuarios.GetByIdAsync(id);
+                if (usuario == null) return NotFound();
+
+                await _unitOfWork.Usuarios.DeleteAsync(id);
+
+                return Ok(new GenericResponseDto { success = true, message = "Usuario eliminado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
     }
 }

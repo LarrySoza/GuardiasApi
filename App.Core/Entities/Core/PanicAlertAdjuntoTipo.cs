@@ -4,15 +4,9 @@ namespace App.Core.Entities.Core
     /// Table: panic_alert_adjunto_tipo
     /// Catalog of attachment types for panic alerts.
     /// </summary>
-    public class PanicAlertAdjuntoTipo : Entity<string>
+    public class PanicAlertAdjuntoTipo
     {
-        public string nombre { get; private set; } = string.Empty;
-
-        protected PanicAlertAdjuntoTipo() { }
-        public PanicAlertAdjuntoTipo(string id, string nombre)
-        {
-            this.id = id;
-            this.nombre = nombre;
-        }
+        public required string id { get; set; }
+        public string? nombre { get; set; }
     }
 }

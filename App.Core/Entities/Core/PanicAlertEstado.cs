@@ -4,15 +4,9 @@ namespace App.Core.Entities.Core
     /// Table: panic_alert_estado
     /// Catalog of possible states for a panic alert.
     /// </summary>
-    public class PanicAlertEstado : Entity<string>
+    public class PanicAlertEstado
     {
-        public string nombre { get; private set; } = string.Empty;
-
-        protected PanicAlertEstado() { }
-        public PanicAlertEstado(string id, string nombre)
-        {
-            this.id = id;
-            this.nombre = nombre;
-        }
+        public required string id { get; set; }
+        public string? nombre { get; set; }
     }
 }

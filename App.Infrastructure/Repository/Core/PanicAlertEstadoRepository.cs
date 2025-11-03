@@ -1,6 +1,8 @@
 using App.Application.Interfaces.Core;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
+using Dapper;
+using System.Linq;
 
 namespace App.Infrastructure.Repository.Core
 {
@@ -15,14 +17,28 @@ namespace App.Infrastructure.Repository.Core
 
         public async Task<IReadOnlyList<PanicAlertEstado>> GetAllAsync()
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            const string sql = "SELECT id, nombre FROM panic_alert_estado ORDER BY id";
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<PanicAlertEstado>(sql);
+                return items.AsList();
+            }
         }
 
         public async Task<PanicAlertEstado?> GetByIdAsync(string id)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            const string sql = "SELECT id, nombre FROM panic_alert_estado WHERE id = @id";
+
+            var p = new DynamicParameters();
+            p.Add("@id", id);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                return (await connection.QueryAsync<PanicAlertEstado>(sql, p)).FirstOrDefault();
+            }
         }
     }
 }

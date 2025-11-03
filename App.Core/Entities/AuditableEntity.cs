@@ -10,23 +10,23 @@ namespace App.Core.Entities
         public DateTimeOffset? deleted_at { get; protected set; }
 
         // Establece los campos de auditoría de creación
-        public void SetCreationAudit(Guid userId)
+        public void SetCreationAudit(DateTimeOffset? dateTimeOffset, Guid? userId)
         {
-            created_at = DateTimeOffset.UtcNow;
-            created_by = userId;
+            if (dateTimeOffset.HasValue) created_at = dateTimeOffset.Value;
+            if (userId.HasValue) created_by = userId;
         }
 
         // Establece los campos de auditoría de actualización
-        public void SetUpdateAudit(Guid userId)
+        public void SetUpdateAudit(DateTimeOffset? dateTimeOffset, Guid? userId)
         {
-            updated_at = DateTimeOffset.UtcNow;
-            updated_by = userId;
+            if (dateTimeOffset.HasValue) updated_at = dateTimeOffset.Value;
+            if (userId.HasValue) updated_by = userId;
         }
 
         // Establece el campo de eliminación (soft delete)
-        public void SetDeletedAudit()
+        public void SetDeletedAudit(DateTimeOffset? dateTimeOffset)
         {
-            deleted_at = DateTimeOffset.UtcNow;
+            if (dateTimeOffset.HasValue) deleted_at = dateTimeOffset.Value;
         }
     }
 }

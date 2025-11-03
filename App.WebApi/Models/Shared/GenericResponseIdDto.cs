@@ -1,10 +1,10 @@
 ﻿namespace App.WebApi.Models.Shared
 {
-    public class GenericResponseId<T>
+    public class GenericResponseIdDto<T>
     {
         public T id { get; private set; }
 
-        public GenericResponseId(T id)
+        public GenericResponseIdDto(T id)
         {
             this.id = id;
         }

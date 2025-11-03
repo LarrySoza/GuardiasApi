@@ -82,6 +82,7 @@ namespace App.WebApi.Controllers.Admin
         /// <param name="search">Texto de búsqueda opcional; si es nulo o vacío devuelve todos los registros paginados.</param>
         /// <param name="page">Número de página (mínimo1).</param>
         /// <param name="pageSize">Tamaño de página (se limita entre1 y100).</param>
+        /// <param name="includeRoles">Si es true, incluye la lista de roles asignados para cada usuario en la respuesta. Cuando es true, el repositorio intentará cargar los roles para todos los usuarios retornados en una sola consulta para evitar el problema N+1. Por defecto es false.</param>
         /// <returns>200 OK con un objeto <see cref="PaginaDatos{UsuarioDto}"/> que contiene la lista paginada de usuarios.</returns>
         /// <response code="200">Resultados paginados devueltos correctamente.</response>
         /// <remarks>
@@ -92,7 +93,8 @@ namespace App.WebApi.Controllers.Admin
         [HttpGet(Name = "Admin_Usuarios_Buscar")]
         public async Task<IActionResult> BuscarUsuario([FromQuery] string? search,
                                                        [FromQuery] int page = 1,
-                                                       [FromQuery] int pageSize = 20)
+                                                       [FromQuery] int pageSize = 20,
+                                                       [FromQuery] bool includeRoles = false)
         {
             try
             {
@@ -101,7 +103,7 @@ namespace App.WebApi.Controllers.Admin
                 pageSize = Math.Clamp(pageSize, 1, 100);
 
                 // Delegar la búsqueda paginada al repositorio de usuarios.
-                var resultado = await _unitOfWork.Usuarios.FindAsync(search, page, pageSize, true);
+                var resultado = await _unitOfWork.Usuarios.FindAsync(search, page, pageSize, includeRoles);
 
                 // Mapear entidades Usuario -> UsuarioDto para la respuesta pública.
                 var dataDto = _mapper.Map<List<UsuarioDto>>(resultado.data);
@@ -132,7 +134,7 @@ namespace App.WebApi.Controllers.Admin
         /// <returns>El <see cref="Guid"/> del usuario creado.</returns>
         /// <response code="201">Usuario creado correctamente; devuelve el id (Guid) y Location hacia el recurso.</response>
         /// <response code="400">Modelo inválido.</response>
-        [ProducesResponseType(typeof(GenericResponseId<Guid>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(GenericResponseIdDto<Guid>), (int)HttpStatusCode.OK)]
         [HttpPost(Name = "Admin_Usuarios_Crear")]
         public async Task<IActionResult> CrearUsuario([FromBody] CrearUsuarioRequestDto dto)
         {
@@ -145,7 +147,7 @@ namespace App.WebApi.Controllers.Admin
                 // generar hash y sello
                 _usuario.contrasena_hash = Crypto.HashPassword(dto.contrasena);
                 _usuario.sello_seguridad = Guid.NewGuid();
-                _usuario.SetCreationAudit(User.Id());
+                _usuario.SetCreationAudit(DateTimeOffset.UtcNow, User.Id());
 
                 // convertir roles (si vienen ids)
                 var roles = (dto.roles_id ?? new List<string>()).Select(id => new Rol { id = id }).ToList();
@@ -153,7 +155,7 @@ namespace App.WebApi.Controllers.Admin
                 var id = await _unitOfWork.Usuarios.AddAsync(_usuario, roles);
 
                 // CreatedAtRoute espera un objeto con los valores de ruta; pasar el Guid directamente provoca error de compilación.
-                return CreatedAtRoute("Admin_Usuarios_GetById", new { id = id }, new GenericResponseId<Guid>(id));
+                return CreatedAtRoute("Admin_Usuarios_GetById", new { id = id }, new GenericResponseIdDto<Guid>(id));
             }
             catch (Exception ex)
             {
@@ -223,7 +225,7 @@ namespace App.WebApi.Controllers.Admin
                 }
 
                 // Auditar la actualización
-                usuario.SetUpdateAudit(User.Id());
+                usuario.SetUpdateAudit(DateTimeOffset.UtcNow, User.Id());
 
                 // Convertir roles
                 var roles = (dto.roles_id ?? new List<string>()).Select(rid => new Rol { id = rid }).ToList();

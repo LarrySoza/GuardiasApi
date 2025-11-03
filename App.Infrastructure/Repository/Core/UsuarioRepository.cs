@@ -155,7 +155,7 @@ namespace App.Infrastructure.Repository.Core
                 {
                     // Mapear campos comunes a Usuario usando propiedades públicas.
                     var usuario = new Usuario();
-                    usuario.SetId(row.id);
+                    
                     usuario.nombre_usuario = row.nombre_usuario;
                     usuario.email = row.email;
                     usuario.contrasena_hash = row.contrasena_hash;
@@ -164,7 +164,11 @@ namespace App.Infrastructure.Repository.Core
                     usuario.tipo_documento_id = row.tipo_documento_id;
                     usuario.numero_documento = row.numero_documento;
                     usuario.estado = row.estado;
-                    // No podemos asignar `id` ni campos de auditoría con setters protegidos desde aquí.
+
+                    usuario.SetId(row.id);
+                    usuario.SetCreationAudit(row.created_at, row.created_by);
+                    usuario.SetUpdateAudit(row.updated_at, row.updated_by);
+                    usuario.SetDeletedAudit(row.deleted_at);
 
                     // Deserializar roles_json en una lista de Rol
                     var rolesJson = (string)row.roles_json;

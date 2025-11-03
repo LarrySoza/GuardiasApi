@@ -1,6 +1,8 @@
-﻿namespace App.WebApi.Models.Usuario
+﻿using App.WebApi.Models.Common;
+
+namespace App.WebApi.Models.Usuario
 {
-    public class UsuarioDto
+    public class UsuarioDto : AuditableEntityDto
     {
         public Guid id { get; set; }
         public string nombre_usuario { get; set; } = default!;

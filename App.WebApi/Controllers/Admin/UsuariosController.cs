@@ -1,4 +1,5 @@
 ﻿using App.Application.Interfaces;
+using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure;
 using App.WebApi.Models.Shared;
@@ -73,6 +74,57 @@ namespace App.WebApi.Controllers.Admin
             }
         }
 
+        [ProducesResponseType(typeof(PaginaDatos<UsuarioDto>), (int)HttpStatusCode.OK)]
+        /// <summary>
+        /// Busca y lista usuarios con paginación. Permite filtrar por texto que coincida
+        /// con el `nombre_usuario`, `email` o `numero_documento`.
+        /// </summary>
+        /// <param name="search">Texto de búsqueda opcional; si es nulo o vacío devuelve todos los registros paginados.</param>
+        /// <param name="page">Número de página (mínimo1).</param>
+        /// <param name="pageSize">Tamaño de página (se limita entre1 y100).</param>
+        /// <returns>200 OK con un objeto <see cref="PaginaDatos{UsuarioDto}"/> que contiene la lista paginada de usuarios.</returns>
+        /// <response code="200">Resultados paginados devueltos correctamente.</response>
+        /// <remarks>
+        /// Este endpoint delega la búsqueda al repositorio `IUsuarioRepository.FindAsync` a través de `IUnitOfWork.Usuarios`.
+        /// Los resultados se mapean usando AutoMapper a `UsuarioDto` para evitar exponer información sensible.
+        /// </remarks>
+        [HttpGet(Name = "Admin_Usuarios_Buscar")]
+        public async Task<IActionResult> BuscarUsuario([FromQuery] string? search,
+                                                       [FromQuery] int page = 1,
+                                                       [FromQuery] int pageSize = 20)
+        {
+            try
+            {
+                // Normalizar parámetros de paginación: asegurar página >=1 y pageSize dentro de un rango razonable.
+                page = Math.Max(1, page);
+                pageSize = Math.Clamp(pageSize,1,100);
+
+                // Delegar la búsqueda paginada al repositorio de usuarios.
+                var resultado = await _unitOfWork.Usuarios.FindAsync(search, page, pageSize);
+
+                // Mapear entidades Usuario -> UsuarioDto para la respuesta pública.
+                var dataDto = _mapper.Map<List<UsuarioDto>>(resultado.data);
+
+                // Construir objeto de paginación para la respuesta.
+                var paginaDto = new PaginaDatos<UsuarioDto>
+                {
+                    total = resultado.total,
+                    page = resultado.page,
+                    pageSize = resultado.pageSize,
+                    totalPages = resultado.totalPages,
+                    data = dataDto
+                };
+
+                return Ok(paginaDto);
+            }
+            catch (Exception ex)
+            {
+                // Registrar y propagar la excepción para que el middleware la maneje.
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
         /// <summary>
         /// Crea un nuevo usuario con los datos proporcionados y retorna su identificador.
         /// </summary>
@@ -100,7 +152,8 @@ namespace App.WebApi.Controllers.Admin
 
                 var id = await _unitOfWork.Usuarios.AddAsync(_usuario, roles);
 
-                return CreatedAtRoute("Admin_Usuarios_GetById", id, new GenericResponseId<Guid>(id));
+                // CreatedAtRoute espera un objeto con los valores de ruta; pasar el Guid directamente provoca error de compilación.
+                return CreatedAtRoute("Admin_Usuarios_GetById", new { id = id }, new GenericResponseId<Guid>(id));
             }
             catch (Exception ex)
             {
@@ -119,8 +172,8 @@ namespace App.WebApi.Controllers.Admin
         /// <response code="200">Contraseña actualizada correctamente.</response>
         /// <response code="404">Usuario no encontrado (cuando la ruta no casó con un guid válido o no existe).</response>
         [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPatch("{id:guid}/password", Name = "Admin_Usuarios_ActualizarPassword")]
-        public async Task<IActionResult> CambiarPassword(Guid id, [FromBody] NuevaContrasenaDto clave)
+        [HttpPatch("{id:guid}/password", Name = "Admin_Usuarios_ActualizarContrasena")]
+        public async Task<IActionResult> CambiarContrasena(Guid id, [FromBody] NuevaContrasenaDto clave)
         {
             try
             {
@@ -129,7 +182,7 @@ namespace App.WebApi.Controllers.Admin
                 return Ok(new GenericResponseDto()
                 {
                     success = true,
-                    message = "Clave actualizada correctamente"
+                    message = "Contraseña actualizada correctamente"
                 });
             }
             catch (Exception ex)

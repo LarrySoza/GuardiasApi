@@ -23,27 +23,43 @@ namespace App.WebApi.Controllers
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Cambia la contraseña del usuario autenticado.
+        /// </summary>
+        /// <param name="claves">Objeto con las propiedades:
+        /// - contrasena_actual: la contraseña actual del usuario.
+        /// - contrasena_nueva: la nueva contraseña a establecer.</param>
+        /// <returns>ActionResult con un `GenericResponseDto`. En caso de éxito devuelve `success = true` y un mensaje descriptivo.</returns>
+        /// <remarks>
+        /// Requiere que el usuario esté autenticado. Si la contraseña actual no coincide
+        /// se lanzará una excepción y se registrará el error. El repositorio debe encargarse
+        /// del hash de la nueva contraseña y de cualquier actualización de sello de seguridad.
+        /// </remarks>
         [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPatch("me/password", Name = "Usuarios_CambiarPassword")]
-        public async Task<IActionResult> CambiarPassword([FromBody] CambiarContrasenaDto claves)
+        [HttpPatch("me/password", Name = "Usuarios_CambiarContrasena")]
+        public async Task<IActionResult> CambiarContrasena([FromBody] CambiarContrasenaDto claves)
         {
             try
             {
+                // Validar que la contraseña actual coincida con la almacenada para el usuario autenticado.
                 if (!await _unitOfWork.Usuarios.ValidatePasswordAsync(User.Id(), claves.contrasena_actual))
                 {
-                    throw new Exception("La clave actual es incorrecta");
+                    throw new Exception("La contraseña actual es incorrecta");
                 }
 
+                // Actualizar la contraseña por la nueva proporcionada (se espera que el repositorio haga el hashing correspondiente).
                 await _unitOfWork.Usuarios.UpdatePasswordAsync(User.Id(), claves.contrasena_nueva);
 
+                // Retornar respuesta genérica indicando éxito.
                 return Ok(new GenericResponseDto()
                 {
                     success = true,
-                    message = "Clave actualizada correctamente"
+                    message = "Contraseña actualizada correctamente"
                 });
             }
             catch (Exception ex)
             {
+                // Registrar el error y volver a lanzar para que el middleware de la API lo gestione.
                 _logger.LogError(ex.Message);
                 throw;
             }

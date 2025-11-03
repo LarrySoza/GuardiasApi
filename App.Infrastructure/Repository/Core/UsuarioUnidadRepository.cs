@@ -1,8 +1,7 @@
-using App.Application.Interfaces;
 using App.Application.Interfaces.Core;
-using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
+using Dapper;
 
 namespace App.Infrastructure.Repository.Core
 {
@@ -15,46 +14,59 @@ namespace App.Infrastructure.Repository.Core
             _dbFactory = dbFactory;
         }
 
-        public async Task<(Guid usuario_id, Guid unidad_id)> AddAsync(UsuarioUnidad entity)
+        public async Task AddAsync(Guid usuarioId, Guid unidadId)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            const string sql = @"INSERT INTO usuario_unidad (usuario_id, unidad_id, created_at)
+                                 VALUES (@usuario_id, @unidad_id, now())
+                                 ON CONFLICT (usuario_id, unidad_id) DO UPDATE
+                                 SET deleted_at = NULL, updated_at = now();";
+
+            var p = new DynamicParameters();
+            p.Add("@usuario_id", usuarioId);
+            p.Add("@unidad_id", unidadId);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                await connection.ExecuteAsync(sql, p);
+            }
         }
 
-        async Task<(Guid usuario_id, Guid unidad_id)> IGenericAutoIdRepository<UsuarioUnidad, (Guid usuario_id, Guid unidad_id)>.AddAsync(UsuarioUnidad entity)
+        public async Task DeleteAsync(Guid usuarioId, Guid unidadId)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            const string sql = @"UPDATE usuario_unidad SET deleted_at = now(), updated_at = now()
+                        WHERE usuario_id = @usuario_id AND unidad_id = @unidad_id";
+
+            var p = new DynamicParameters();
+            p.Add("@usuario_id", usuarioId);
+            p.Add("@unidad_id", unidadId);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                await connection.ExecuteAsync(sql, p);
+            }
         }
 
-        public async Task AddOrUpdateAsync(UsuarioUnidad entity)
+        public async Task<IReadOnlyList<Unidad>> GetAllAsync(Guid usuarioId)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
+            const string sql = @"SELECT u.*
+                                     FROM unidad u
+                                     JOIN usuario_unidad uu ON uu.unidad_id = u.id
+                                     WHERE uu.usuario_id = @usuario_id
+                                     AND uu.deleted_at IS NULL
+                                     AND u.deleted_at IS NULL
+                                     ORDER BY u.nombre";
 
-        public async Task UpdateAsync(UsuarioUnidad entity)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
+            var p = new DynamicParameters();
+            p.Add("@usuario_id", usuarioId);
 
-        public async Task DeleteAsync((Guid usuario_id, Guid unidad_id) id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<PaginaDatos<UsuarioUnidad>> FindAsync(string? search, int page = 1, int pageSize = 20)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
-
-        public async Task<UsuarioUnidad?> GetByIdAsync((Guid usuario_id, Guid unidad_id) id)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<Unidad>(sql, p);
+                return items.AsList();
+            }
         }
     }
 }

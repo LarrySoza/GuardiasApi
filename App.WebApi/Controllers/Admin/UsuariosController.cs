@@ -74,7 +74,7 @@ namespace App.WebApi.Controllers.Admin
             }
         }
 
-        [ProducesResponseType(typeof(PaginaDatos<UsuarioDto>), (int)HttpStatusCode.OK)]
+
         /// <summary>
         /// Busca y lista usuarios con paginación. Permite filtrar por texto que coincida
         /// con el `nombre_usuario`, `email` o `numero_documento`.
@@ -88,6 +88,7 @@ namespace App.WebApi.Controllers.Admin
         /// Este endpoint delega la búsqueda al repositorio `IUsuarioRepository.FindAsync` a través de `IUnitOfWork.Usuarios`.
         /// Los resultados se mapean usando AutoMapper a `UsuarioDto` para evitar exponer información sensible.
         /// </remarks>
+        [ProducesResponseType(typeof(PaginaDatos<UsuarioDto>), (int)HttpStatusCode.OK)]
         [HttpGet(Name = "Admin_Usuarios_Buscar")]
         public async Task<IActionResult> BuscarUsuario([FromQuery] string? search,
                                                        [FromQuery] int page = 1,
@@ -100,7 +101,7 @@ namespace App.WebApi.Controllers.Admin
                 pageSize = Math.Clamp(pageSize,1,100);
 
                 // Delegar la búsqueda paginada al repositorio de usuarios.
-                var resultado = await _unitOfWork.Usuarios.FindAsync(search, page, pageSize);
+                var resultado = await _unitOfWork.Usuarios.FindAsync(search, page, pageSize, true);
 
                 // Mapear entidades Usuario -> UsuarioDto para la respuesta pública.
                 var dataDto = _mapper.Map<List<UsuarioDto>>(resultado.data);
@@ -119,7 +120,6 @@ namespace App.WebApi.Controllers.Admin
             }
             catch (Exception ex)
             {
-                // Registrar y propagar la excepción para que el middleware la maneje.
                 _logger.LogError(ex.Message);
                 throw;
             }

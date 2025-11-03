@@ -12,6 +12,9 @@ namespace App.Core.Entities.Core
         public string? telefono { get; set; }
         public string? tipo_documento_id { get; set; }
         public string? numero_documento { get; set; }
-        public char estado { get; set; } = 'A';
+        public string estado { get; set; } = "A";
+
+        // Lista de roles asignados al usuario. Se utiliza cuando se consulta con includeRoles = true.
+        public List<Rol> roles { get; set; } = new();
     }
 }

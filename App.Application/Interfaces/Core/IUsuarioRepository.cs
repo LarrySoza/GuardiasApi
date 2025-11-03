@@ -1,3 +1,4 @@
+using App.Core.Entities;
 using App.Core.Entities.Core;
 
 namespace App.Application.Interfaces.Core
@@ -31,5 +32,12 @@ namespace App.Application.Interfaces.Core
         /// Registra un nuevo usuario junto con sus roles asignados.
         /// </summary>
         Task<Guid> AddAsync(Usuario usuario, List<Rol> roles);
+
+        /// <summary>
+        /// Búsqueda paginada de usuarios con opción de incluir los roles asignados en una sola consulta.
+        /// Evita el problema N+1 cuando `includeRoles` es true cargando los roles para todos los usuarios retornados
+        /// en una única consulta adicional.
+        /// </summary>
+        Task<PaginaDatos<Usuario>> FindAsync(string? search, int page =1, int pageSize =20, bool includeRoles = false);
     }
 }

@@ -66,9 +66,29 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
-        public async Task<PaginaDatos<Usuario>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        // Implementación de la firma original heredada de ISearchRepository
+        public Task<PaginaDatos<Usuario>> FindAsync(string? search, int page =1, int pageSize =20)
         {
-            var sql = @"
+            return FindAsync(search, page, pageSize, false);
+        }
+
+        public async Task<PaginaDatos<Usuario>> FindAsync(string? search, int page =1, int pageSize =20, bool includeRoles = false)
+        {
+            var offset = (page -1) * pageSize;
+            var parametros = new
+            {
+                search = string.IsNullOrWhiteSpace(search) ? null : search,
+                offset,
+                pageSize
+            };
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+
+                if (!includeRoles)
+                {
+                    var sql = @"
                         SELECT count(*)
                         FROM usuario u
                         WHERE u.deleted_at IS NULL
@@ -87,28 +107,87 @@ namespace App.Infrastructure.Repository.Core
                         ORDER BY u.nombre_usuario
                         LIMIT @pageSize OFFSET @offset;";
 
-            var offset = (page - 1) * pageSize;
-            var parametros = new
-            {
-                search = string.IsNullOrWhiteSpace(search) ? null : search,
-                offset,
-                pageSize
-            };
+                    using var multi = await connection.QueryMultipleAsync(sql, parametros);
+                    var total = await multi.ReadSingleAsync<int>();
+                    var data = (await multi.ReadAsync<Usuario>()).AsList();
 
-            using (var connection = _dbFactory.CreateConnection())
-            {
-                connection.Open();
-                using var multi = await connection.QueryMultipleAsync(sql, parametros);
-                var total = await multi.ReadSingleAsync<int>();
-                var data = (await multi.ReadAsync<Usuario>()).AsList();
+                    return new PaginaDatos<Usuario>
+                    {
+                        total = total,
+                        page = page,
+                        pageSize = pageSize,
+                        totalPages = (int)Math.Ceiling(total / (double)pageSize),
+                        data = data
+                    };
+                }
+
+                // includeRoles == true -> retornar usuarios con sus roles en una sola consulta
+                var sqlWithRoles = @"
+                    SELECT count(*)
+                    FROM usuario u
+                    WHERE u.deleted_at IS NULL
+                    AND (@search IS NULL
+                    OR u.nombre_usuario ILIKE '%' || @search || '%'
+                    OR u.email ILIKE '%' || @search || '%'
+                    OR u.numero_documento ILIKE '%' || @search || '%');
+
+                    SELECT u.*, COALESCE(json_agg(json_build_object('id', r.id, 'nombre', r.nombre)) FILTER (WHERE r.id IS NOT NULL), '[]') as roles_json
+                    FROM usuario u
+                    LEFT JOIN usuario_rol ur ON ur.usuario_id = u.id AND ur.deleted_at IS NULL
+                    LEFT JOIN rol r ON r.id = ur.rol_id
+                    WHERE u.deleted_at IS NULL
+                    AND (@search IS NULL
+                    OR u.nombre_usuario ILIKE '%' || @search || '%'
+                    OR u.email ILIKE '%' || @search || '%'
+                    OR u.numero_documento ILIKE '%' || @search || '%')
+                    GROUP BY u.id
+                    ORDER BY u.nombre_usuario
+                    LIMIT @pageSize OFFSET @offset;";
+
+                using var multi2 = await connection.QueryMultipleAsync(sqlWithRoles, parametros);
+                var total2 = await multi2.ReadSingleAsync<int>();
+
+                // Leer cada registro como dynamic para capturar roles_json
+                var rows = (await multi2.ReadAsync()).AsList();
+
+                var usuarios = new List<Usuario>();
+                foreach (var row in rows)
+                {
+                    // Mapear campos comunes a Usuario usando propiedades públicas.
+                    var usuario = new Usuario();
+                    usuario.SetId(row.id);
+                    usuario.nombre_usuario = row.nombre_usuario;
+                    usuario.email = row.email;
+                    usuario.contrasena_hash = row.contrasena_hash;
+                    usuario.sello_seguridad = row.sello_seguridad;
+                    usuario.telefono = row.telefono;
+                    usuario.tipo_documento_id = row.tipo_documento_id;
+                    usuario.numero_documento = row.numero_documento;
+                    usuario.estado = row.estado;
+                    // No podemos asignar `id` ni campos de auditoría con setters protegidos desde aquí.
+
+                    // Deserializar roles_json en una lista de Rol
+                    var rolesJson = (string)row.roles_json;
+                    try
+                    {
+                        var roles = System.Text.Json.JsonSerializer.Deserialize<List<Rol>>(rolesJson) ?? new List<Rol>();
+                        usuario.roles = roles;
+                    }
+                    catch
+                    {
+                        // ignorar errores de deserialización y continuar
+                    }
+
+                    usuarios.Add(usuario);
+                }
 
                 return new PaginaDatos<Usuario>
                 {
-                    total = total,
+                    total = total2,
                     page = page,
                     pageSize = pageSize,
-                    totalPages = (int)Math.Ceiling(total / (double)pageSize),
-                    data = data
+                    totalPages = (int)Math.Ceiling(total2 / (double)pageSize),
+                    data = usuarios
                 };
             }
         }

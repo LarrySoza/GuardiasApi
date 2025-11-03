@@ -4,5 +4,11 @@ namespace App.Core.Entities
     public abstract class Entity<TId>
     {
         public TId? id { get; protected set; }
+
+        // Establece los campos de auditoría de actualización
+        public void SetId(TId id)
+        {
+            this.id = id;
+        }
     }
 }

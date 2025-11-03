@@ -3,6 +3,7 @@ using App.Application.Interfaces.Core;
 using App.Infrastructure.Database;
 using App.Infrastructure.Repository;
 using App.Infrastructure.Repository.Core;
+using App.Infrastructure.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -61,6 +62,9 @@ namespace App.Infrastructure
 
             // Registrar UnitOfWork como Scoped
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Registrar servicio de almacenamiento de archivos
+            services.AddSingleton<IFileStorageService, FileStorageService>();
 
             return services;
         }

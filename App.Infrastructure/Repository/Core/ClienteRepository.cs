@@ -71,7 +71,7 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
-        public async Task<PaginaDatos<Cliente>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<Cliente>> GetPagedAsync(string? search, int page = 1, int pageSize = 20)
         {
             var offset = (page - 1) * pageSize;
             var parametros = new

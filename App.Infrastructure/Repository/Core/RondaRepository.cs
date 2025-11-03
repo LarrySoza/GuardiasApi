@@ -32,7 +32,7 @@ namespace App.Infrastructure.Repository.Core
             throw new NotImplementedException();
         }
 
-        public async Task<PaginaDatos<Ronda>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<Ronda>> GetPagedAsync(string? search, int page = 1, int pageSize = 20)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

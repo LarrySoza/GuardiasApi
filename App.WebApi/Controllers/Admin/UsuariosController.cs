@@ -103,7 +103,7 @@ namespace App.WebApi.Controllers.Admin
                 pageSize = Math.Clamp(pageSize, 1, 100);
 
                 // Delegar la búsqueda paginada al repositorio de usuarios.
-                var resultado = await _unitOfWork.Usuarios.FindAsync(search, page, pageSize, includeRoles);
+                var resultado = await _unitOfWork.Usuarios.GetPagedAsync(search, page, pageSize, includeRoles);
 
                 // Mapear entidades Usuario -> UsuarioDto para la respuesta pública.
                 var dataDto = _mapper.Map<List<UsuarioDto>>(resultado.data);

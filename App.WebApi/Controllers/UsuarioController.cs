@@ -6,7 +6,6 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Linq;
 
 namespace App.WebApi.Controllers
 {

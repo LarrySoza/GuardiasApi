@@ -67,12 +67,12 @@ namespace App.Infrastructure.Repository.Core
         }
 
         // Implementación de la firma original heredada de ISearchRepository
-        public Task<PaginaDatos<Usuario>> FindAsync(string? search, int page = 1, int pageSize = 20)
+        public Task<PaginaDatos<Usuario>> GetPagedAsync(string? search, int page = 1, int pageSize = 20)
         {
-            return FindAsync(search, page, pageSize, false);
+            return GetPagedAsync(search, page, pageSize, false);
         }
 
-        public async Task<PaginaDatos<Usuario>> FindAsync(string? search, int page = 1, int pageSize = 20, bool includeRoles = false)
+        public async Task<PaginaDatos<Usuario>> GetPagedAsync(string? search, int page = 1, int pageSize = 20, bool includeRoles = false)
         {
             var offset = (page - 1) * pageSize;
             var parametros = new

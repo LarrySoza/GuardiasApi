@@ -71,7 +71,7 @@ namespace App.WebApi.Controllers.Admin
                 page = Math.Max(1, page);
                 pageSize = Math.Clamp(pageSize, 1, 100);
 
-                var resultado = await _unitOfWork.Clientes.FindAsync(search, page, pageSize);
+                var resultado = await _unitOfWork.Clientes.GetPagedAsync(search, page, pageSize);
 
                 var dataDto = _mapper.Map<List<ClienteDto>>(resultado.data);
 

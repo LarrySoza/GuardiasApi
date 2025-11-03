@@ -3,7 +3,7 @@ using App.Core.Entities.Core;
 namespace App.Application.Interfaces.Core
 {
     // Repositorio para incidencia
-    public interface IIncidenciaRepository : IGenericAutoIdRepository<Incidencia, Guid>
+    public interface IIncidenciaRepository : IAutoIdRepository<Incidencia, Guid>
     {
     }
 }

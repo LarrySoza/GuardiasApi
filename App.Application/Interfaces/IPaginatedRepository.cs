@@ -5,9 +5,9 @@ namespace App.Application.Interfaces
     /// <summary>
     /// Repositorio de solo lectura orientado a búsquedas y paginación para tablas con muchos registros.
     /// </summary>
-    public interface ISearchRepository<T, TKey> where T : class
+    public interface IPaginatedRepository<T, TKey> where T : class
     {
         Task<T?> GetByIdAsync(TKey id);
-        Task<PaginaDatos<T>> FindAsync(string? search, int page = 1, int pageSize = 20);
+        Task<PaginaDatos<T>> GetPagedAsync(string? search, int page = 1, int pageSize = 20);
     }
 }

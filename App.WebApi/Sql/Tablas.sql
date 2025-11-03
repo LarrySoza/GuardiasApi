@@ -55,21 +55,18 @@ CREATE TABLE configuracion (
  REFERENCES tipo_configuracion (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
-INSERT INTO tipo_configuracion VALUES
-('jwtConfig','La configuración de la autentificación JWT');
-
 -- =====================
 -- Descripción: Catálogo de roles del sistema (GUARDIA, SUPERVISOR, ADMIN, ...).
 -- =====================
 CREATE TABLE rol (
  id text NOT NULL,
- codigo text,
+ nombre text NOT NULL,
  CONSTRAINT rol_pk PRIMARY KEY (id),
  CONSTRAINT rol_codigo_unq UNIQUE (codigo)
 );
 
 -- Insertar roles iniciales (IDs de2 dígitos)
-INSERT INTO rol (id, codigo) VALUES
+INSERT INTO rol (id, nombre) VALUES
  ('00', 'ADMIN'),
  ('01', 'GUARDIA'),
  ('02', 'SUPERVISOR'),
@@ -91,6 +88,21 @@ INSERT INTO usuario_estado (id,nombre) VALUES
  ('E','ELIMINADO');
 
 -- =====================
+-- Descripción: Catálogo de tipos de documento (p.ej. DNI, PASAPORTE, CEX).
+-- =====================
+CREATE TABLE tipo_documento (
+ id text NOT NULL,
+ nombre text NOT NULL,
+ CONSTRAINT tipo_documento_pk PRIMARY KEY (id)
+);
+
+-- Datos iniciales para tipo_documento (IDs de2 dígitos)
+INSERT INTO tipo_documento (id, nombre) VALUES
+ ('1','DNI'),
+ ('7','PASAPORTE'),
+ ('4','CARNET_EXTRANJERIA');
+
+-- =====================
 -- Descripción: Usuarios del sistema con credenciales y auditoría.
 -- =====================
 CREATE TABLE usuario (
@@ -100,9 +112,9 @@ CREATE TABLE usuario (
  contrasena_hash text NOT NULL,
  sello_seguridad uuid NOT NULL DEFAULT uuid_generate_v4(), -- Un valor aleatorio que debería cambiar cuando se modifiquen credenciales
  telefono text,
- tipo_documento text,
+ tipo_documento_id text,
  numero_documento text,
- estado char(1) NOT NULL DEFAULT 'A', -- 'A': activo, 'I': inactivo, 'E': eliminado
+ estado text NOT NULL DEFAULT 'A', -- 'A': activo, 'I': inactivo, 'E': eliminado
 -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,
@@ -113,6 +125,7 @@ CREATE TABLE usuario (
  CONSTRAINT usuario_usuario_unq UNIQUE (nombre_usuario),
  CONSTRAINT usuario_email_unq UNIQUE (email),
  CONSTRAINT usuario_fk_estado FOREIGN KEY (estado) REFERENCES usuario_estado (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT usuario_fk_tipo_documento FOREIGN KEY (tipo_documento_id) REFERENCES tipo_documento (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT usuario_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
@@ -133,7 +146,7 @@ CREATE TABLE usuario_rol (
  updated_by uuid,
  deleted_at timestamp with time zone,
  CONSTRAINT usuario_rol_pk PRIMARY KEY (usuario_id, rol_id),
- CONSTRAINT usuario_rol_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT usuario_rol_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE CASCADE,
  CONSTRAINT usuario_rol_fk_rol FOREIGN KEY (rol_id) REFERENCES rol (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT usuario_rol_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT usuario_rol_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
@@ -184,9 +197,9 @@ CREATE TABLE cliente_usuario (
 -- =====================
 CREATE TABLE unidad (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
- cliente_id uuid,
+ cliente_id uuid NOT NULL,
  unidad_id_padre uuid,
- nombre text,
+ nombre text NOT NULL,
  direccion text,
  lat numeric(10,6),
  lng numeric(10,6),

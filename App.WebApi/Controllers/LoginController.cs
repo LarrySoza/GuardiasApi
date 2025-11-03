@@ -1,6 +1,4 @@
 ﻿using App.Application.Interfaces;
-using App.Infrastructure;
-using App.WebApi.Configuration;
 using App.WebApi.Models.Auth;
 using App.WebApi.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -28,27 +26,42 @@ namespace App.WebApi.Controllers
         /// <summary>
         /// Autentica un usuario y emite un token JWT si las credenciales son válidas.
         /// </summary>
-        /// <param name="loginRequest">Objeto con las credenciales de inicio de sesión (usuario y clave).</param>
+        /// <param name="loginRequest">Objeto con las credenciales de inicio de sesión (por ejemplo, nombre de usuario y contraseña).</param>
         /// <returns>
-        /// -200 OK con <see cref="LoginResponseDto"/> que contiene el token cuando la autenticación es exitosa.
-        /// -401 Unauthorized cuando las credenciales no son válidas.
+        /// 200 OK con <see cref="LoginResponseDto"/> cuando la autenticación es exitosa.
+        /// 401 Unauthorized cuando las credenciales no son válidas.
+        /// 400 BadRequest cuando el request es inválido.
         /// </returns>
+        /// <response code="200">Autenticación exitosa; devuelve el token y metadatos en <see cref="LoginResponseDto"/>.</response>
+        /// <response code="401">Credenciales inválidas.</response>
+        /// <response code="400">Solicitud con formato inválido o datos faltantes.</response>
+        /// <response code="500">Error interno del servidor.</response>
         /// <remarks>
-        /// El token emitido incluye los claims estándar (sub, jti, iat) y los claims personalizados
-        /// con el identificador del usuario y el sello de seguridad. La duración del token se obtiene
-        /// desde la configuración JWT.
+        /// El token emitido incluye claims estándar (sub, jti, iat) y claims personalizados con el identificador
+        /// del usuario y el sello de seguridad. Use siempre HTTPS para transmitir credenciales y proteja el token
+        /// en el cliente (almacenamiento seguro, envío en Authorization header: "Bearer {token}").
         /// </remarks>
         [ProducesResponseType(typeof(LoginResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPost(Name = "Login")]
+        [ProducesResponseType((int)HttpStatusCode.Unauthorized)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [HttpPost(Name = "Auth_Login")]
         public async Task<IActionResult> Login([FromBody] LoginRequestDto loginRequest)
         {
-            var response = await _authService.AuthenticateAsync(loginRequest);
-            if (response == null)
+            try
             {
-                return Unauthorized(null);
-            }
+                var response = await _authService.AuthenticateAsync(loginRequest);
+                if (response == null)
+                {
+                    return Unauthorized(null);
+                }
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
         }
     }
 }

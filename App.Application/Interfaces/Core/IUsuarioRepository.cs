@@ -3,8 +3,12 @@ using App.Core.Entities.Core;
 namespace App.Application.Interfaces.Core
 {
     // Repositorio para `usuario` (operaciones completas), clave Guid
-    public interface IUsuarioRepository : IGenericAutoIdRepository<Usuario, Guid>
+    public interface IUsuarioRepository : ISearchRepository<Usuario, Guid> 
     {
+        Task UpdateAsync(Usuario entity);
+        
+        Task DeleteAsync(Guid id);
+
         /// <summary>
         /// Obtener usuario por su nombre de usuario (login).
         /// </summary>
@@ -22,5 +26,10 @@ namespace App.Application.Interfaces.Core
         /// Implementación típica: generar hash, guardar en base de datos y actualizar sello_seguridad si procede.
         /// </summary>
         Task UpdatePasswordAsync(Guid usuarioId, string clave);
+
+        /// <summary>
+        /// Registra un nuevo usuario junto con sus roles asignados.
+        /// </summary>
+        Task<Guid> AddAsync(Usuario usuario, List<Rol> roles);
     }
 }

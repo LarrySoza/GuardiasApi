@@ -1,6 +1,9 @@
 ﻿using App.Application.Interfaces;
+using App.WebApi.Models.Shared;
+using App.WebApi.Models.Usuario;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace App.WebApi.Controllers
 {
@@ -20,22 +23,20 @@ namespace App.WebApi.Controllers
             _unitOfWork = unitOfWork;
         }
 
-        /*[ProducesResponseType(typeof(ResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPut("clave", Name = "CambiarClave")]
-        public async Task<IActionResult> ActualizarClave([FromBody] CambiarClaveDto claves)
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
+        [HttpPatch("me/password", Name = "Usuarios_CambiarPassword")]
+        public async Task<IActionResult> CambiarPassword([FromBody] CambiarContrasenaDto claves)
         {
             try
             {
-                var _usuarioClass = new UsuarioClass(_config);
-
-                if (!(await _usuarioClass.ValidarClave(User.Id(), claves.ClaveActual)))
+                if (!await _unitOfWork.Usuarios.ValidatePasswordAsync(User.Id(), claves.contrasena_actual))
                 {
                     throw new Exception("La clave actual es incorrecta");
                 }
 
-                await _usuarioClass.ActualizarClaveAsync(User.Id(), claves.ClaveNueva);
+                await _unitOfWork.Usuarios.UpdatePasswordAsync(User.Id(), claves.contrasena_nueva);
 
-                return Ok(new ResponseDto
+                return Ok(new GenericResponseDto()
                 {
                     success = true,
                     message = "Clave actualizada correctamente"
@@ -46,6 +47,6 @@ namespace App.WebApi.Controllers
                 _logger.LogError(ex.Message);
                 throw;
             }
-        }*/
+        }
     }
 }

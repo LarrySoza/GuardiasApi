@@ -24,6 +24,9 @@ namespace App.WebApi
                 // Registrar servicio de autenticacion
                 builder.Services.AddScoped<IAuthService, AuthService>();
 
+                // Register AutoMapper using local extension
+                builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
                 builder.Services.ConfigureAuthJwt(builder.Configuration);
                 builder.Services.AddControllers(options =>
                 {

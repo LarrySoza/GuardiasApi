@@ -4,12 +4,12 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
-namespace App.WebApi.Controllers
+namespace App.WebApi.Controllers.Admin
 {
     //[ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = "ADMIN")]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/admin/[controller]")]
     public class JwtController : ControllerBase
     {
         private readonly ILogger<JwtController> _logger;
@@ -27,7 +27,7 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns></returns>
         [ProducesResponseType(typeof(JwtOptions), (int)HttpStatusCode.OK)]
-        [HttpGet(Name = "LeerConfiguracionJwt")]
+        [HttpGet("config", Name = "Admin_Jwt_LeerConfig")]
         public ActionResult LeerConfiguracionJwt()
         {
             try
@@ -51,7 +51,7 @@ namespace App.WebApi.Controllers
         /// <param name="config"></param>
         /// <returns></returns>
         [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
-        [HttpPut(Name = "GuardarJwtConfig")]
+        [HttpPut("config", Name = "Admin_Jwt_ActualizarConfig")]
         public IActionResult GuardarJwtConfig([FromBody] JwtOptions config)
         {
             try

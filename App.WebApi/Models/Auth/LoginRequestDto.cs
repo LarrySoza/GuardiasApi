@@ -5,11 +5,11 @@
         /// <summary>
         /// Por lo general se usa un correo electronico
         /// </summary>
-        public required string usuario { get; set; }
+        public required string nombre_usuario { get; set; }
 
         /// <summary>
         /// La clave de usuario sin encriptar
         /// </summary>
-        public required string clave { get; set; }
+        public required string contrasena { get; set; }
     }
 }

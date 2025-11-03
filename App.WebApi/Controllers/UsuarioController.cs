@@ -89,8 +89,8 @@ namespace App.WebApi.Controllers
         /// </remarks>
         [ProducesResponseType(typeof(List<UnidadDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet("me/unidades", Name = "Usuarios_GetUnidades")]
-        public async Task<IActionResult> GetUnidadesAsignadas()
+        [HttpGet("me/unidades", Name = "Usuarios_ObtenerUnidades")]
+        public async Task<IActionResult> ObtenerUnidadesAsignadas()
         {
             try
             {

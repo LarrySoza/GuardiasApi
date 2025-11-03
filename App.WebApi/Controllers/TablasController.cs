@@ -29,8 +29,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("alive_check_estado", Name = "Tablas_AliveCheckEstados")]
-        public async Task<IActionResult> GetAliveCheckEstados()
+        [HttpGet("alive_check_estado", Name = "Tablas_ObtenerAliveCheckEstados")]
+        public async Task<IActionResult> ObtenerAliveCheckEstados()
         {
             try
             {
@@ -50,8 +50,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("asignacion_evento_tipo", Name = "Tablas_AsignacionEventoTipos")]
-        public async Task<IActionResult> GetAsignacionEventoTipos()
+        [HttpGet("asignacion_evento_tipo", Name = "Tablas_ObtenerAsignacionEventoTipos")]
+        public async Task<IActionResult> ObtenerAsignacionEventoTipos()
         {
             try
             {
@@ -71,8 +71,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("panic_alert_adjunto_tipo", Name = "Tablas_PanicAlertAdjuntoTipos")]
-        public async Task<IActionResult> GetPanicAlertAdjuntoTipos()
+        [HttpGet("panic_alert_adjunto_tipo", Name = "Tablas_ObtenerPanicAlertAdjuntoTipos")]
+        public async Task<IActionResult> ObtenerPanicAlertAdjuntoTipos()
         {
             try
             {
@@ -92,8 +92,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("panic_alert_estado", Name = "Tablas_PanicAlertEstados")]
-        public async Task<IActionResult> GetPanicAlertEstados()
+        [HttpGet("panic_alert_estado", Name = "Tablas_ObtenerPanicAlertEstados")]
+        public async Task<IActionResult> ObtenerPanicAlertEstados()
         {
             try
             {
@@ -113,8 +113,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("tipo_documento", Name = "Tablas_TipoDocumentos")]
-        public async Task<IActionResult> GetTipoDocumentos()
+        [HttpGet("tipo_documento", Name = "Tablas_ObtenerTipoDocumentos")]
+        public async Task<IActionResult> ObtenerTipoDocumentos()
         {
             try
             {
@@ -134,8 +134,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("usuario_estado", Name = "Tablas_UsuarioEstados")]
-        public async Task<IActionResult> GetUsuarioEstados()
+        [HttpGet("usuario_estado", Name = "Tablas_ObtenerUsuarioEstados")]
+        public async Task<IActionResult> ObtenerUsuarioEstados()
         {
             try
             {
@@ -155,8 +155,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("rol", Name = "Tablas_Roles")]
-        public async Task<IActionResult> GetRoles()
+        [HttpGet("rol", Name = "Tablas_ObtenerRoles")]
+        public async Task<IActionResult> ObtenerRoles()
         {
             try
             {

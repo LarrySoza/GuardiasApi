@@ -35,7 +35,7 @@ namespace App.WebApi.Controllers.Admin
         [ProducesResponseType(typeof(UnidadDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpGet("{id:guid}", Name = "Admin_Unidades_GetById")]
-        public async Task<IActionResult> GetUnidad(Guid id)
+        public async Task<IActionResult> ObtenerUnidad(Guid id)
         {
             try
             {
@@ -58,8 +58,8 @@ namespace App.WebApi.Controllers.Admin
         /// <param name="clienteId">Identificador del cliente</param>
         /// <returns>200 OK con lista de unidades en estructura de árbol.</returns>
         [ProducesResponseType(typeof(List<UnidadDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("cliente/{clienteId:guid}/tree", Name = "Admin_Unidades_GetTreeByCliente")]
-        public async Task<IActionResult> GetUnidadesTreeByCliente(Guid clienteId)
+        [HttpGet("cliente/{clienteId:guid}/tree", Name = "Admin_Unidades_ObtenerArbolPorCliente")]
+        public async Task<IActionResult> ObtenerArbolUnidadesPorCliente(Guid clienteId)
         {
             try
             {

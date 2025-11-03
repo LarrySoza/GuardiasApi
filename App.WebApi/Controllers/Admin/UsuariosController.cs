@@ -50,7 +50,7 @@ namespace App.WebApi.Controllers.Admin
         /// </remarks>
         [ProducesResponseType(typeof(UsuarioDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet("{id:guid}", Name = "Admin_Usuarios_GetById")]
+        [HttpGet("{id:guid}", Name = "Admin_Usuarios_ObtenerPorId")]
         public async Task<IActionResult> GetUsuario(Guid id)
         {
             try
@@ -74,14 +74,13 @@ namespace App.WebApi.Controllers.Admin
             }
         }
 
-
         /// <summary>
-        /// Busca y lista usuarios con paginación. Permite filtrar por texto que coincida
+        /// Lista usuarios con paginación. Permite filtrar por texto que coincida
         /// con el `nombre_usuario`, `email` o `numero_documento`.
         /// </summary>
-        /// <param name="search">Texto de búsqueda opcional; si es nulo o vacío devuelve todos los registros paginados.</param>
-        /// <param name="page">Número de página (mínimo1).</param>
-        /// <param name="pageSize">Tamaño de página (se limita entre1 y100).</param>
+        /// <param name="filtro">Texto de búsqueda opcional; si es nulo o vacío devuelve todos los registros paginados.</param>
+        /// <param name="pagina">Número de página (mínimo1).</param>
+        /// <param name="tamanoPagina">Tamaño de página (se limita entre1 y100).</param>
         /// <param name="includeRoles">Si es true, incluye la lista de roles asignados para cada usuario en la respuesta. Cuando es true, el repositorio intentará cargar los roles para todos los usuarios retornados en una sola consulta para evitar el problema N+1. Por defecto es false.</param>
         /// <returns>200 OK con un objeto <see cref="PaginaDatos{UsuarioDto}"/> que contiene la lista paginada de usuarios.</returns>
         /// <response code="200">Resultados paginados devueltos correctamente.</response>
@@ -90,20 +89,20 @@ namespace App.WebApi.Controllers.Admin
         /// Los resultados se mapean usando AutoMapper a `UsuarioDto` para evitar exponer información sensible.
         /// </remarks>
         [ProducesResponseType(typeof(PaginaDatos<UsuarioDto>), (int)HttpStatusCode.OK)]
-        [HttpGet(Name = "Admin_Usuarios_Buscar")]
-        public async Task<IActionResult> BuscarUsuario([FromQuery] string? search,
-                                                       [FromQuery] int page = 1,
-                                                       [FromQuery] int pageSize = 20,
+        [HttpGet(Name = "Admin_Usuarios_ObtenerPagina")]
+        public async Task<IActionResult> ObtenerPaginaUsuarios([FromQuery] string? filtro,
+                                                       [FromQuery] int pagina = 1,
+                                                       [FromQuery] int tamanoPagina = 20,
                                                        [FromQuery] bool includeRoles = false)
         {
             try
             {
-                // Normalizar parámetros de paginación: asegurar página >=1 y pageSize dentro de un rango razonable.
-                page = Math.Max(1, page);
-                pageSize = Math.Clamp(pageSize, 1, 100);
+                // Normalizar parámetros de paginación: asegurar página >=1 y tamanoPagina dentro de un rango razonable.
+                pagina = Math.Max(1, pagina);
+                tamanoPagina = Math.Clamp(tamanoPagina, 1, 100);
 
                 // Delegar la búsqueda paginada al repositorio de usuarios.
-                var resultado = await _unitOfWork.Usuarios.GetPagedAsync(search, page, pageSize, includeRoles);
+                var resultado = await _unitOfWork.Usuarios.GetPagedAsync(filtro, pagina, tamanoPagina, includeRoles);
 
                 // Mapear entidades Usuario -> UsuarioDto para la respuesta pública.
                 var dataDto = _mapper.Map<List<UsuarioDto>>(resultado.data);
@@ -155,7 +154,7 @@ namespace App.WebApi.Controllers.Admin
                 var id = await _unitOfWork.Usuarios.AddAsync(_usuario, roles);
 
                 // CreatedAtRoute espera un objeto con los valores de ruta; pasar el Guid directamente provoca error de compilación.
-                return CreatedAtRoute("Admin_Usuarios_GetById", new { id = id }, new GenericResponseIdDto<Guid>(id));
+                return CreatedAtRoute("Admin_Usuarios_ObtenerPorId", new { id = id }, new GenericResponseIdDto<Guid>(id));
             }
             catch (Exception ex)
             {

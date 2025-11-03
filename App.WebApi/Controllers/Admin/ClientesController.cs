@@ -35,8 +35,8 @@ namespace App.WebApi.Controllers.Admin
         /// <returns>200 OK con <see cref="ClienteDto"/> o404 si no existe.</returns>
         [ProducesResponseType(typeof(ClienteDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet("{id:guid}", Name = "Admin_Clientes_GetById")]
-        public async Task<IActionResult> GetCliente(Guid id)
+        [HttpGet("{id:guid}", Name = "Admin_Clientes_ObtenerPorId")]
+        public async Task<IActionResult> ObtenerCliente(Guid id)
         {
             try
             {
@@ -54,24 +54,24 @@ namespace App.WebApi.Controllers.Admin
         }
 
         /// <summary>
-        /// Busca y lista clientes con paginación y filtro por razon_social o ruc.
+        /// Lista clientes con paginación y filtro por razon_social o ruc.
         /// </summary>
-        /// <param name="search">Texto opcional para filtrar por razon_social o ruc.</param>
-        /// <param name="page">Número de página.</param>
-        /// <param name="pageSize">Tamaño de página.</param>
+        /// <param name="filtro">Texto opcional para filtrar por razon_social o ruc.</param>
+        /// <param name="pagina">Número de página.</param>
+        /// <param name="tamanoPagina">Tamaño de página.</param>
         /// <returns>200 OK con la paginación de clientes.</returns>
         [ProducesResponseType(typeof(PaginaDatos<ClienteDto>), (int)HttpStatusCode.OK)]
-        [HttpGet(Name = "Admin_Clientes_Buscar")]
-        public async Task<IActionResult> BuscarCliente([FromQuery] string? search,
-                                                     [FromQuery] int page = 1,
-                                                     [FromQuery] int pageSize = 20)
+        [HttpGet(Name = "Admin_Clientes_ObtenerPagina")]
+        public async Task<IActionResult> ObtenerPaginaClientes([FromQuery] string? filtro,
+                                                     [FromQuery] int pagina = 1,
+                                                     [FromQuery] int tamanoPagina = 20)
         {
             try
             {
-                page = Math.Max(1, page);
-                pageSize = Math.Clamp(pageSize, 1, 100);
+                pagina = Math.Max(1, pagina);
+                tamanoPagina = Math.Clamp(tamanoPagina, 1, 100);
 
-                var resultado = await _unitOfWork.Clientes.GetPagedAsync(search, page, pageSize);
+                var resultado = await _unitOfWork.Clientes.GetPagedAsync(filtro, pagina, tamanoPagina);
 
                 var dataDto = _mapper.Map<List<ClienteDto>>(resultado.data);
 
@@ -112,7 +112,7 @@ namespace App.WebApi.Controllers.Admin
 
                 var id = await _unitOfWork.Clientes.AddAsync(entity);
 
-                return CreatedAtRoute("Admin_Clientes_GetById", new { id = id }, new GenericResponseIdDto<Guid>(id));
+                return CreatedAtRoute("Admin_Clientes_ObtenerPorId", new { id = id }, new GenericResponseIdDto<Guid>(id));
             }
             catch (Exception ex)
             {

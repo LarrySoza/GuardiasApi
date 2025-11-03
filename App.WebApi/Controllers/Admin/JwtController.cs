@@ -52,7 +52,7 @@ namespace App.WebApi.Controllers.Admin
         /// <returns></returns>
         [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
         [HttpPut("config", Name = "Admin_Jwt_ActualizarConfig")]
-        public IActionResult GuardarJwtConfig([FromBody] JwtOptions config)
+        public IActionResult ActualizarJwtConfig([FromBody] JwtOptions config)
         {
             try
             {

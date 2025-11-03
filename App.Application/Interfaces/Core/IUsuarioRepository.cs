@@ -6,7 +6,7 @@ namespace App.Application.Interfaces.Core
     // Repositorio para `usuario` (operaciones completas), clave Guid
     public interface IUsuarioRepository : ISearchRepository<Usuario, Guid>
     {
-        Task UpdateAsync(Usuario entity);
+        Task UpdateAsync(Usuario entity, List<Rol> roles);
 
         Task DeleteAsync(Guid id);
 

@@ -205,7 +205,7 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
-        public async Task UpdateAsync(Usuario entity)
+        public async Task UpdateAsync(Usuario entity, List<Rol> roles)
         {
             const string sql = @"UPDATE usuario SET
                                     nombre_usuario = @nombre_usuario,
@@ -235,7 +235,48 @@ namespace App.Infrastructure.Repository.Core
             using (var connection = _dbFactory.CreateConnection())
             {
                 connection.Open();
-                await connection.ExecuteAsync(sql, p);
+                using var tx = connection.BeginTransaction();
+                try
+                {
+                    // Actualizar tabla usuario
+                    await connection.ExecuteAsync(sql, p, tx);
+
+                    // Sincronizar roles: agregar los nuevos y marcar como borrados los que ya no aplican
+                    if (roles != null)
+                    {
+                        // Obtener roles actuales
+                        const string sqlGetCurrent = @"SELECT rol_id FROM usuario_rol WHERE usuario_id = @usuario_id AND deleted_at IS NULL";
+                        var current = (await connection.QueryAsync<string>(sqlGetCurrent, new { usuario_id = entity.id }, tx)).AsList();
+
+                        var newIds = roles.Select(r => r.id).Where(id => !string.IsNullOrWhiteSpace(id)).Distinct().ToList();
+
+                        var toAdd = newIds.Except(current).ToList();
+                        var toRemove = current.Except(newIds).ToList();
+
+                        const string sqlInsertRol = @"INSERT INTO usuario_rol (usuario_id, rol_id, created_at) VALUES (@usuario_id, @rol_id, now())
+ ON CONFLICT (usuario_id, rol_id) DO UPDATE
+ SET deleted_at = NULL, updated_at = now();";
+
+                        const string sqlDeleteRol = @"UPDATE usuario_rol SET deleted_at = now(), updated_at = now() WHERE usuario_id = @usuario_id AND rol_id = @rol_id AND deleted_at IS NULL";
+
+                        foreach (var rolId in toAdd)
+                        {
+                            await connection.ExecuteAsync(sqlInsertRol, new { usuario_id = entity.id, rol_id = rolId }, tx);
+                        }
+
+                        foreach (var rolId in toRemove)
+                        {
+                            await connection.ExecuteAsync(sqlDeleteRol, new { usuario_id = entity.id, rol_id = rolId }, tx);
+                        }
+                    }
+
+                    tx.Commit();
+                }
+                catch
+                {
+                    try { tx.Rollback(); } catch { }
+                    throw;
+                }
             }
         }
 

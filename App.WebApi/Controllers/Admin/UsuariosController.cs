@@ -191,5 +191,52 @@ namespace App.WebApi.Controllers.Admin
                 throw;
             }
         }
+
+        /// <summary>
+        /// Actualiza los datos y roles de un usuario existente (administrativo).
+        /// </summary>
+        /// <param name="id">Identificador del usuario a actualizar.</param>
+        /// <param name="dto">Datos para actualizar el usuario.</param>
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpPut("{id:guid}", Name = "Admin_Usuarios_Actualizar")]
+        public async Task<IActionResult> ActualizarUsuario(Guid id, [FromBody] ActualizarUsuarioRequest dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var usuario = await _unitOfWork.Usuarios.GetByIdAsync(id);
+                if (usuario == null) return NotFound();
+
+                // Actualizar campos permitidos
+                usuario.nombre_usuario = dto.nombre_usuario;
+                usuario.email = dto.email;
+                usuario.telefono = dto.telefono;
+                usuario.tipo_documento_id = dto.tipo_documento_id;
+                usuario.numero_documento = dto.numero_documento;
+
+                if (!string.IsNullOrWhiteSpace(dto.estado))
+                {
+                    usuario.estado = dto.estado!;
+                }
+
+                // Auditar la actualización
+                usuario.SetUpdateAudit(User.Id());
+
+                // Convertir roles
+                var roles = (dto.roles_id ?? new List<string>()).Select(rid => new Rol { id = rid }).ToList();
+
+                await _unitOfWork.Usuarios.UpdateAsync(usuario, roles);
+
+                return Ok(new GenericResponseDto { success = true, message = "Usuario actualizado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
     }
 }

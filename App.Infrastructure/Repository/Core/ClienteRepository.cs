@@ -49,8 +49,7 @@ namespace App.Infrastructure.Repository.Core
 
         public async Task AddOrUpdateAsync(Cliente entity)
         {
-            // Si no tiene id o id es Guid.Empty -> Add, else Update
-            if (entity.id == null || (entity.id is Guid g && g == Guid.Empty))
+            if (entity.id == new Guid())
             {
                 await AddAsync(entity);
                 return;

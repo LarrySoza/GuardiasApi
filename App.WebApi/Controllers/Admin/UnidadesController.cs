@@ -1,5 +1,4 @@
 using App.Application.Interfaces;
-using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.WebApi.Models.Shared;
 using App.WebApi.Models.Unidad;
@@ -45,96 +44,6 @@ namespace App.WebApi.Controllers.Admin
 
                 var dto = _mapper.Map<UnidadDto>(unidad);
                 return Ok(dto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Busca y lista unidades con paginación y filtro por nombre o direccion.
-        /// </summary>
-        /// <param name="search">Texto opcional para filtrar por nombre o direccion.</param>
-        /// <param name="page">Número de página.</param>
-        /// <param name="pageSize">Tamaño de página.</param>
-        /// <returns>200 OK con la paginación de unidades.</returns>
-        [ProducesResponseType(typeof(PaginaDatos<UnidadDto>), (int)HttpStatusCode.OK)]
-        [HttpGet(Name = "Admin_Unidades_Buscar")]
-        public async Task<IActionResult> BuscarUnidad([FromQuery] string? search,
-                                                      [FromQuery] int page = 1,
-                                                      [FromQuery] int pageSize = 20)
-        {
-            try
-            {
-                page = Math.Max(1, page);
-                pageSize = Math.Clamp(pageSize, 1, 100);
-
-                var resultado = await _unitOfWork.Unidades.FindAsync(search, page, pageSize);
-
-                var dataDto = _mapper.Map<List<UnidadDto>>(resultado.data);
-
-                var paginaDto = new PaginaDatos<UnidadDto>
-                {
-                    total = resultado.total,
-                    page = resultado.page,
-                    pageSize = resultado.pageSize,
-                    totalPages = resultado.totalPages,
-                    data = dataDto
-                };
-
-                return Ok(paginaDto);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-                throw;
-            }
-        }
-
-        /// <summary>
-        /// Busca y lista unidades de un cliente específico con paginación y filtro por nombre o direccion.
-        /// </summary>
-        /// <param name="clienteId">Identificador (GUID) del cliente cuyos unidades se desean listar. Requerido.</param>
-        /// <param name="search">Texto opcional para filtrar por nombre o direccion.</param>
-        /// <param name="page">Número de página.</param>
-        /// <param name="pageSize">Tamaño de página.</param>
-        /// <returns>200 OK con la paginación de unidades filtradas por cliente.</returns>
-        [ProducesResponseType(typeof(PaginaDatos<UnidadDto>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [HttpGet("por-cliente", Name = "Admin_Unidades_BuscarPorCliente")]
-        public async Task<IActionResult> BuscarUnidadPorCliente([FromQuery] Guid clienteId,
-                                                               [FromQuery] string? search,
-                                                               [FromQuery] int page = 1,
-                                                               [FromQuery] int pageSize = 20)
-        {
-            try
-            {
-                if (clienteId == Guid.Empty) return BadRequest("clienteId es requerido");
-
-                page = Math.Max(1, page);
-                pageSize = Math.Clamp(pageSize, 1, 100);
-
-                var resultado = await _unitOfWork.Unidades.FindAsync(clienteId, search, page, pageSize);
-
-                var dataDto = _mapper.Map<List<UnidadDto>>(resultado.data);
-
-                var paginaDto = new PaginaDatos<UnidadDto>
-                {
-                    total = resultado.total,
-                    page = resultado.page,
-                    pageSize = resultado.pageSize,
-                    totalPages = resultado.totalPages,
-                    data = dataDto
-                };
-
-                return Ok(paginaDto);
-            }
-            catch (ArgumentNullException ex)
-            {
-                _logger.LogError(ex.Message);
-                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -222,6 +131,53 @@ namespace App.WebApi.Controllers.Admin
                 await _unitOfWork.Unidades.DeleteAsync(id);
 
                 return Ok(new GenericResponseDto { success = true, message = "Unidad eliminada correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Cambia el padre de una unidad (reparent). Valida que el nuevo padre pertenezca al mismo cliente y que no cree ciclos.
+        /// </summary>
+        /// <param name="id">Identificador de la unidad a mover.</param>
+        /// <param name="dto">Objeto con `parentId` (null para mover a raíz).</param>
+        /// <returns>200 OK si se actualizó correctamente,400/409/404 según el error.</returns>
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [ProducesResponseType((int)HttpStatusCode.Conflict)]
+        [HttpPatch("{id:guid}/parent", Name = "Admin_Unidades_UpdateParent")]
+        public async Task<IActionResult> UpdateParent(Guid id, [FromBody] ParentUpdateDto dto)
+        {
+            try
+            {
+                if (!ModelState.IsValid) return BadRequest(ModelState);
+
+                var unidad = await _unitOfWork.Unidades.GetByIdAsync(id);
+                if (unidad == null) return NotFound();
+
+                // si parentId no es null, validar existencia y mismo cliente
+                if (dto.parentId.HasValue)
+                {
+                    var parent = await _unitOfWork.Unidades.GetByIdAsync(dto.parentId.Value);
+                    if (parent == null) return NotFound();
+                    if (parent.cliente_id != unidad.cliente_id) return BadRequest("El padre debe pertenecer al mismo cliente");
+                    // evitar que parent sea la propia unidad
+                    if (parent.id == unidad.id) return BadRequest("El padre no puede ser la unidad misma");
+                    // evitar ciclos
+                    var isDesc = await _unitOfWork.Unidades.IsDescendantAsync(unidad.id, dto.parentId.Value);
+                    if (isDesc) return Conflict("La asignación de padre crearía un ciclo");
+                }
+
+                // aplicar cambio
+                unidad.SetParent(dto.parentId);
+                unidad.SetUpdateAudit(DateTimeOffset.UtcNow, User.Id());
+                await _unitOfWork.Unidades.UpdateAsync(unidad);
+
+                return Ok(new GenericResponseDto { success = true, message = "Padre actualizado correctamente" });
             }
             catch (Exception ex)
             {

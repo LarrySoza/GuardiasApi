@@ -1,5 +1,4 @@
 using App.Application.Interfaces.Core;
-using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
 using Dapper;
@@ -51,17 +50,6 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
-        public async Task AddOrUpdateAsync(Unidad entity)
-        {
-            if (entity.id == null || (entity.id is Guid g && g == Guid.Empty))
-            {
-                await AddAsync(entity);
-                return;
-            }
-
-            await UpdateAsync(entity);
-        }
-
         public async Task DeleteAsync(Guid id)
         {
             const string sql = "UPDATE unidad SET deleted_at = now() WHERE id = @id";
@@ -72,101 +60,6 @@ namespace App.Infrastructure.Repository.Core
             {
                 connection.Open();
                 await connection.ExecuteAsync(sql, p);
-            }
-        }
-
-        public async Task<PaginaDatos<Unidad>> FindAsync(string? search, int page = 1, int pageSize = 20)
-        {
-            var offset = (page - 1) * pageSize;
-            var parametros = new
-            {
-                search = string.IsNullOrWhiteSpace(search) ? null : search,
-                offset,
-                pageSize
-            };
-
-            using (var connection = _dbFactory.CreateConnection())
-            {
-                connection.Open();
-
-                var sql = @"
-                    SELECT count(*)
-                    FROM unidad u
-                    WHERE u.deleted_at IS NULL
-                    AND (@search IS NULL
-                    OR u.nombre ILIKE '%' || @search || '%'
-                    OR u.direccion ILIKE '%' || @search || '%');
-
-                    SELECT u.*
-                    FROM unidad u
-                    WHERE u.deleted_at IS NULL
-                    AND (@search IS NULL
-                    OR u.nombre ILIKE '%' || @search || '%'
-                    OR u.direccion ILIKE '%' || @search || '%')
-                    ORDER BY u.nombre
-                    LIMIT @pageSize OFFSET @offset;";
-
-                using var multi = await connection.QueryMultipleAsync(sql, parametros);
-                var total = await multi.ReadSingleAsync<int>();
-                var data = (await multi.ReadAsync<Unidad>()).AsList();
-
-                return new PaginaDatos<Unidad>
-                {
-                    total = total,
-                    page = page,
-                    pageSize = pageSize,
-                    totalPages = (int)Math.Ceiling(total / (double)pageSize),
-                    data = data
-                };
-            }
-        }
-
-        public async Task<PaginaDatos<Unidad>> FindAsync(Guid clienteId, string? search, int page = 1, int pageSize = 20)
-        {
-            var offset = (page - 1) * pageSize;
-            var parametros = new
-            {
-                clienteId = clienteId,
-                search = string.IsNullOrWhiteSpace(search) ? null : search,
-                offset,
-                pageSize
-            };
-
-            using (var connection = _dbFactory.CreateConnection())
-            {
-                connection.Open();
-
-                var sql = @"
-                    SELECT count(*)
-                    FROM unidad u
-                    WHERE u.deleted_at IS NULL
-                    AND u.cliente_id = @clienteId
-                    AND (@search IS NULL
-                    OR u.nombre ILIKE '%' || @search || '%'
-                    OR u.direccion ILIKE '%' || @search || '%');
-
-                    SELECT u.*
-                    FROM unidad u
-                    WHERE u.deleted_at IS NULL
-                    AND u.cliente_id = @clienteId
-                    AND (@search IS NULL
-                    OR u.nombre ILIKE '%' || @search || '%'
-                    OR u.direccion ILIKE '%' || @search || '%')
-                    ORDER BY u.nombre
-                    LIMIT @pageSize OFFSET @offset;";
-
-                using var multi = await connection.QueryMultipleAsync(sql, parametros);
-                var total = await multi.ReadSingleAsync<int>();
-                var data = (await multi.ReadAsync<Unidad>()).AsList();
-
-                return new PaginaDatos<Unidad>
-                {
-                    total = total,
-                    page = page,
-                    pageSize = pageSize,
-                    totalPages = (int)Math.Ceiling(total / (double)pageSize),
-                    data = data
-                };
             }
         }
 
@@ -220,6 +113,40 @@ namespace App.Infrastructure.Repository.Core
                     try { tx.Rollback(); } catch { }
                     throw;
                 }
+            }
+        }
+
+        public async Task<IReadOnlyList<Unidad>> GetAllByClienteIdAsync(Guid clienteId)
+        {
+            const string sql = "SELECT * FROM unidad WHERE cliente_id = @clienteId AND deleted_at IS NULL ORDER BY nombre";
+            var p = new DynamicParameters();
+            p.Add("@clienteId", clienteId);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<Unidad>(sql, p);
+                return items.AsList();
+            }
+        }
+
+        public async Task<bool> IsDescendantAsync(Guid unidadId, Guid possibleDescendantId)
+        {
+            const string sql = @"WITH RECURSIVE descendants AS (
+ SELECT id, unidad_id_padre FROM unidad WHERE id = @unidadId
+ UNION ALL
+ SELECT u.id, u.unidad_id_padre FROM unidad u JOIN descendants d ON u.unidad_id_padre = d.id
+ ) SELECT1 FROM descendants WHERE id = @possibleId LIMIT1";
+
+            var p = new DynamicParameters();
+            p.Add("@unidadId", unidadId);
+            p.Add("@possibleId", possibleDescendantId);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var found = await connection.QueryFirstOrDefaultAsync<int?>(sql, p);
+                return found.HasValue && found.Value == 1;
             }
         }
     }

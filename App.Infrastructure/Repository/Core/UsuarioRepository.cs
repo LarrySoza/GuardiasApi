@@ -155,7 +155,7 @@ namespace App.Infrastructure.Repository.Core
                 {
                     // Mapear campos comunes a Usuario usando propiedades públicas.
                     var usuario = new Usuario();
-                    
+
                     usuario.nombre_usuario = row.nombre_usuario;
                     usuario.email = row.email;
                     usuario.contrasena_hash = row.contrasena_hash;

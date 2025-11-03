@@ -2,7 +2,6 @@ using App.Application.Interfaces.Core;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
 using Dapper;
-using System.Linq;
 
 namespace App.Infrastructure.Repository.Core
 {

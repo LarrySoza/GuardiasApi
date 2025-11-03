@@ -12,15 +12,5 @@ namespace App.Core.Entities.Core
         public string? direccion { get; private set; }
         public decimal? lat { get; private set; }
         public decimal? lng { get; private set; }
-
-        private readonly List<UsuarioUnidad> _usuarioUnidades = new();
-        public IReadOnlyCollection<UsuarioUnidad> usuario_unidades => _usuarioUnidades.AsReadOnly();
-
-        protected Unidad() { }
-        public Unidad(Guid id)
-        {
-            this.id = id;
-            created_at = DateTimeOffset.UtcNow;
-        }
     }
 }

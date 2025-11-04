@@ -239,5 +239,34 @@ namespace App.WebApi.Controllers.Admin
                 throw;
             }
         }
+
+        /// <summary>
+        /// Actualiza únicamente el campo 'estado' de una alerta de pánico.
+        /// </summary>
+        /// <param name="id">Identificador de la alerta.</param>
+        /// <param name="request">Objeto que contiene el nuevo estado (estado_id).</param>
+        /// <returns>200 OK con mensaje genérico o404 si no existe.</returns>
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpPatch("{id:guid}/estado", Name = "Admin_PanicAlerts_ActualizarEstado")]
+        public async Task<IActionResult> ActualizarEstado(Guid id, [FromBody] UpdateEstadoRequestDto request)
+        {
+            try
+            {
+                var existing = await _unitOfWork.PanicAlerts.GetByIdAsync(id);
+                if (existing == null) return NotFound();
+
+                if (string.IsNullOrWhiteSpace(request.estado_id))
+                    return BadRequest(new GenericResponseDto { success = false, message = "estado_id es requerido" });
+
+                await _unitOfWork.PanicAlerts.UpdateEstadoAsync(id, request.estado_id!, User.Id());
+                return Ok(new GenericResponseDto { success = true, message = "Estado actualizado correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
     }
 }

@@ -14,7 +14,5 @@ namespace App.WebApi.Models.Sesion
         public object? equipos_a_cargo { get; set; }
         public string? otros_detalle { get; set; }
         public string? descripcion_cierre { get; set; }
-
-        // evidencias omitted to avoid large payloads; include if needed
     }
 }

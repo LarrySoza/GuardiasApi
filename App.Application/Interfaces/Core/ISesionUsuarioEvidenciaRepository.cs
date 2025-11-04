@@ -7,7 +7,7 @@ namespace App.Application.Interfaces.Core
     {
         Task<Guid> GetByIdAsync(Guid id);
         Task<IReadOnlyList<SesionUsuarioEvidencia>> GetAllAsync(Guid sesionUsuarioId);
-        Task<Guid> AddAsync(Guid sesionUsuarioId, Stream content, string originalFileName, CancellationToken cancellationToken = default);
+        Task<Guid> AddAsync(Guid createdBy, Guid sesionUsuarioId, Stream content, string originalFileName, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid id);
     }
 }

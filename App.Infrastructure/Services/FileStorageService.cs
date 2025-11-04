@@ -27,8 +27,8 @@ namespace App.Infrastructure.Services
             _root = config["App:StoragePath"] ?? "storage";
 
             var maxMbStr = config["App:MaxUploadSizeMb"];
-            if (!int.TryParse(maxMbStr, out var maxMb)) maxMb =100;
-            _maxSizeBytes = maxMb *1024L *1024L;
+            if (!int.TryParse(maxMbStr, out var maxMb)) maxMb = 100;
+            _maxSizeBytes = maxMb * 1024L * 1024L;
         }
 
         /// <summary>
@@ -64,7 +64,7 @@ namespace App.Infrastructure.Services
             {
                 if (content.CanSeek)
                 {
-                    if (content.Length ==0) throw new ArgumentException("El archivo está vacío", nameof(content));
+                    if (content.Length == 0) throw new ArgumentException("El archivo está vacío", nameof(content));
                     if (content.Length > _maxSizeBytes) throw new ArgumentException($"El archivo excede el tamaño máximo permitido de {_maxSizeBytes} bytes", nameof(content));
                 }
             }

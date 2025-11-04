@@ -1,53 +1,102 @@
+using App.Application.Interfaces;
 using App.Application.Interfaces.Core;
-using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
+using Dapper;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class PanicAlertAdjuntoRepository : IPanicAlertAdjuntoRepository
     {
         private readonly IDbConnectionFactory _dbFactory;
+        private readonly IFileStorageService _fileStorage;
 
-        public PanicAlertAdjuntoRepository(IDbConnectionFactory dbFactory)
+        public PanicAlertAdjuntoRepository(IDbConnectionFactory dbFactory, IFileStorageService fileStorage)
         {
             _dbFactory = dbFactory;
+            _fileStorage = fileStorage;
         }
 
-        public async Task<Guid> AddAsync(PanicAlertAdjunto entity)
+        public async Task<Guid> AddAsync(Guid createdBy, Guid panicAlertId, Stream content, string originalFileName, CancellationToken cancellationToken = default)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            // Save file to storage
+            var relativePath = await _fileStorage.SaveAsync(content, originalFileName, "PanicAlertAdjunto", cancellationToken);
+
+            // Determine tipo_id based on file extension
+            string tipoId = GetTipoIdFromFileName(originalFileName);
+
+            const string sql = "INSERT INTO panic_alert_adjunto (panic_alert_id, tipo_id, ruta, created_at, created_by) VALUES (@panic_alert_id, @tipo_id, @ruta, @created_at, @created_by) RETURNING id";
+
+            var p = new DynamicParameters();
+            p.Add("@panic_alert_id", panicAlertId);
+            p.Add("@tipo_id", tipoId);
+            p.Add("@ruta", relativePath);
+            p.Add("@created_at", DateTimeOffset.UtcNow);
+            p.Add("@created_by", createdBy);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                using var tx = connection.BeginTransaction();
+                try
+                {
+                    var id = await connection.ExecuteScalarAsync<Guid>(sql, p, tx);
+                    tx.Commit();
+                    return id;
+                }
+                catch
+                {
+                    try { tx.Rollback(); } catch { }
+                    throw;
+                }
+            }
         }
 
-        public async Task AddOrUpdateAsync(PanicAlertAdjunto entity)
+        private static string GetTipoIdFromFileName(string fileName)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            if (string.IsNullOrWhiteSpace(fileName)) return "03"; // texto por defecto
+            var ext = Path.GetExtension(fileName).ToLowerInvariant();
+            if (string.IsNullOrEmpty(ext)) return "03";
+
+            // Image extensions
+            var imageExt = new[] { ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".tiff" };
+            if (imageExt.Contains(ext)) return "01";
+
+            // Audio extensions
+            var audioExt = new[] { ".mp3", ".wav", ".m4a", ".aac", ".ogg", ".flac" };
+            if (audioExt.Contains(ext)) return "02";
+
+            // Default to texto
+            return "03";
         }
 
-        public async Task DeleteAsync(Guid id)
+        public async Task<IReadOnlyList<PanicAlertAdjunto>> GetAllAsync(Guid panicAlertId)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
+            const string sql = "SELECT * FROM panic_alert_adjunto WHERE panic_alert_id = @panicAlertId AND deleted_at IS NULL ORDER BY created_at";
 
-        public async Task<PaginaDatos<PanicAlertAdjunto>> GetPagedAsync(string? search, int page = 1, int pageSize = 20)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var p = new DynamicParameters();
+            p.Add("@panicAlertId", panicAlertId);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<PanicAlertAdjunto>(sql, p);
+                return items.AsList();
+            }
         }
 
         public async Task<PanicAlertAdjunto?> GetByIdAsync(Guid id)
         {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
-        }
+            const string sql = "SELECT * FROM panic_alert_adjunto WHERE id = @id AND deleted_at IS NULL";
 
-        public async Task UpdateAsync(PanicAlertAdjunto entity)
-        {
-            await Task.CompletedTask;
-            throw new NotImplementedException();
+            var p = new DynamicParameters();
+            p.Add("@id", id);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                return await connection.QueryFirstOrDefaultAsync<PanicAlertAdjunto>(sql, p);
+            }
         }
     }
 }

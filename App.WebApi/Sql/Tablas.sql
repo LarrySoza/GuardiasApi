@@ -303,12 +303,12 @@ INSERT INTO panic_alert_estado (id, nombre) VALUES
 -- =========================================
 CREATE TABLE panic_alert (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
- sesion_usuario_id uuid,
+ sesion_usuario_id uuid NOT NULL,
  fecha_hora timestamp with time zone DEFAULT now(),
  lat numeric(10,6),
  lng numeric(10,6),
- mensaje text,
- estado_id text,
+ mensaje text, --Se actualizar al momento de atender la emergencia	
+ estado_id text NOT NULL,
 -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,
@@ -344,7 +344,7 @@ CREATE TABLE panic_alert_adjunto (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
  panic_alert_id uuid NOT NULL, -- FK a panic_alert.id
  tipo_id text NOT NULL, -- FK a panic_alert_adjunto_tipo.id
- ruta text, -- ruta o URL del archivo
+ ruta text NOT NULL, -- ruta o URL del archivo
  -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,

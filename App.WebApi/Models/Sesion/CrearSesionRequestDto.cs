@@ -1,5 +1,8 @@
 namespace App.WebApi.Models.Sesion
 {
+    /// <summary>
+    /// DTO para crear una sesión de usuario.
+    /// </summary>
     public class CrearSesionRequestDto
     {
         public required Guid unidad_id { get; set; }

@@ -1,5 +1,8 @@
 namespace App.WebApi.Models.Unidad
 {
+    /// <summary>
+    /// DTO para crear una nueva unidad.
+    /// </summary>
     public class CrearUnidadRequestDto
     {
         public Guid cliente_id { get; set; }

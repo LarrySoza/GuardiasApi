@@ -1,5 +1,8 @@
 namespace App.WebApi.Models.PanicAlert
 {
+    /// <summary>
+    /// DTO para crear una alerta de pánico.
+    /// </summary>
     public class CrearPanicAlertRequestDto
     {
         public required Guid sesion_usuario_id { get; set; }

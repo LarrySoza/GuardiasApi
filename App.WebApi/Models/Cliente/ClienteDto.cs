@@ -2,6 +2,9 @@ using App.WebApi.Models.Common;
 
 namespace App.WebApi.Models.Cliente
 {
+    /// <summary>
+    /// DTO que expone la información del cliente.
+    /// </summary>
     public class ClienteDto : AuditableEntityDto
     {
         public Guid id { get; set; }

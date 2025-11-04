@@ -2,6 +2,9 @@
 
 namespace App.WebApi.Models.Usuario
 {
+    /// <summary>
+    /// DTO que expone la información del usuario.
+    /// </summary>
     public class UsuarioDto : AuditableEntityDto
     {
         public Guid id { get; set; }

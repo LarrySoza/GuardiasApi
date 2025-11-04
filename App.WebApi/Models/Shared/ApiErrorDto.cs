@@ -1,5 +1,8 @@
 ﻿namespace App.WebApi.Models.Shared
 {
+    /// <summary>
+    /// DTO que representa un error de API con código y mensaje.
+    /// </summary>
     public class ApiErrorDto
     {
         public string code { get; private set; }

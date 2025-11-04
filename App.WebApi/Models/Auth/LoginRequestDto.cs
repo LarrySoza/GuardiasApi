@@ -1,5 +1,8 @@
 ﻿namespace App.WebApi.Models.Auth
 {
+    /// <summary>
+    /// DTO para la solicitud de inicio de sesión. Contiene el nombre de usuario y la contraseña.
+    /// </summary>
     public class LoginRequestDto
     {
         /// <summary>

@@ -1,5 +1,8 @@
 ﻿namespace App.WebApi.Models.Usuario
 {
+    /// <summary>
+    /// DTO para la creación de un nuevo usuario.
+    /// </summary>
     public class CrearUsuarioRequestDto
     {
         public required string nombre_usuario { get; set; }

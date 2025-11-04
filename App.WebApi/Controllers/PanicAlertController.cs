@@ -11,13 +11,13 @@ namespace App.WebApi.Controllers
     [Authorize]
     [ApiController]
     [Route("api/[controller]")]
-    public class PanicAlertsController : ControllerBase
+    public class PanicAlertController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly ILogger<PanicAlertsController> _logger;
+        private readonly ILogger<PanicAlertController> _logger;
 
-        public PanicAlertsController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<PanicAlertsController> logger)
+        public PanicAlertController(IUnitOfWork unitOfWork, IMapper mapper, ILogger<PanicAlertController> logger)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;

@@ -6,10 +6,7 @@ namespace App.WebApi.Configuration
     public class ConfigureJwtBearerOptions : IConfigureNamedOptions<JwtBearerOptions>
     {
         private readonly TokenValidationParametersProvider _provider;
-        public ConfigureJwtBearerOptions(TokenValidationParametersProvider provider)
-        {
-            _provider = provider;
-        }
+        public ConfigureJwtBearerOptions(TokenValidationParametersProvider provider) => _provider = provider;
 
         public void Configure(JwtBearerOptions options) => Configure(Options.DefaultName, options);
 

@@ -1,6 +1,8 @@
 namespace App.WebApi.Models.Common
 {
-    // Campos base de auditoría usados por los DTOs
+    /// <summary>
+    /// Campos base de auditoría usados por los DTOs.
+    /// </summary>
     public abstract class AuditableEntityDto
     {
         public DateTimeOffset? created_at { get; set; }

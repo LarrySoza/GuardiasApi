@@ -2,6 +2,9 @@ using App.WebApi.Models.Common;
 
 namespace App.WebApi.Models.Sesion
 {
+    /// <summary>
+    /// DTO que expone la información de una sesión de usuario incluyendo auditoría.
+    /// </summary>
     public class SesionUsuarioDto : AuditableEntityDto
     {
         public Guid id { get; set; }

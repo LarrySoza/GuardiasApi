@@ -2,11 +2,10 @@ namespace App.Core.Entities.Core
 {
     /// <summary>
     /// Table: control_point
-    /// Control points (QR/GPS) associated with client and unit.
+    /// Control points (QR/GPS) associated with unit.
     /// </summary>
     public class ControlPoint : AuditableEntity<Guid>
     {
-        public Guid cliente_id { get; private set; }
         public Guid unidad_id { get; private set; }
         public string nombre { get; private set; } = string.Empty;
         public string? codigo_qr { get; private set; }
@@ -18,10 +17,9 @@ namespace App.Core.Entities.Core
         public IReadOnlyCollection<Ronda> rondas => _rondas.AsReadOnly();
 
         protected ControlPoint() { }
-        public ControlPoint(Guid id, Guid clienteId, Guid unidadId, string nombre)
+        public ControlPoint(Guid id, Guid unidadId, string nombre)
         {
             this.id = id;
-            cliente_id = clienteId;
             unidad_id = unidadId;
             this.nombre = nombre;
             created_at = DateTimeOffset.UtcNow;

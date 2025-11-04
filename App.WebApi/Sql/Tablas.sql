@@ -381,11 +381,10 @@ CREATE TABLE panic_alert_recepcion (
 
 
 -- =========================================
--- Descripción: Puntos de control (QR/GPS) asociados a cliente y unidad.
+-- Descripción: Puntos de control (QR/GPS) asociados a unidad.
 -- =========================================
 CREATE TABLE control_point (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
- cliente_id uuid NOT NULL,
  unidad_id uuid NOT NULL,
  nombre text NOT NULL,
  codigo_qr text,
@@ -401,7 +400,6 @@ CREATE TABLE control_point (
  CONSTRAINT control_point_pk PRIMARY KEY (id),
  CONSTRAINT control_point_nombre_unq UNIQUE (nombre),
  CONSTRAINT control_point_codigo_qr_unq UNIQUE (codigo_qr),
- CONSTRAINT control_point_fk_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT control_point_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT control_point_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT control_point_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT

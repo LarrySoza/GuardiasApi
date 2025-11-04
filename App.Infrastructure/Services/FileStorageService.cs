@@ -14,6 +14,11 @@ namespace App.Infrastructure.Services
         private readonly ILogger<FileStorageService> _logger;
         private readonly long _maxSizeBytes;
 
+        /// <summary>
+        /// Crea una nueva instancia de <see cref="FileStorageService"/>.
+        /// </summary>
+        /// <param name="config">Configuración para leer la ruta raíz y tamaño máximo.</param>
+        /// <param name="logger">Logger para registrar eventos y errores.</param>
         public FileStorageService(IConfiguration config, ILogger<FileStorageService> logger)
         {
             _logger = logger;
@@ -22,10 +27,30 @@ namespace App.Infrastructure.Services
             _root = config["App:StoragePath"] ?? "storage";
 
             var maxMbStr = config["App:MaxUploadSizeMb"];
-            if (!int.TryParse(maxMbStr, out var maxMb)) maxMb = 100;
-            _maxSizeBytes = maxMb * 1024L * 1024L;
+            if (!int.TryParse(maxMbStr, out var maxMb)) maxMb =100;
+            _maxSizeBytes = maxMb *1024L *1024L;
         }
 
+        /// <summary>
+        /// Guarda un stream en el almacenamiento físico bajo una carpeta asociada a la entidad.
+        /// </summary>
+        /// <remarks>
+        /// - Genera un nombre en disco a partir de un GUID + extensión extraída de <paramref name="fileName"/>
+        /// - Crea una subcarpeta por entidad y fecha en formato: <c>entityName/yyyy/MM/dd</c>
+        /// - Escribe el archivo en disco y devuelve la ruta relativa que debe almacenarse en la base de datos.
+        /// </remarks>
+        /// <param name="content">Stream con el contenido del archivo (se lee desde la posición actual o desde0 si es seekable).</param>
+        /// <param name="fileName">Nombre original del archivo (se usa para obtener la extensión).</param>
+        /// <param name="entityName">Nombre de la entidad (por ejemplo "SesionUsuario") que se utiliza como carpeta raíz dentro del storage.</param>
+        /// <param name="cancellationToken">Token de cancelación opcional.</param>
+        /// <returns>
+        /// Ruta relativa del archivo creado con separadores '/' en el formato:
+        /// <c>"{entityName}/{yyyy}/{MM}/{dd}/{guid}{ext}"</c>.
+        /// Ejemplo: <c>SesionUsuario/2025/01/31/3f2a1b4e-... .jpg</c>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Si <paramref name="content"/> es null.</exception>
+        /// <exception cref="ArgumentException">Si <paramref name="fileName"/> o <paramref name="entityName"/> son inválidos o el stream no es legible o está vacío.</exception>
+        /// <exception cref="InvalidOperationException">Si no hay permisos para crear carpetas o escribir el archivo.</exception>
         public async Task<string> SaveAsync(Stream content, string fileName, string entityName, CancellationToken cancellationToken = default)
         {
             if (content == null) throw new ArgumentNullException(nameof(content));
@@ -39,7 +64,7 @@ namespace App.Infrastructure.Services
             {
                 if (content.CanSeek)
                 {
-                    if (content.Length == 0) throw new ArgumentException("El archivo está vacío", nameof(content));
+                    if (content.Length ==0) throw new ArgumentException("El archivo está vacío", nameof(content));
                     if (content.Length > _maxSizeBytes) throw new ArgumentException($"El archivo excede el tamaño máximo permitido de {_maxSizeBytes} bytes", nameof(content));
                 }
             }
@@ -105,6 +130,22 @@ namespace App.Infrastructure.Services
             return relative;
         }
 
+        /// <summary>
+        /// Abre un stream de lectura para un archivo previamente almacenado.
+        /// </summary>
+        /// <remarks>
+        /// - Devuelve un <see cref="Stream"/> abierto en modo lectura. El consumidor es responsable de disponer el stream.
+        /// - El método verifica la existencia del archivo y lanzará <see cref="FileNotFoundException"/> si no existe.
+        /// - En caso de falta de permisos se lanzará <see cref="InvalidOperationException"/> con inner exception.
+        /// </remarks>
+        /// <param name="relativePath">Ruta relativa devuelta por <see cref="SaveAsync"/>, por ejemplo "SesionUsuario/2025/01/31/{file}.jpg".</param>
+        /// <param name="cancellationToken">Token de cancelación opcional (no usado en la implementación local).</param>
+        /// <returns>
+        /// <see cref="Task{Stream}"/> que contiene un <see cref="Stream"/> de solo lectura apuntando al archivo en disco.
+        /// </returns>
+        /// <exception cref="ArgumentException">Si <paramref name="relativePath"/> es nulo o vacío.</exception>
+        /// <exception cref="FileNotFoundException">Si el archivo no existe en la ruta calculada a partir del storage root.</exception>
+        /// <exception cref="InvalidOperationException">Si no hay permisos para leer el archivo.</exception>
         public Task<Stream> OpenReadAsync(string relativePath, CancellationToken cancellationToken = default)
         {
             if (string.IsNullOrWhiteSpace(relativePath)) throw new ArgumentException("La ruta relativa es requerida", nameof(relativePath));
@@ -127,6 +168,16 @@ namespace App.Infrastructure.Services
             }
         }
 
+        /// <summary>
+        /// Devuelve la ruta física completa correspondiente a la ruta relativa dentro del storage.
+        /// </summary>
+        /// <remarks>
+        /// - No valida la existencia del archivo; para verificar si el archivo existe use <see cref="OpenReadAsync"/>.
+        /// - Convierte separadores '/' a los del sistema y concatena con la carpeta raíz configurada.
+        /// </remarks>
+        /// <param name="relativePath">Ruta relativa devuelta por <see cref="SaveAsync"/>, por ejemplo "Entidad/yyyy/MM/dd/{file.ext}".</param>
+        /// <returns>Ruta física absoluta en el sistema de archivos (string).</returns>
+        /// <exception cref="ArgumentException">Si <paramref name="relativePath"/> es nulo o vacío.</exception>
         public string GetPhysicalPath(string relativePath)
         {
             if (string.IsNullOrWhiteSpace(relativePath)) throw new ArgumentException("La ruta relativa es requerida", nameof(relativePath));
@@ -134,6 +185,10 @@ namespace App.Infrastructure.Services
             return Path.Combine(_root, safeRelative);
         }
 
+        /// <summary>
+        /// Asegura que la carpeta raíz de almacenamiento exista creando la carpeta si es necesario.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">Cuando no hay permisos para crear o acceder a la carpeta raíz.</exception>
         private void EnsureRootExists()
         {
             try

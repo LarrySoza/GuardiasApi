@@ -53,6 +53,9 @@ namespace App.Infrastructure
             services.AddTransient<ISesionUsuarioEvidenciaRepository, SesionUsuarioEvidenciaRepository>();
             services.AddTransient<ISesionUsuarioRepository, SesionUsuarioRepository>();
 
+            // Registrar repositorio para tipo_documento
+            services.AddTransient<ITipoDocumentoRepository, TipoDocumentoRepository>();
+
             services.AddTransient<ITipoConfiguracionRepository, TipoConfiguracionRepository>();
             services.AddTransient<IUnidadRepository, UnidadRepository>();
             services.AddTransient<IUsuarioEstadoRepository, UsuarioEstadoRepository>();

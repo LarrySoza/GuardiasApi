@@ -242,6 +242,21 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
+        public async Task UpdateEstadoAsync(Guid id, string estadoId, Guid? updatedBy = null)
+        {
+            const string sql = "UPDATE panic_alert SET estado_id = @estadoId, updated_at = now(), updated_by = @updatedBy WHERE id = @id AND deleted_at IS NULL";
+            var p = new DynamicParameters();
+            p.Add("@id", id);
+            p.Add("@estadoId", estadoId);
+            p.Add("@updatedBy", updatedBy);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                await connection.ExecuteAsync(sql, p);
+            }
+        }
+
         public async Task UpdateMensajeAsync(Guid id, string? mensaje, Guid? updatedBy = null)
         {
             const string sql = "UPDATE panic_alert SET mensaje = @mensaje, updated_at = now(), updated_by = @updatedBy WHERE id = @id AND deleted_at IS NULL";

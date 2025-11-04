@@ -5,6 +5,7 @@ using App.WebApi.Models.Shared;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Net;
 
 namespace App.WebApi.Controllers
 {
@@ -31,8 +32,8 @@ namespace App.WebApi.Controllers
         /// <returns>Devuelve201 y el identificador del recurso creado en caso de éxito, o400 si el modelo no es válido.</returns>
         /// <response code="201">Alerta creada correctamente. Devuelve un objeto con el id creado.</response>
         /// <response code="400">Datos de entrada inválidos.</response>
-        [ProducesResponseType(typeof(GenericResponseDto), StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.Created)]
+        [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [HttpPost(Name = "PanicAlert_Crear")]
         public async Task<IActionResult> Crear([FromForm] CrearPanicAlertRequestDto dto)
         {
@@ -68,8 +69,8 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <param name="id">Identificador (GUID) de la alerta de pánico.</param>
         /// <returns>200 OK con <see cref="PanicAlertDto"/> o404 si no existe.</returns>
-        [ProducesResponseType(typeof(PanicAlertDto), StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(PanicAlertDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpGet("{id:guid}", Name = "PanicAlert_ObtenerPorId")]
         public async Task<IActionResult> ObtenerPorId(Guid id)
         {
@@ -80,6 +81,32 @@ namespace App.WebApi.Controllers
 
                 var dto = _mapper.Map<PanicAlertDto>(item);
                 return Ok(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Cancela una alerta de pánico estableciendo su estado a '03' (cancelado).
+        /// </summary>
+        /// <param name="id">Identificador (GUID) de la alerta a cancelar.</param>
+        /// <returns>200 OK con mensaje genérico o404 si no existe.</returns>
+        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
+        [ProducesResponseType((int)HttpStatusCode.NotFound)]
+        [HttpPost("{id:guid}/cancelar", Name = "PanicAlert_Cancelar")]
+        public async Task<IActionResult> Cancelar(Guid id)
+        {
+            try
+            {
+                var item = await _unitOfWork.PanicAlerts.GetByIdAsync(id);
+                if (item == null) return NotFound();
+
+                await _unitOfWork.PanicAlerts.UpdateEstadoAsync(id, "03", User.Id());
+
+                return Ok(new GenericResponseDto { success = true, message = "Alerta cancelada correctamente" });
             }
             catch (Exception ex)
             {

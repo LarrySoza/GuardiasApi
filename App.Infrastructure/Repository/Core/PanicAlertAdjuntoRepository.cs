@@ -98,5 +98,18 @@ namespace App.Infrastructure.Repository.Core
                 return await connection.QueryFirstOrDefaultAsync<PanicAlertAdjunto>(sql, p);
             }
         }
+
+        public async Task DeleteAsync(Guid id)
+        {
+            const string sql = "UPDATE panic_alert_adjunto SET deleted_at = now() WHERE id = @id";
+            var p = new DynamicParameters();
+            p.Add("@id", id);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                await connection.ExecuteAsync(sql, p);
+            }
+        }
     }
 }

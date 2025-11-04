@@ -14,5 +14,6 @@ namespace App.Application.Interfaces.Core
         Task<PaginaDatos<PanicAlert>> GetPagedByClienteIdAsync(Guid clienteId, string? estadoId, int page = 1, int pageSize = 20, DateOnly? date = null);
         Task<PaginaDatos<PanicAlert>> GetPagedByUnidadIdAsync(Guid unidadId, string? estadoId, int page = 1, int pageSize = 20, DateOnly? date = null);
         Task UpdateMensajeAsync(Guid id, string? mensaje, Guid? updatedBy = null);
+        Task UpdateEstadoAsync(Guid id, string estadoId, Guid? updatedBy = null);
     }
 }

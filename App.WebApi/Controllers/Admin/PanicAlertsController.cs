@@ -85,12 +85,12 @@ namespace App.WebApi.Controllers.Admin
         /// <returns>200 OK con paginación de <see cref="PanicAlertDto"/>.</returns>
         [ProducesResponseType(typeof(PaginaDatos<PanicAlertDto>), (int)HttpStatusCode.OK)]
         [HttpGet("usuario/{usuarioId:guid}", Name = "Admin_PanicAlerts_GetPagedByUsuario")]
-        public async Task<IActionResult> GetPagedByUsuarioId(Guid usuarioId, [FromQuery] string? estadoId = null, [FromQuery] int pagina =1, [FromQuery] int tamanoPagina =20, [FromQuery] DateOnly? date = null)
+        public async Task<IActionResult> GetPagedByUsuarioId(Guid usuarioId, [FromQuery] string? estadoId = null, [FromQuery] int pagina = 1, [FromQuery] int tamanoPagina = 20, [FromQuery] DateOnly? date = null)
         {
             try
             {
                 pagina = Math.Max(1, pagina);
-                tamanoPagina = Math.Clamp(tamanoPagina,1,100);
+                tamanoPagina = Math.Clamp(tamanoPagina, 1, 100);
 
                 var resultado = await _unitOfWork.PanicAlerts.GetPagedByUsuarioIdAsync(usuarioId, estadoId, pagina, tamanoPagina, date);
                 var dataDto = _mapper.Map<List<PanicAlertDto>>(resultado.data);
@@ -123,12 +123,12 @@ namespace App.WebApi.Controllers.Admin
         /// <param name="date">Fecha opcional (DateOnly) para filtrar por fecha de alerta.</param>
         [ProducesResponseType(typeof(PaginaDatos<PanicAlertDto>), (int)HttpStatusCode.OK)]
         [HttpGet("cliente/{clienteId:guid}", Name = "Admin_PanicAlerts_GetPagedByCliente")]
-        public async Task<IActionResult> GetPagedByClienteId(Guid clienteId, [FromQuery] string? estadoId = null, [FromQuery] int pagina =1, [FromQuery] int tamanoPagina =20, [FromQuery] DateOnly? date = null)
+        public async Task<IActionResult> GetPagedByClienteId(Guid clienteId, [FromQuery] string? estadoId = null, [FromQuery] int pagina = 1, [FromQuery] int tamanoPagina = 20, [FromQuery] DateOnly? date = null)
         {
             try
             {
                 pagina = Math.Max(1, pagina);
-                tamanoPagina = Math.Clamp(tamanoPagina,1,100);
+                tamanoPagina = Math.Clamp(tamanoPagina, 1, 100);
 
                 var resultado = await _unitOfWork.PanicAlerts.GetPagedByClienteIdAsync(clienteId, estadoId, pagina, tamanoPagina, date);
                 var dataDto = _mapper.Map<List<PanicAlertDto>>(resultado.data);
@@ -161,12 +161,12 @@ namespace App.WebApi.Controllers.Admin
         /// <param name="date">Fecha opcional (DateOnly) para filtrar por fecha de alerta.</param>
         [ProducesResponseType(typeof(PaginaDatos<PanicAlertDto>), (int)HttpStatusCode.OK)]
         [HttpGet("unidad/{unidadId:guid}", Name = "Admin_PanicAlerts_GetPagedByUnidad")]
-        public async Task<IActionResult> GetPagedByUnidadId(Guid unidadId, [FromQuery] string? estadoId = null, [FromQuery] int pagina =1, [FromQuery] int tamanoPagina =20, [FromQuery] DateOnly? date = null)
+        public async Task<IActionResult> GetPagedByUnidadId(Guid unidadId, [FromQuery] string? estadoId = null, [FromQuery] int pagina = 1, [FromQuery] int tamanoPagina = 20, [FromQuery] DateOnly? date = null)
         {
             try
             {
                 pagina = Math.Max(1, pagina);
-                tamanoPagina = Math.Clamp(tamanoPagina,1,100);
+                tamanoPagina = Math.Clamp(tamanoPagina, 1, 100);
 
                 var resultado = await _unitOfWork.PanicAlerts.GetPagedByUnidadIdAsync(unidadId, estadoId, pagina, tamanoPagina, date);
                 var dataDto = _mapper.Map<List<PanicAlertDto>>(resultado.data);

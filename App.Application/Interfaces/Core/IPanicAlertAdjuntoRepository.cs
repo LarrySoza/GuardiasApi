@@ -6,6 +6,7 @@ namespace App.Application.Interfaces.Core
     public interface IPanicAlertAdjuntoRepository
     {
         Task<Guid> AddAsync(Guid createdBy, Guid panicAlertId, Stream content, string originalFileName, CancellationToken cancellationToken = default);
+        Task DeleteAsync(Guid id);
         Task<PanicAlertAdjunto?> GetByIdAsync(Guid id);
         Task<IReadOnlyList<PanicAlertAdjunto>> GetAllAsync(Guid panicAlertId);
     }

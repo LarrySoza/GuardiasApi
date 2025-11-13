@@ -27,14 +27,6 @@ namespace App.WebApi.Models.Unidad
         /// Dirección de la unidad.
         /// </summary>
         public string? direccion { get; set; }
-        /// <summary>
-        /// Latitud geográfica.
-        /// </summary>
-        public decimal? lat { get; set; }
-        /// <summary>
-        /// Longitud geográfica.
-        /// </summary>
-        public decimal? lng { get; set; }
 
         // hijos para representar el árbol
         public List<UnidadDto> children { get; set; } = new();

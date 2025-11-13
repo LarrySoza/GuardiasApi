@@ -17,9 +17,9 @@ namespace App.Infrastructure.Repository.Core
         public async Task<Guid> AddAsync(Unidad entity)
         {
             const string sql = @"INSERT INTO unidad
-                        (cliente_id, unidad_id_padre, nombre, direccion, lat, lng, created_at, created_by)
+                        (cliente_id, unidad_id_padre, nombre, direccion, created_at, created_by)
                         VALUES
-                        (@cliente_id, @unidad_id_padre, @nombre, @direccion, @lat, @lng, @created_at, @created_by)
+                        (@cliente_id, @unidad_id_padre, @nombre, @direccion, @created_at, @created_by)
                         RETURNING id";
 
             var p = new DynamicParameters();
@@ -27,8 +27,6 @@ namespace App.Infrastructure.Repository.Core
             p.Add("@unidad_id_padre", entity.unidad_id_padre);
             p.Add("@nombre", entity.nombre);
             p.Add("@direccion", entity.direccion);
-            p.Add("@lat", entity.lat);
-            p.Add("@lng", entity.lng);
             p.Add("@created_at", entity.created_at == null ? DateTimeOffset.UtcNow : entity.created_at);
             p.Add("@created_by", entity.created_by);
 
@@ -83,8 +81,6 @@ namespace App.Infrastructure.Repository.Core
                             unidad_id_padre = @unidad_id_padre,
                             nombre = @nombre,
                             direccion = @direccion,
-                            lat = @lat,
-                            lng = @lng,
                             updated_at = now(),
                             updated_by = @updated_by
                             WHERE id = @id";
@@ -95,8 +91,6 @@ namespace App.Infrastructure.Repository.Core
             p.Add("@unidad_id_padre", entity.unidad_id_padre);
             p.Add("@nombre", entity.nombre);
             p.Add("@direccion", entity.direccion);
-            p.Add("@lat", entity.lat);
-            p.Add("@lng", entity.lng);
             p.Add("@updated_by", entity.updated_by);
 
             using (var connection = _dbFactory.CreateConnection())

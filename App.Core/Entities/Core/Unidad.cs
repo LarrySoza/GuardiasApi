@@ -10,8 +10,6 @@ namespace App.Core.Entities.Core
         public Guid? unidad_id_padre { get; private set; }
         public string? nombre { get; private set; }
         public string? direccion { get; private set; }
-        public decimal? lat { get; private set; }
-        public decimal? lng { get; private set; }
 
         // Permite cambiar el padre de la unidad respetando la encapsulación
         public void SetParent(Guid? parentId)

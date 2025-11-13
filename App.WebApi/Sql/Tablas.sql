@@ -201,8 +201,6 @@ CREATE TABLE unidad (
  unidad_id_padre uuid,
  nombre text NOT NULL,
  direccion text,
- lat numeric(10,6),
- lng numeric(10,6),
 -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,
@@ -455,6 +453,8 @@ CREATE TABLE puesto (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
  unidad_id uuid NOT NULL, -- FK a unidad.id
  nombre text NOT NULL, -- Nombre del puesto (único)
+ lat numeric(10,6),
+ lng numeric(10,6),
  -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,

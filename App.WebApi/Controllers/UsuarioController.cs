@@ -149,5 +149,33 @@ namespace App.WebApi.Controllers
                 throw;
             }
         }
+
+        /// <summary>
+        /// Obtiene los puestos asignados al usuario autenticado.
+        /// </summary>
+        /// <remarks>
+        /// Recupera los puestos asociados a las unidades asignadas al usuario autenticado así como
+        /// los puestos pertenecientes a las unidades descendientes de dichas unidades. Esta operación
+        /// delega en `IUnitOfWork.Puestos.GetAllByUsuarioIdAsync` para resolver la jerarquía y la asociación
+        /// de turnos.
+        /// </remarks>
+        /// <returns>
+        /// - 200 OK: Devuelve una colección de <see cref="App.Application.Models.Puesto.PuestoConTurnosDto"/> (puede estar vacía).
+        /// </returns>
+        [ProducesResponseType(typeof(IReadOnlyList<App.Application.Models.Puesto.PuestoConTurnosDto>), (int)HttpStatusCode.OK)]
+        [HttpGet("me/puestos", Name = "Usuarios_ObtenerPuestos")]
+        public async Task<IActionResult> ObtenerPuestosAsignados()
+        {
+            try
+            {
+                var lista = await _unitOfWork.Puestos.GetAllByUsuarioIdAsync(User.Id());
+                return Ok(lista);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error obteniendo puestos por usuario");
+                throw;
+            }
+        }
     }
 }

@@ -4,6 +4,7 @@ using App.WebApi.Models.Puesto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
+using System.Collections.Generic;
 
 namespace App.WebApi.Controllers.Admin
 {
@@ -29,7 +30,7 @@ namespace App.WebApi.Controllers.Admin
         /// <param name="tamanoPagina">Tamaño de página (entre 1 y 100).</param>
         /// <returns>200 OK con la página de puestos y sus turnos.</returns>
         [ProducesResponseType(typeof(App.Core.Entities.PaginaDatos<App.Application.Models.Puesto.PuestoConTurnosDto>), (int)HttpStatusCode.OK)]
-        [HttpGet(Name = "Puestos_ObtenerPagina")]
+        [HttpGet(Name = "Admin_Puestos_ObtenerPagina")]
         public async Task<IActionResult> GetPaged([FromQuery] string? search, [FromQuery] int pagina = 1, [FromQuery] int tamanoPagina = 20)
         {
             try
@@ -54,7 +55,7 @@ namespace App.WebApi.Controllers.Admin
         /// <returns>200 OK con el puesto o 404 si no existe.</returns>
         [ProducesResponseType(typeof(Puesto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpGet("{id:guid}", Name = "Puestos_ObtenerPorId")]
+        [HttpGet("{id:guid}", Name = "Admin_Puestos_ObtenerPorId")]
         public async Task<IActionResult> GetById(Guid id)
         {
             try
@@ -71,13 +72,55 @@ namespace App.WebApi.Controllers.Admin
         }
 
         /// <summary>
+        /// Obtiene todos los puestos de una unidad (sin paginar), incluyendo sus turnos.
+        /// </summary>
+        /// <param name="unidadId">Identificador (GUID) de la unidad.</param>
+        /// <returns>200 OK con la lista de puestos; 200 con lista vacía si no hay puestos.</returns>
+        [ProducesResponseType(typeof(IReadOnlyList<App.Application.Models.Puesto.PuestoConTurnosDto>), (int)HttpStatusCode.OK)]
+        [HttpGet("unidad/{unidadId:guid}", Name = "Admin_Puestos_ObtenerPorUnidad")]
+        public async Task<IActionResult> GetAllByUnidadId(Guid unidadId)
+        {
+            try
+            {
+                var lista = await _unitOfWork.Puestos.GetAllByUnidadIdAsync(unidadId);
+                return Ok(lista);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error obteniendo puestos por unidad");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene todos los puestos accesibles por un usuario (unidades asignadas y sus descendientes), incluyendo sus turnos.
+        /// </summary>
+        /// <param name="userId">Identificador (GUID) del usuario.</param>
+        /// <returns>200 OK con la lista de puestos; 200 con lista vacía si no hay puestos.</returns>
+        [ProducesResponseType(typeof(IReadOnlyList<App.Application.Models.Puesto.PuestoConTurnosDto>), (int)HttpStatusCode.OK)]
+        [HttpGet("usuario/{userId:guid}", Name = "Admin_Puestos_ObtenerPorUsuario")]
+        public async Task<IActionResult> GetAllByUsuarioId(Guid userId)
+        {
+            try
+            {
+                var lista = await _unitOfWork.Puestos.GetAllByUsuarioIdAsync(userId);
+                return Ok(lista);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error obteniendo puestos por usuario");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Crea un nuevo puesto con la lista de turnos (ids).
         /// </summary>
         /// <param name="dto">Datos para crear el puesto.</param>
         /// <returns>201 Created con el id del nuevo puesto o 400 Bad Request si los datos son inválidos.</returns>
         [ProducesResponseType(typeof(App.WebApi.Models.Shared.GenericResponseIdDto<Guid>), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
-        [HttpPost(Name = "Puestos_Crear")]
+        [HttpPost(Name = "Admin_Puestos_Crear")]
         public async Task<IActionResult> Create([FromBody] CrearPuestoDtoRequest dto)
         {
             try
@@ -122,7 +165,7 @@ namespace App.WebApi.Controllers.Admin
         [ProducesResponseType(typeof(App.WebApi.Models.Shared.GenericResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpPut("{id:guid}", Name = "Puestos_Actualizar")]
+        [HttpPut("{id:guid}", Name = "Admin_Puestos_Actualizar")]
         public async Task<IActionResult> Update(Guid id, [FromBody] ActualizarPuestoDtoRequest dto)
         {
             try
@@ -163,7 +206,7 @@ namespace App.WebApi.Controllers.Admin
         /// <returns>200 OK si se eliminó correctamente, 404 si no existe.</returns>
         [ProducesResponseType(typeof(App.WebApi.Models.Shared.GenericResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
-        [HttpDelete("{id:guid}", Name = "Puestos_Eliminar")]
+        [HttpDelete("{id:guid}", Name = "Admin_Puestos_Eliminar")]
         public async Task<IActionResult> Delete(Guid id)
         {
             try

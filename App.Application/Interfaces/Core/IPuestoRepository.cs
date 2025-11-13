@@ -15,5 +15,10 @@ namespace App.Application.Interfaces.Core
 
         // Devuelve puestos junto con sus turnos (proyección/DTO)
         Task<PaginaDatos<PuestoConTurnosDto>> GetPagedWithTurnosAsync(string? search, int page = 1, int pageSize = 20);
+
+        // Devuelve todos los puestos de una unidad (sin paginar)
+        Task<IReadOnlyList<PuestoConTurnosDto>> GetAllByUnidadIdAsync(Guid unidadId);
+
+        Task<IReadOnlyList<PuestoConTurnosDto>> GetAllByUsuarioIdAsync(Guid userId);
     }
 }

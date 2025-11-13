@@ -8,16 +8,19 @@ using Dapper;
 using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace App.Infrastructure.Repository.Core
 {
     public class PuestoRepository : IPuestoRepository
     {
         private readonly IDbConnectionFactory _dbFactory;
+        private readonly IUsuarioUnidadRepository _usuarioUnidadRepository;
 
-        public PuestoRepository(IDbConnectionFactory dbFactory)
+        public PuestoRepository(IDbConnectionFactory dbFactory, IUsuarioUnidadRepository usuarioUnidadRepository)
         {
             _dbFactory = dbFactory;
+            _usuarioUnidadRepository = usuarioUnidadRepository;
         }
 
         public async Task<Guid> AddAsync(Puesto entity, List<int> turnosId)
@@ -253,6 +256,121 @@ namespace App.Infrastructure.Repository.Core
                 }
 
                 return result;
+            }
+        }
+
+        public async Task<IReadOnlyList<PuestoConTurnosDto>> GetAllByUnidadIdAsync(Guid unidadId)
+        {
+            const string sql = @"SELECT p.id, p.unidad_id, p.nombre, p.lat, p.lng, t.id as turno_id, t.nombre as turno_nombre
+                                 FROM puesto p
+                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id AND pt.deleted_at IS NULL
+                                 LEFT JOIN turno t ON t.id = pt.turno_id
+                                 WHERE p.unidad_id = @unidadId AND p.deleted_at IS NULL
+                                 ORDER BY p.nombre;";
+
+            var parametros = new DynamicParameters();
+            parametros.Add("@unidadId", unidadId);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+
+                var rows = await connection.QueryAsync(sql, parametros);
+
+                var lookup = new Dictionary<Guid, PuestoConTurnosDto>();
+
+                foreach (var r in rows)
+                {
+                    Guid pid = r.id;
+                    if (!lookup.TryGetValue(pid, out var dto))
+                    {
+                        dto = new PuestoConTurnosDto
+                        {
+                            id = r.id,
+                            unidad_id = r.unidad_id,
+                            nombre = r.nombre,
+                            lat = r.lat,
+                            lng = r.lng
+                        };
+                        lookup[pid] = dto;
+                    }
+
+                    if (r.turno_id != null)
+                    {
+                        lookup[pid].Turnos.Add(new TurnoDto
+                        {
+                            id = (int)r.turno_id,
+                            nombre = r.turno_nombre
+                        });
+                    }
+                }
+
+                return lookup.Values.ToList();
+            }
+        }
+
+        public async Task<IReadOnlyList<PuestoConTurnosDto>> GetAllByUsuarioIdAsync(Guid userId)
+        {
+            // Obtener las unidades directamente asignadas al usuario
+            var assignedUnidades = (await _usuarioUnidadRepository.GetAllAsync(userId)).Select(u => u.id).ToArray();
+
+            if (assignedUnidades == null || assignedUnidades.Length == 0)
+                return new List<PuestoConTurnosDto>();
+
+            const string sql = @"WITH RECURSIVE descendants AS (
+                                    SELECT id
+                                    FROM unidad
+                                    WHERE id = ANY(@assigned)
+                                  UNION ALL
+                                    SELECT u.id
+                                    FROM unidad u
+                                    JOIN descendants d ON u.unidad_id_padre = d.id
+                                 )
+                                 SELECT p.id, p.unidad_id, p.nombre, p.lat, p.lng, t.id as turno_id, t.nombre as turno_nombre
+                                 FROM puesto p
+                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id AND pt.deleted_at IS NULL
+                                 LEFT JOIN turno t ON t.id = pt.turno_id
+                                 WHERE p.unidad_id IN (SELECT id FROM descendants)
+                                 AND p.deleted_at IS NULL
+                                 ORDER BY p.nombre;";
+
+            var parametros = new DynamicParameters();
+            parametros.Add("@assigned", assignedUnidades);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var rows = await connection.QueryAsync(sql, parametros);
+
+                var lookup = new Dictionary<Guid, PuestoConTurnosDto>();
+
+                foreach (var r in rows)
+                {
+                    Guid pid = r.id;
+                    if (!lookup.TryGetValue(pid, out var dto))
+                    {
+                        dto = new PuestoConTurnosDto
+                        {
+                            id = r.id,
+                            unidad_id = r.unidad_id,
+                            nombre = r.nombre,
+                            lat = r.lat,
+                            lng = r.lng
+                        };
+                        lookup[pid] = dto;
+                    }
+
+                    if (r.turno_id != null)
+                    {
+                        lookup[pid].Turnos.Add(new TurnoDto
+                        {
+                            id = (int)r.turno_id,
+                            nombre = r.turno_nombre
+                        });
+                    }
+                }
+
+                return lookup.Values.ToList();
             }
         }
     }

@@ -37,5 +37,7 @@ namespace App.Application.Interfaces
         IUsuarioRolRepository UsuarioRoles { get; }
         IUsuarioUnidadRepository UsuarioUnidades { get; }
         IUsuarioRepository Usuarios { get; }
+        ITipoDocumentoRepository TipoDocumento { get; }
+        ITurnoRepository Turnos { get; }
     }
 }

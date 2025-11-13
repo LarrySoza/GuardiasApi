@@ -49,6 +49,7 @@ namespace App.Infrastructure
             services.AddTransient<IRolRepository, RolRepository>();
             services.AddTransient<IRondaAdjuntoRepository, RondaAdjuntoRepository>();
             services.AddTransient<IRondaRepository, RondaRepository>();
+            services.AddTransient<ITurnoRepository, TurnoRepository>();
 
             services.AddTransient<ISesionUsuarioEvidenciaRepository, SesionUsuarioEvidenciaRepository>();
             services.AddTransient<ISesionUsuarioRepository, SesionUsuarioRepository>();

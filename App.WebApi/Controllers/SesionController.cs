@@ -10,7 +10,7 @@ namespace App.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class SesionController : ControllerBase
     {
         private readonly ILogger<SesionController> _logger;

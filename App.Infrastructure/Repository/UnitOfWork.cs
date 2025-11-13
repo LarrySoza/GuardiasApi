@@ -40,7 +40,9 @@ namespace App.Infrastructure.Repository
             IUsuarioEstadoRepository usuarioEstados,
             IUsuarioRolRepository usuarioRoles,
             IUsuarioUnidadRepository usuarioUnidades,
-            IUsuarioRepository usuarios)
+            IUsuarioRepository usuarios,
+            ITipoDocumentoRepository tipoDocumento,
+            ITurnoRepository turnos)
         {
             AliveCheckEstados = aliveCheckEstados;
             AliveChecks = aliveChecks;
@@ -75,6 +77,8 @@ namespace App.Infrastructure.Repository
             UsuarioRoles = usuarioRoles;
             UsuarioUnidades = usuarioUnidades;
             Usuarios = usuarios;
+            TipoDocumento = tipoDocumento;
+            Turnos = turnos;
         }
 
         public IAliveCheckEstadoRepository AliveCheckEstados { get; }
@@ -142,5 +146,9 @@ namespace App.Infrastructure.Repository
         public IUsuarioUnidadRepository UsuarioUnidades { get; }
 
         public IUsuarioRepository Usuarios { get; }
+
+        public ITipoDocumentoRepository TipoDocumento { get; }
+
+        public ITurnoRepository Turnos { get; }
     }
 }

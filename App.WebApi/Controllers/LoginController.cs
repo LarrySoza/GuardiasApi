@@ -7,7 +7,7 @@ using System.Net;
 namespace App.WebApi.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class LoginController : ControllerBase
     {
         private readonly ILogger<LoginController> _logger;

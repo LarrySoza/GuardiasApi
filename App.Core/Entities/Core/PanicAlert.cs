@@ -6,7 +6,7 @@ namespace App.Core.Entities.Core
     /// </summary>
     public class PanicAlert : AuditableEntity<Guid>
     {
-        public Guid? sesion_usuario_id { get; set; }
+        public Guid sesion_usuario_id { get; set; }
         public DateTimeOffset fecha_hora { get; set; }
         public decimal? lat { get; set; }
         public decimal? lng { get; set; }

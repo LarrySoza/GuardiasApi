@@ -11,7 +11,7 @@ namespace App.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class PanicAlertController : ControllerBase
     {
         private readonly IUnitOfWork _unitOfWork;

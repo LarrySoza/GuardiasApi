@@ -9,7 +9,7 @@ namespace App.WebApi.Controllers.Admin
     //[ApiExplorerSettings(IgnoreApi = true)]
     [Authorize(Roles = "ADMIN")]
     [ApiController]
-    [Route("api/admin/[controller]")]
+    [Route("admin/[controller]")]
     public class JwtController : ControllerBase
     {
         private readonly ILogger<JwtController> _logger;

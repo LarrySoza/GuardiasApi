@@ -10,7 +10,7 @@ namespace App.WebApi.Controllers.Admin
 {
     [Authorize(Roles = "ADMIN")]
     [ApiController]
-    [Route("api/admin/usuarios")]
+    [Route("admin/usuarios")]
     public class UsuarioUnidadesController : ControllerBase
     {
         private readonly ILogger<UsuarioUnidadesController> _logger;

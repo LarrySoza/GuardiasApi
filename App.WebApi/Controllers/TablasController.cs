@@ -1,6 +1,6 @@
 using App.Application.Interfaces;
-using App.Application.Interfaces.Core;
 using App.WebApi.Models.Shared;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 
@@ -10,18 +10,18 @@ namespace App.WebApi.Controllers
     /// Endpoints para obtener catálogos simples (tablas) usados por la UI.
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class TablasController : ControllerBase
     {
         private readonly ILogger<TablasController> _logger;
         private readonly IUnitOfWork _unitOfWork;
-        private readonly ITipoDocumentoRepository _tipoDocumentoRepo;
+        private readonly IMapper _mapper;
 
-        public TablasController(ILogger<TablasController> logger, IUnitOfWork unitOfWork, ITipoDocumentoRepository tipoDocumentoRepo)
+        public TablasController(ILogger<TablasController> logger, IUnitOfWork unitOfWork, IMapper mapper)
         {
             _logger = logger;
             _unitOfWork = unitOfWork;
-            _tipoDocumentoRepo = tipoDocumentoRepo;
+            _mapper = mapper;
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace App.WebApi.Controllers
         {
             try
             {
-                var items = await _tipoDocumentoRepo.GetAllAsync();
+                var items = await _unitOfWork.TipoDocumento.GetAllAsync();
                 var dtos = items.Select(i => new TablaDto { id = i.id, nombre = i.nombre }).ToList();
                 return Ok(dtos);
             }
@@ -167,6 +167,26 @@ namespace App.WebApi.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error obteniendo rol");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene todos los turnos.
+        /// </summary>
+        [ProducesResponseType(typeof(List<App.Application.Models.Turno.TurnoDto>), (int)HttpStatusCode.OK)]
+        [HttpGet("turno", Name = "Tablas_ObtenerTurnos")]
+        public async Task<IActionResult> ObtenerTurnos()
+        {
+            try
+            {
+                var items = await _unitOfWork.Turnos.GetAllAsync();
+                var dtos = _mapper.Map<List<App.Application.Models.Turno.TurnoDto>>(items);
+                return Ok(dtos);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error obteniendo turno");
                 throw;
             }
         }

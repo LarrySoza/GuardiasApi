@@ -11,7 +11,7 @@ namespace App.WebApi.Controllers
 {
     [Authorize]
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class UsuarioController : ControllerBase
     {
         private readonly ILogger<UsuarioController> _logger;

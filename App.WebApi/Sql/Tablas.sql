@@ -469,6 +469,32 @@ CREATE TABLE puesto (
 );
 
 -- =====================
+-- Descripción: Catálogo de turnos (1,2,3,...).
+-- =====================
+CREATE TABLE turno (
+	id integer NOT NULL,
+	nombre text NOT NULL,
+	CONSTRAINT turno_pk PRIMARY KEY (id)
+);
+
+INSERT INTO turno (id, nombre) VALUES
+	(1, 'DIURNO'),
+	(2, 'NOCTURNO');
+
+-- =====================
+-- Descripción: Asignaciones de turnos a puestos (tabla intermedia).
+-- Relaciona un `turno` (turno.id) con un `puesto` (puesto.id). Incluye campos de auditoría para trazabilidad.
+-- =====================
+CREATE TABLE puesto_turno (
+	id uuid DEFAULT uuid_generate_v4() NOT NULL,
+	turno_id integer NOT NULL,
+	puesto_id uuid NOT NULL,
+	CONSTRAINT puesto_turno_pk PRIMARY KEY (id),
+	CONSTRAINT puesto_turno_fk_turno FOREIGN KEY (turno_id) REFERENCES turno(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	CONSTRAINT puesto_turno_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto(id) ON DELETE RESTRICT ON UPDATE RESTRICT
+);
+
+-- =====================
 -- Descripción: Catálogo de tipos de incidentes (p. ej. robo, accidente, atención médica).
 -- =====================
 CREATE TABLE incidente_tipo (

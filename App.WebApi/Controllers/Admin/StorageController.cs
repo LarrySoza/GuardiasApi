@@ -7,7 +7,7 @@ namespace App.WebApi.Controllers.Admin
 {
     [Authorize(Roles = "ADMIN")]
     [ApiController]
-    [Route("api/admin/[controller]")]
+    [Route("admin/[controller]")]
     public class StorageController : ControllerBase
     {
         private readonly ILogger<StorageController> _logger;

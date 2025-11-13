@@ -6,9 +6,9 @@ namespace App.Core.Entities.Core
     /// </summary>
     public class Puesto : AuditableEntity<Guid>
     {
-        public Guid unidad_id { get; private set; }
-        public string? nombre { get; private set; }
-        public decimal? lat { get; private set; }
-        public decimal? lng { get; private set; }
+        public Guid unidad_id { get; set; }
+        public string? nombre { get; set; }
+        public decimal? lat { get; set; }
+        public decimal? lng { get; set; }
     }
 }

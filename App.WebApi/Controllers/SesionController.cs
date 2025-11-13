@@ -53,6 +53,8 @@ namespace App.WebApi.Controllers
                 }
 
                 sesion.unidad_id = dto.unidad_id;
+                if (dto.puesto_id.HasValue) sesion.puesto_id = dto.puesto_id.Value;
+                if (dto.turno_id.HasValue) sesion.turno_id = dto.turno_id.Value;
                 sesion.fecha_inicio = dto.fecha_inicio ?? DateTimeOffset.UtcNow;
 
                 if (!string.IsNullOrEmpty(dto.otros_detalle))

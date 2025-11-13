@@ -11,6 +11,8 @@ namespace App.WebApi.Models.Sesion
         public Guid usuario_id { get; set; }
         public Guid? cliente_id { get; set; }
         public Guid unidad_id { get; set; }
+        public Guid? puesto_id { get; set; }
+        public int? turno_id { get; set; }
         public DateTimeOffset fecha_inicio { get; set; }
         public string? ruta_foto_inicio { get; set; }
         public DateTimeOffset? fecha_fin { get; set; }

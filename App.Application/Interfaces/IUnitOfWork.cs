@@ -16,7 +16,7 @@ namespace App.Application.Interfaces
         IControlPointRepository ControlPoints { get; }
         IIncidenciaAdjuntoRepository IncidenciaAdjuntos { get; }
         IIncidenciaRepository Incidencias { get; }
-        IIncidenteTipoRepository IncidenteTipos { get; }
+        IIncidenciaTipoRepository IncidenteTipos { get; }
         IOcurrenciaAdjuntoRepository OcurrenciaAdjuntos { get; }
         IOcurrenciaRepository Ocurrencias { get; }
         IOcurrenciaTipoRepository OcurrenciaTipos { get; }

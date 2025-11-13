@@ -5,10 +5,6 @@ using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
 using Dapper;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace App.Infrastructure.Repository.Core
 {

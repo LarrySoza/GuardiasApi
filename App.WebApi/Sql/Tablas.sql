@@ -233,54 +233,6 @@ CREATE TABLE usuario_unidad (
  CONSTRAINT cliente_usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
--- =====================
--- Descripción: Registra sesiones de usuario (inicio/fin), foto inicial, equipos a cargo y cierre.
--- =====================
-CREATE TABLE sesion_usuario (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- usuario_id uuid NOT NULL,
- cliente_id uuid,
- unidad_id uuid NOT NULL,
- fecha_inicio timestamp with time zone DEFAULT now(),
- ruta_foto_inicio text,
--- Cierre (único por sesión)
- fecha_fin timestamp with time zone,
- equipos_a_cargo jsonb, -- checklist consolidado
- otros_detalle text,
- descripcion_cierre text,
--- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT sesion_usuario_pk PRIMARY KEY (id),
- CONSTRAINT sesion_usuario_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- =====================
--- Descripción: Evidencias (fotos) asociadas a una sesión.
--- =====================
-CREATE TABLE sesion_usuario_evidencia (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- sesion_usuario_id uuid NOT NULL,
- ruta_foto text,
--- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT sesion_usuario_evidencia_pk PRIMARY KEY (id),
- CONSTRAINT sesion_usuario_evidencia_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_evidencia_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_evidencia_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
 -- =========================================
 -- Descripción: Catálogo de estados posibles para una alerta de pánico.
 -- =========================================
@@ -497,7 +449,7 @@ CREATE TABLE puesto_turno (
 -- =====================
 -- Descripción: Catálogo de tipos de incidentes (p. ej. robo, accidente, atención médica).
 -- =====================
-CREATE TABLE incidente_tipo (
+CREATE TABLE incidencia_tipo (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
  nombre text NOT NULL, -- Nombre del tipo de incidente
  -- auditoría
@@ -506,10 +458,10 @@ CREATE TABLE incidente_tipo (
  updated_at timestamp with time zone,
  updated_by uuid,
  deleted_at timestamp with time zone,
- CONSTRAINT incidente_tipo_pk PRIMARY KEY (id),
- CONSTRAINT incidente_tipo_nombre_unq UNIQUE (nombre),
- CONSTRAINT incidente_tipo_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT incidente_tipo_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+ CONSTRAINT incidencia_tipo_pk PRIMARY KEY (id),
+ CONSTRAINT incidencia_tipo_nombre_unq UNIQUE (nombre),
+ CONSTRAINT incidencia_tipo_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT incidencia_tipo_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- =====================
@@ -520,7 +472,7 @@ CREATE TABLE incidencia (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
  sesion_usuario_id uuid, -- FK a sesion_usuario.id (nullable)
  ronda_id uuid, -- FK a ronda.id (NULL si no viene de ronda)
- incidente_tipo_id uuid, -- FK a incidente_tipo.id
+ incidencia_tipo_id uuid, -- FK a incidencia_tipo.id
  puesto_id uuid, -- FK a puesto.id
  fecha_hora timestamp with time zone DEFAULT now(),
  lat numeric(10,6),
@@ -535,7 +487,7 @@ CREATE TABLE incidencia (
  CONSTRAINT incidencia_pk PRIMARY KEY (id),
  CONSTRAINT incidencia_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT incidencia_fk_ronda FOREIGN KEY (ronda_id) REFERENCES ronda (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT incidencia_fk_tipo FOREIGN KEY (incidente_tipo_id) REFERENCES incidente_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT incidencia_fk_incidencia_tipo FOREIGN KEY (incidencia_tipo_id) REFERENCES incidencia_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT incidencia_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT incidencia_ronda_unq UNIQUE (ronda_id) -- fuerza1 incidencia por ronda
 );
@@ -752,4 +704,56 @@ CREATE TABLE ocurrencia_adjunto (
  CONSTRAINT ocurrencia_adjunto_fk_ocurrencia FOREIGN KEY (ocurrencia_id) REFERENCES ocurrencia (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT ocurrencia_adjunto_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT ocurrencia_adjunto_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+-- =====================
+-- Descripción: Registra sesiones de usuario (inicio/fin), foto inicial, equipos a cargo y cierre.
+-- =====================
+CREATE TABLE sesion_usuario (
+ id uuid NOT NULL DEFAULT uuid_generate_v4(),
+ usuario_id uuid NOT NULL,
+ cliente_id uuid,
+ unidad_id uuid NOT NULL,
+ puesto_id uuid,
+ turno_id integer,
+ fecha_inicio timestamp with time zone DEFAULT now(),
+ ruta_foto_inicio text,
+-- Cierre (único por sesión)
+ fecha_fin timestamp with time zone,
+ equipos_a_cargo jsonb, -- checklist consolidado
+ otros_detalle text,
+ descripcion_cierre text,
+-- auditoría
+ created_at timestamp with time zone DEFAULT now(),
+ created_by uuid,
+ updated_at timestamp with time zone,
+ updated_by uuid,
+ deleted_at timestamp with time zone,
+ CONSTRAINT sesion_usuario_pk PRIMARY KEY (id),
+ CONSTRAINT sesion_usuario_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_turno FOREIGN KEY (turno_id) REFERENCES turno (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+-- =====================
+-- Descripción: Evidencias (fotos) asociadas a una sesión.
+-- =====================
+CREATE TABLE sesion_usuario_evidencia (
+ id uuid NOT NULL DEFAULT uuid_generate_v4(),
+ sesion_usuario_id uuid NOT NULL,
+ ruta_foto text,
+-- auditoría
+ created_at timestamp with time zone DEFAULT now(),
+ created_by uuid,
+ updated_at timestamp with time zone,
+ updated_by uuid,
+ deleted_at timestamp with time zone,
+ CONSTRAINT sesion_usuario_evidencia_pk PRIMARY KEY (id),
+ CONSTRAINT sesion_usuario_evidencia_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_evidencia_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_evidencia_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );

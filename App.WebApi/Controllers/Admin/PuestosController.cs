@@ -4,7 +4,6 @@ using App.WebApi.Models.Puesto;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.Collections.Generic;
 
 namespace App.WebApi.Controllers.Admin
 {

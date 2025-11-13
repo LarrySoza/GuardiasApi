@@ -1,5 +1,4 @@
 ﻿using App.Application.Interfaces;
-using App.WebApi.Controllers.Admin;
 using App.WebApi.Models.Shared;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -43,14 +42,14 @@ namespace App.WebApi.Controllers
 
                 var _panicAlert = await _unitOfWork.PanicAlerts.GetByIdAsync(panicAlertId);
 
-                if( _panicAlert == null)
+                if (_panicAlert == null)
                 {
                     return BadRequest("Alerta de pánico no encontrada");
                 }
 
                 var _sesionUsuario = await _unitOfWork.SesionUsuarios.GetByIdAsync(_panicAlert.sesion_usuario_id);
 
-                if(_sesionUsuario!.usuario_id != User.Id() )
+                if (_sesionUsuario!.usuario_id != User.Id())
                 {
                     return Forbid();
                 }

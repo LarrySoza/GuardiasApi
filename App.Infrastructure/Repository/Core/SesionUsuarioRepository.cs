@@ -28,14 +28,16 @@ namespace App.Infrastructure.Repository.Core
             }
 
             const string insertSql = @"INSERT INTO sesion_usuario
-                                       (usuario_id, cliente_id, unidad_id, fecha_inicio, ruta_foto_inicio, created_at, created_by)
-                                       VALUES (@usuario_id, @cliente_id, @unidad_id, @fecha_inicio, @ruta_foto_inicio, @created_at, @created_by)
+                                       (usuario_id, cliente_id, unidad_id, puesto_id, turno_id, fecha_inicio, ruta_foto_inicio, created_at, created_by)
+                                       VALUES (@usuario_id, @cliente_id, @unidad_id, @puesto_id, @turno_id, @fecha_inicio, @ruta_foto_inicio, @created_at, @created_by)
                                        RETURNING id";
 
             var p = new DynamicParameters();
             p.Add("@usuario_id", entity.usuario_id);
             p.Add("@cliente_id", entity.cliente_id);
             p.Add("@unidad_id", entity.unidad_id);
+            p.Add("@puesto_id", entity.puesto_id);
+            p.Add("@turno_id", entity.turno_id);
             p.Add("@fecha_inicio", entity.fecha_inicio == default ? DateTimeOffset.UtcNow : entity.fecha_inicio);
             p.Add("@ruta_foto_inicio", rutaFotoInicio);
             p.Add("@created_at", entity.created_at == null ? DateTimeOffset.UtcNow : entity.created_at);

@@ -1,5 +1,4 @@
 using App.Application.Interfaces;
-using App.Application.Interfaces.Core;
 using App.WebApi.Models.PanicAlert;
 using App.WebApi.Models.Shared;
 using AutoMapper;

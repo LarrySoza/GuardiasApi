@@ -33,7 +33,7 @@ namespace App.Infrastructure
 
             services.AddTransient<IIncidenciaAdjuntoRepository, IncidenciaAdjuntoRepository>();
             services.AddTransient<IIncidenciaRepository, IncidenciaRepository>();
-            services.AddTransient<IIncidenteTipoRepository, IncidenteTipoRepository>();
+            services.AddTransient<IIncidenciaTipoRepository, IncidenciaTipoRepository>();
 
             services.AddTransient<IOcurrenciaAdjuntoRepository, OcurrenciaAdjuntoRepository>();
             services.AddTransient<IOcurrenciaRepository, OcurrenciaRepository>();

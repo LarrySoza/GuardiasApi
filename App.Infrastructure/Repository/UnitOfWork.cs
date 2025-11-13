@@ -20,7 +20,7 @@ namespace App.Infrastructure.Repository
             IControlPointRepository controlPoints,
             IIncidenciaAdjuntoRepository incidenciaAdjuntos,
             IIncidenciaRepository incidencias,
-            IIncidenteTipoRepository incidenteTipos,
+            IIncidenciaTipoRepository incidenteTipos,
             IOcurrenciaAdjuntoRepository ocurrenciaAdjuntos,
             IOcurrenciaRepository ocurrencias,
             IOcurrenciaTipoRepository ocurrenciaTipos,
@@ -105,7 +105,7 @@ namespace App.Infrastructure.Repository
 
         public IIncidenciaRepository Incidencias { get; }
 
-        public IIncidenteTipoRepository IncidenteTipos { get; }
+        public IIncidenciaTipoRepository IncidenteTipos { get; }
 
         public IOcurrenciaAdjuntoRepository OcurrenciaAdjuntos { get; }
 

@@ -7,6 +7,8 @@ namespace App.WebApi.Models.Sesion
     {
         public required Guid unidad_id { get; set; }
         public Guid? cliente_id { get; set; }
+        public Guid? puesto_id { get; set; }
+        public int? turno_id { get; set; }
         public DateTimeOffset? fecha_inicio { get; set; }
         public string? otros_detalle { get; set; }
 

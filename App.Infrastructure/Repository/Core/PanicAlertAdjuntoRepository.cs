@@ -22,14 +22,14 @@ namespace App.Infrastructure.Repository.Core
             // Save file to storage
             var relativePath = await _fileStorage.SaveAsync(content, originalFileName, "PanicAlertAdjunto", cancellationToken);
 
-            // Determine tipo_id based on file extension
-            string tipoId = GetTipoIdFromFileName(originalFileName);
+            // Determine adjunto_tipo_id based on file extension
+            string adjuntoTipoId = GetTipoIdFromFileName(originalFileName);
 
-            const string sql = "INSERT INTO panic_alert_adjunto (panic_alert_id, tipo_id, ruta, created_at, created_by) VALUES (@panic_alert_id, @tipo_id, @ruta, @created_at, @created_by) RETURNING id";
+            const string sql = "INSERT INTO panic_alert_adjunto (panic_alert_id, adjunto_tipo_id, ruta, created_at, created_by) VALUES (@panic_alert_id, @adjunto_tipo_id, @ruta, @created_at, @created_by) RETURNING id";
 
             var p = new DynamicParameters();
             p.Add("@panic_alert_id", panicAlertId);
-            p.Add("@tipo_id", tipoId);
+            p.Add("@adjunto_tipo_id", adjuntoTipoId);
             p.Add("@ruta", relativePath);
             p.Add("@created_at", DateTimeOffset.UtcNow);
             p.Add("@created_by", createdBy);

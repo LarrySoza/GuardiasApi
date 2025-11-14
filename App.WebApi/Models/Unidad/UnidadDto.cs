@@ -22,13 +22,15 @@ namespace App.WebApi.Models.Unidad
         /// <summary>
         /// Nombre de la unidad.
         /// </summary>
-        public string? nombre { get; set; }
+        public string nombre { get; set; } = default!;
         /// <summary>
         /// Dirección de la unidad.
         /// </summary>
         public string? direccion { get; set; }
 
-        // hijos para representar el árbol
+        /// <summary>
+        /// Lista de hijos (unidades descendientes) para construir el árbol.
+        /// </summary>
         public List<UnidadDto> children { get; set; } = new();
     }
 }

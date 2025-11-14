@@ -9,7 +9,7 @@ namespace App.WebApi.Models.PanicAlert
     {
         public Guid id { get; set; }
         public Guid panic_alert_id { get; set; }
-        public string tipo_id { get; set; } = string.Empty;
+        public string adjunto_tipo_id { get; set; } = string.Empty;
         public string ruta { get; set; } = string.Empty;
     }
 }

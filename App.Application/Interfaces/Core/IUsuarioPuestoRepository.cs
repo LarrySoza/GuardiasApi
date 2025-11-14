@@ -1,11 +1,11 @@
-using App.Core.Entities.Core;
+﻿using App.Core.Entities.Core;
 
 namespace App.Application.Interfaces.Core
 {
-    public interface IUsuarioUnidadRepository
+    public interface IUsuarioPuestoRepository
     {
         Task AddAsync(Guid usuarioId, Guid unidadId);
         Task DeleteAsync(Guid usuarioId, Guid unidadId);
-        Task<IReadOnlyList<Unidad>> GetAllAsync(Guid usuarioId);
+        Task<IReadOnlyList<Puesto>> GetAllAsync(Guid usuarioId);
     }
 }

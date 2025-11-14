@@ -5,22 +5,22 @@ using App.Infrastructure.Database;
 
 namespace App.Infrastructure.Repository.Core
 {
-    public class IncidenciaRepository : IIncidenciaRepository
+    public class EventoAdjuntoRepository : IEventoAdjuntoRepository
     {
         private readonly IDbConnectionFactory _dbFactory;
 
-        public IncidenciaRepository(IDbConnectionFactory dbFactory)
+        public EventoAdjuntoRepository(IDbConnectionFactory dbFactory)
         {
             _dbFactory = dbFactory;
         }
 
-        public async Task<Guid> AddAsync(Incidencia entity)
+        public async Task<Guid> AddAsync(EventoAdjunto entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task AddOrUpdateAsync(Incidencia entity)
+        public async Task AddOrUpdateAsync(EventoAdjunto entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
@@ -32,19 +32,19 @@ namespace App.Infrastructure.Repository.Core
             throw new NotImplementedException();
         }
 
-        public async Task<PaginaDatos<Incidencia>> GetPagedAsync(string? search, int page = 1, int pageSize = 20)
+        public async Task<PaginaDatos<EventoAdjunto>> GetPagedAsync(string? search, int page = 1, int pageSize = 20)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task<Incidencia?> GetByIdAsync(Guid id)
+        public async Task<EventoAdjunto?> GetByIdAsync(Guid id)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();
         }
 
-        public async Task UpdateAsync(Incidencia entity)
+        public async Task UpdateAsync(EventoAdjunto entity)
         {
             await Task.CompletedTask;
             throw new NotImplementedException();

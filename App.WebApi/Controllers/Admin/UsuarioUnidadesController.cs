@@ -8,6 +8,10 @@ using System.Net;
 
 namespace App.WebApi.Controllers.Admin
 {
+    /// <summary>
+    /// Controller para gestionar las asignaciones de unidades a usuarios (operaciones administrativas).
+    /// Acceso restringido a usuarios con rol "ADMIN".
+    /// </summary>
     [Authorize(Roles = "ADMIN")]
     [ApiController]
     [Route("admin/usuarios")]
@@ -27,8 +31,14 @@ namespace App.WebApi.Controllers.Admin
         }
 
         /// <summary>
-        /// Asigna una unidad a un usuario (crea relación usuario_unidad).
+        /// Asigna una unidad a un usuario.
         /// </summary>
+        /// <param name="usuarioId">Identificador del usuario (GUID).</param>
+        /// <param name="unidadId">Identificador de la unidad a asignar (GUID).</param>
+        /// <returns>
+        /// - 200 OK con <see cref="GenericResponseDto"/> cuando la asignación se realizó correctamente.
+        /// - 404 Not Found si el usuario o la unidad no existen.
+        /// </returns>
         [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpPost("{usuarioId:guid}/unidades/{unidadId:guid}", Name = "Admin_Usuarios_AsignarUnidad")]
@@ -54,8 +64,14 @@ namespace App.WebApi.Controllers.Admin
         }
 
         /// <summary>
-        /// Remueve (soft delete) la asignación de una unidad a un usuario.
+        /// Remueve la asignación de una unidad a un usuario.
         /// </summary>
+        /// <param name="usuarioId">Identificador del usuario (GUID).</param>
+        /// <param name="unidadId">Identificador de la unidad a remover (GUID).</param>
+        /// <returns>
+        /// - 200 OK con <see cref="GenericResponseDto"/> cuando la operación termina correctamente.
+        /// - 404 Not Found si el usuario o la unidad no existen.
+        /// </returns>
         [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpDelete("{usuarioId:guid}/unidades/{unidadId:guid}", Name = "Admin_Usuarios_RemoverUnidad")]
@@ -81,8 +97,13 @@ namespace App.WebApi.Controllers.Admin
         }
 
         /// <summary>
-        /// Obtiene las unidades asignadas a un usuario en forma de árbol, incluyendo ancestros no asignados.
+        /// Obtiene las unidades asignadas a un usuario en forma de árbol (incluye ancestros necesarios).
         /// </summary>
+        /// <param name="usuarioId">Identificador del usuario (GUID).</param>
+        /// <returns>
+        /// - 200 OK con una lista de <see cref="UnidadDto"/> representando las raíces del árbol de unidades.
+        /// - 404 Not Found si el usuario no existe.
+        /// </returns>
         [ProducesResponseType(typeof(List<UnidadDto>), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpGet("{usuarioId:guid}/unidades", Name = "Admin_Usuarios_GetUnidades")]

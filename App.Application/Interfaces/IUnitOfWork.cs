@@ -4,40 +4,38 @@ namespace App.Application.Interfaces
 {
     public interface IUnitOfWork
     {
+        IAdjuntoTipoRepository AdjuntoTipos { get; }
         IAliveCheckEstadoRepository AliveCheckEstados { get; }
         IAliveCheckRepository AliveChecks { get; }
         IAliveCheckRespuestaRepository AliveCheckRespuestas { get; }
         IAsignacionEventoRepository AsignacionEventos { get; }
         IAsignacionEventoTipoRepository AsignacionEventoTipos { get; }
         IAsignacionRepository Asignaciones { get; }
-        IClienteUsuarioRepository ClienteUsuarios { get; }
         IClienteRepository Clientes { get; }
+        IClienteUsuarioRepository ClienteUsuarios { get; }
         IConfiguracionRepository Configuraciones { get; }
         IControlPointRepository ControlPoints { get; }
-        IIncidenciaAdjuntoRepository IncidenciaAdjuntos { get; }
-        IIncidenciaRepository Incidencias { get; }
-        IIncidenciaTipoRepository IncidenteTipos { get; }
-        IOcurrenciaAdjuntoRepository OcurrenciaAdjuntos { get; }
-        IOcurrenciaRepository Ocurrencias { get; }
-        IOcurrenciaTipoRepository OcurrenciaTipos { get; }
-        IPanicAlertAdjuntoTipoRepository PanicAlertAdjuntoTipos { get; }
+        IEventoAdjuntoRepository EventoAdjuntos { get; }
+        IEventoRepository Eventos { get; }
+        IEventoTipoRepository EventoTipos { get; }
         IPanicAlertAdjuntoRepository PanicAlertAdjuntos { get; }
         IPanicAlertEstadoRepository PanicAlertEstados { get; }
-        IPanicAlertRepository PanicAlerts { get; }
         IPanicAlertRecepcionRepository PanicAlertRecepciones { get; }
+        IPanicAlertRepository PanicAlerts { get; }
         IPuestoRepository Puestos { get; }
+        IRolRepository Roles { get; }
         IRondaAdjuntoRepository RondaAdjuntos { get; }
         IRondaRepository Rondas { get; }
-        IRolRepository Roles { get; }
         ISesionUsuarioEvidenciaRepository SesionUsuarioEvidencias { get; }
         ISesionUsuarioRepository SesionUsuarios { get; }
         ITipoConfiguracionRepository TipoConfiguraciones { get; }
-        IUnidadRepository Unidades { get; }
-        IUsuarioEstadoRepository UsuarioEstados { get; }
-        IUsuarioRolRepository UsuarioRoles { get; }
-        IUsuarioUnidadRepository UsuarioUnidades { get; }
-        IUsuarioRepository Usuarios { get; }
         ITipoDocumentoRepository TipoDocumento { get; }
         ITurnoRepository Turnos { get; }
+        IUnidadRepository Unidades { get; }
+        IUsuarioEstadoRepository UsuarioEstados { get; }
+        IUsuarioPuestoRepository UsuarioPuestos { get; }
+        IUsuarioRepository Usuarios { get; }
+        IUsuarioRolRepository UsuarioRoles { get; }
+        IUsuarioUnidadRepository UsuarioUnidades { get; }
     }
 }

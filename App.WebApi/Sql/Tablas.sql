@@ -62,7 +62,7 @@ CREATE TABLE rol (
  id text NOT NULL,
  nombre text NOT NULL,
  CONSTRAINT rol_pk PRIMARY KEY (id),
- CONSTRAINT rol_codigo_unq UNIQUE (codigo)
+ CONSTRAINT rol_codigo_unq UNIQUE (nombre)
 );
 
 -- Insertar roles iniciales (IDs de2 dígitos)
@@ -74,18 +74,17 @@ INSERT INTO rol (id, nombre) VALUES
  ('04', 'LEGAL_REP');
  
 -- =====================
--- Descripción: Catálogo de estados de usuario (1 carácter: 'A'|'I'|'E').
+-- Descripción: Catálogo de estados de usuario
 -- =====================
 CREATE TABLE usuario_estado (
- id text NOT NULL, -- 'A' activo, 'I' inactivo, 'E' eliminado
+ id text NOT NULL,
  nombre text NOT NULL,
  CONSTRAINT usuario_estado_pk PRIMARY KEY (id)
 );
 
 INSERT INTO usuario_estado (id,nombre) VALUES
  ('A','ACTIVO'),
- ('I','INACTIVO'),
- ('E','ELIMINADO');
+ ('I','INACTIVO');
 
 -- =====================
 -- Descripción: Catálogo de tipos de documento (p.ej. DNI, PASAPORTE, CEX).
@@ -96,11 +95,53 @@ CREATE TABLE tipo_documento (
  CONSTRAINT tipo_documento_pk PRIMARY KEY (id)
 );
 
--- Datos iniciales para tipo_documento (IDs de2 dígitos)
 INSERT INTO tipo_documento (id, nombre) VALUES
  ('1','DNI'),
  ('7','PASAPORTE'),
  ('4','CARNET_EXTRANJERIA');
+
+-- =====================
+-- Descripción: Catálogo de turnos (1,2,3,...).
+-- =====================
+CREATE TABLE turno (
+	id integer NOT NULL,
+	nombre text NOT NULL,
+	CONSTRAINT turno_pk PRIMARY KEY (id)
+);
+
+INSERT INTO turno (id, nombre) VALUES
+	(1, 'DIURNO'),
+	(2, 'NOCTURNO');
+
+-- =========================================
+-- Descripción: Catálogo de estados posibles para una alerta de pánico.
+-- =========================================
+CREATE TABLE panic_alert_estado (
+ id text NOT NULL,
+ nombre text NOT NULL,
+ CONSTRAINT panic_alert_estado_pk PRIMARY KEY (id)
+);
+
+-- Insertar estados iniciales (IDs de2 dígitos)
+INSERT INTO panic_alert_estado (id, nombre) VALUES
+ ('01', 'ENVIADA'),
+ ('02', 'ATENDIDA'),
+ ('03', 'CANCELADA');
+
+-- =====================
+-- Descripción: Catálogo de tipos de adjuntos para alertas de pánico.
+-- =====================
+CREATE TABLE adjunto_tipo (
+ id text NOT NULL,
+ nombre text NOT NULL,
+ CONSTRAINT adjunto_tipo_pk PRIMARY KEY (id)
+);
+
+-- Insertar tipos iniciales (IDs de2 dígitos)
+INSERT INTO adjunto_tipo (id, nombre) VALUES
+ ('01', 'imagen'),
+ ('02', 'audio'),
+ ('03', 'texto');
 
 -- =====================
 -- Descripción: Usuarios del sistema con credenciales y auditoría.
@@ -139,17 +180,9 @@ INSERT INTO usuario(nombre_usuario,contrasena_hash) VALUES('admin','ALiah/Ydxclg
 CREATE TABLE usuario_rol (
  usuario_id uuid NOT NULL,
  rol_id text NOT NULL,
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
  CONSTRAINT usuario_rol_pk PRIMARY KEY (usuario_id, rol_id),
  CONSTRAINT usuario_rol_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE CASCADE,
- CONSTRAINT usuario_rol_fk_rol FOREIGN KEY (rol_id) REFERENCES rol (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT usuario_rol_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT usuario_rol_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+ CONSTRAINT usuario_rol_fk_rol FOREIGN KEY (rol_id) REFERENCES rol (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 INSERT INTO usuario_rol SELECT id,'00' FROM usuario WHERE nombre_usuario='admin'; 
@@ -220,33 +253,107 @@ CREATE TABLE unidad (
 CREATE TABLE usuario_unidad (
  usuario_id uuid NOT NULL,
  unidad_id uuid NOT NULL,
+ CONSTRAINT usuario_unidad_pk PRIMARY KEY (usuario_id, unidad_id),
+ CONSTRAINT usuario_unidad_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT usuario_unidad_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+-- =====================
+-- Descripción: Puestos dentro de una unidad (ej. guardias asignados a un puesto físico).
+-- =====================
+CREATE TABLE puesto (
+ id uuid NOT NULL DEFAULT uuid_generate_v4(),
+ unidad_id uuid NOT NULL, -- FK a unidad.id
+ nombre text NOT NULL, -- Nombre del puesto (único)
+ lat numeric(10,6),
+ lng numeric(10,6),
  -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,
  updated_at timestamp with time zone,
  updated_by uuid,
  deleted_at timestamp with time zone,
- CONSTRAINT usuario_unidad_pk PRIMARY KEY (usuario_id, unidad_id),
- CONSTRAINT usuario_unidad_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT usuario_unidad_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT cliente_usuario_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT cliente_usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+ CONSTRAINT puesto_pk PRIMARY KEY (id),
+ CONSTRAINT puesto_nombre_unq UNIQUE (nombre),
+ CONSTRAINT puesto_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT puesto_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT puesto_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
--- =========================================
--- Descripción: Catálogo de estados posibles para una alerta de pánico.
--- =========================================
-CREATE TABLE panic_alert_estado (
- id text NOT NULL,
- nombre text NOT NULL,
- CONSTRAINT panic_alert_estado_pk PRIMARY KEY (id)
+-- =====================
+-- Descripción: Asignaciones de turnos a puestos (tabla intermedia).
+-- Relaciona un `turno` (turno.id) con un `puesto` (puesto.id). Incluye campos de auditoría para trazabilidad.
+-- =====================
+CREATE TABLE puesto_turno (
+	puesto_id uuid NOT NULL,
+    turno_id integer NOT NULL,
+	CONSTRAINT puesto_turno_pk PRIMARY KEY (puesto_id,turno_id),
+	CONSTRAINT puesto_turno_fk_turno FOREIGN KEY (turno_id) REFERENCES turno(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+	CONSTRAINT puesto_turno_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto(id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );
 
--- Insertar estados iniciales (IDs de2 dígitos)
-INSERT INTO panic_alert_estado (id, nombre) VALUES
- ('01', 'ENVIADA'),
- ('02', 'ATENDIDA'),
- ('03', 'CANCELADA');
+-- =====================
+-- Descripción: Asignaciones de usuarios a unidades (N:N).
+-- =====================
+CREATE TABLE usuario_puesto (
+ usuario_id uuid NOT NULL,
+ puesto_id uuid NOT NULL,
+ CONSTRAINT usuario_puesto_pk PRIMARY KEY (usuario_id, unidad_id),
+ CONSTRAINT usuario_puesto_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT usuario_puesto_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+-- =====================
+-- Descripción: Registra sesiones de usuario (inicio/fin), foto inicial, equipos a cargo y cierre.
+-- =====================
+CREATE TABLE sesion_usuario (
+ id uuid NOT NULL DEFAULT uuid_generate_v4(),
+ usuario_id uuid NOT NULL,
+ cliente_id uuid,
+ unidad_id uuid NOT NULL,
+ puesto_id uuid,
+ turno_id integer,
+ fecha_inicio timestamp with time zone DEFAULT now(),
+ ruta_foto_inicio text,
+-- Cierre (único por sesión)
+ fecha_fin timestamp with time zone,
+ equipos_a_cargo jsonb, -- checklist consolidado
+ otros_detalle text,
+ descripcion_cierre text,
+-- auditoría
+ created_at timestamp with time zone DEFAULT now(),
+ created_by uuid,
+ updated_at timestamp with time zone,
+ updated_by uuid,
+ deleted_at timestamp with time zone,
+ CONSTRAINT sesion_usuario_pk PRIMARY KEY (id),
+ CONSTRAINT sesion_usuario_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_turno FOREIGN KEY (turno_id) REFERENCES turno (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+-- =====================
+-- Descripción: Evidencias (fotos) asociadas a una sesión.
+-- =====================
+CREATE TABLE sesion_usuario_evidencia (
+ id uuid NOT NULL DEFAULT uuid_generate_v4(),
+ sesion_usuario_id uuid NOT NULL,
+ ruta_foto text,
+-- auditoría
+ created_at timestamp with time zone DEFAULT now(),
+ created_by uuid,
+ updated_at timestamp with time zone,
+ updated_by uuid,
+ deleted_at timestamp with time zone,
+ CONSTRAINT sesion_usuario_evidencia_pk PRIMARY KEY (id),
+ CONSTRAINT sesion_usuario_evidencia_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_evidencia_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT sesion_usuario_evidencia_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+);
 
 -- =========================================
 -- Descripción: Registro de alertas de pánico enlazadas a sesiones.
@@ -273,28 +380,13 @@ CREATE TABLE panic_alert (
 );
 
 -- =====================
--- Descripción: Catálogo de tipos de adjuntos para alertas de pánico.
--- =====================
-CREATE TABLE panic_alert_adjunto_tipo (
- id text NOT NULL,
- nombre text NOT NULL,
- CONSTRAINT panic_alert_adjunto_tipo_pk PRIMARY KEY (id)
-);
-
--- Insertar tipos iniciales (IDs de2 dígitos)
-INSERT INTO panic_alert_adjunto_tipo (id, nombre) VALUES
- ('01', 'imagen'),
- ('02', 'audio'),
- ('03', 'texto');
-
--- =====================
 -- Descripción: Archivos (imagen/audio/texto) asociados a una panic_alert.
 -- =====================
 CREATE TABLE panic_alert_adjunto (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
- panic_alert_id uuid NOT NULL, -- FK a panic_alert.id
- tipo_id text NOT NULL, -- FK a panic_alert_adjunto_tipo.id
- ruta text NOT NULL, -- ruta o URL del archivo
+ panic_alert_id uuid NOT NULL,
+ adjunto_tipo_id text NOT NULL,
+ ruta text NOT NULL,
  -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,
@@ -303,7 +395,7 @@ CREATE TABLE panic_alert_adjunto (
  deleted_at timestamp with time zone,
  CONSTRAINT panic_alert_adjunto_pk PRIMARY KEY (id),
  CONSTRAINT panic_alert_adjunto_fk_alert FOREIGN KEY (panic_alert_id) REFERENCES panic_alert (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT panic_alert_adjunto_fk_tipo FOREIGN KEY (tipo_id) REFERENCES panic_alert_adjunto_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT panic_alert_adjunto_fk_adjunto_tipo FOREIGN KEY (adjunto_tipo_id) REFERENCES adjunto_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT panic_alert_adjunto_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT panic_alert_adjunto_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
@@ -396,117 +488,6 @@ CREATE TABLE ronda_adjunto (
  CONSTRAINT ronda_adjunto_fk_ronda FOREIGN KEY (ronda_id) REFERENCES ronda (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT ronda_adjunto_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT ronda_adjunto_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- =====================
--- Descripción: Puestos dentro de una unidad (ej. guardias asignados a un puesto físico).
--- =====================
-CREATE TABLE puesto (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- unidad_id uuid NOT NULL, -- FK a unidad.id
- nombre text NOT NULL, -- Nombre del puesto (único)
- lat numeric(10,6),
- lng numeric(10,6),
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT puesto_pk PRIMARY KEY (id),
- CONSTRAINT puesto_nombre_unq UNIQUE (nombre),
- CONSTRAINT puesto_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT puesto_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT puesto_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- =====================
--- Descripción: Catálogo de turnos (1,2,3,...).
--- =====================
-CREATE TABLE turno (
-	id integer NOT NULL,
-	nombre text NOT NULL,
-	CONSTRAINT turno_pk PRIMARY KEY (id)
-);
-
-INSERT INTO turno (id, nombre) VALUES
-	(1, 'DIURNO'),
-	(2, 'NOCTURNO');
-
--- =====================
--- Descripción: Asignaciones de turnos a puestos (tabla intermedia).
--- Relaciona un `turno` (turno.id) con un `puesto` (puesto.id). Incluye campos de auditoría para trazabilidad.
--- =====================
-CREATE TABLE puesto_turno (
-	id uuid DEFAULT uuid_generate_v4() NOT NULL,
-	turno_id integer NOT NULL,
-	puesto_id uuid NOT NULL,
-	CONSTRAINT puesto_turno_pk PRIMARY KEY (id),
-	CONSTRAINT puesto_turno_fk_turno FOREIGN KEY (turno_id) REFERENCES turno(id) ON DELETE RESTRICT ON UPDATE RESTRICT,
-	CONSTRAINT puesto_turno_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto(id) ON DELETE RESTRICT ON UPDATE RESTRICT
-);
-
--- =====================
--- Descripción: Catálogo de tipos de incidentes (p. ej. robo, accidente, atención médica).
--- =====================
-CREATE TABLE incidencia_tipo (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- nombre text NOT NULL, -- Nombre del tipo de incidente
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT incidencia_tipo_pk PRIMARY KEY (id),
- CONSTRAINT incidencia_tipo_nombre_unq UNIQUE (nombre),
- CONSTRAINT incidencia_tipo_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT incidencia_tipo_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
-);
-
--- =====================
--- Descripción: Incidentes reportados en el sistema. Pueden relacionarse a una sesión y/o a una ronda y están clasificados por tipo.
--- Restricciones: una incidencia por ronda (UNIQUE sobre ronda_id)
--- =====================
-CREATE TABLE incidencia (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- sesion_usuario_id uuid, -- FK a sesion_usuario.id (nullable)
- ronda_id uuid, -- FK a ronda.id (NULL si no viene de ronda)
- incidencia_tipo_id uuid, -- FK a incidencia_tipo.id
- puesto_id uuid, -- FK a puesto.id
- fecha_hora timestamp with time zone DEFAULT now(),
- lat numeric(10,6),
- lng numeric(10,6),
- descripcion text,
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT incidencia_pk PRIMARY KEY (id),
- CONSTRAINT incidencia_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT incidencia_fk_ronda FOREIGN KEY (ronda_id) REFERENCES ronda (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT incidencia_fk_incidencia_tipo FOREIGN KEY (incidencia_tipo_id) REFERENCES incidencia_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT incidencia_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT incidencia_ronda_unq UNIQUE (ronda_id) -- fuerza1 incidencia por ronda
-);
-
--- =====================
--- Descripción: Archivos/adjuntos (fotos, evidencias) asociados a una incidencia.
--- =====================
-CREATE TABLE incidencia_adjunto (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- incidencia_id uuid NOT NULL,
- ruta_foto text,
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT incidencia_adjunto_pk PRIMARY KEY (id),
- CONSTRAINT incidencia_adjunto_fk_incidencia FOREIGN KEY (incidencia_id) REFERENCES incidencia (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- =====================
@@ -639,121 +620,138 @@ CREATE TABLE asignacion_evento (
  CONSTRAINT asignacion_evento_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
--- =========================================
--- Descripción: Catálogo de tipos de ocurrencias (global o por cliente).
--- =========================================
-CREATE TABLE ocurrencia_tipo (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- cliente_id uuid, -- NULL = global; set si catálogo por cliente
- nombre text NOT NULL,
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT ocurrencia_tipo_pk PRIMARY KEY (id),
- CONSTRAINT ocurrencia_tipo_unq UNIQUE (cliente_id, nombre),
- CONSTRAINT ocurrencia_tipo_fk_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_tipo_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_tipo_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+-- =====================
+-- Catálogo independiente de categorías de evento
+-- =====================
+CREATE TABLE evento_categoria (
+    id text NOT NULL,
+    nombre text NOT NULL,
+    CONSTRAINT evento_categoria_pk PRIMARY KEY (id)
 );
 
--- =========================================
--- Descripción: Registros de ocurrencias asociadas a sesiones y puestos.
--- Cada registro puede referenciar opcionalmente una `sesion_usuario` y/o un `puesto` y
--- debe clasificarse mediante un `ocurrencia_tipo`.
--- =========================================
-CREATE TABLE ocurrencia (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- sesion_usuario_id uuid, -- FK a sesion_usuario(id)
- puesto_id uuid, -- FK a puesto(id)
- ocurrencia_tipo_id uuid NOT NULL, -- FK a ocurrencia_tipo(id)
- descripcion text,
- fecha_hora timestamp with time zone DEFAULT now(),
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT ocurrencia_pk PRIMARY KEY (id),
- CONSTRAINT ocurrencia_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_fk_tipo FOREIGN KEY (ocurrencia_tipo_id) REFERENCES ocurrencia_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
-);
+INSERT INTO evento_categoria (id, nombre) VALUES
+ ('I', 'INCIDENCIA'),
+ ('O', 'OCURRENCIA');
 
--- =========================================
--- ocurrencia_adjunto
--- Descripción: Archivos/adjuntos (fotos, evidencias) asociados a una ocurrencia.
--- Cada adjunto referencia una ocurrencia y contiene ruta/URL del archivo y campos de auditoría.
--- =========================================
-CREATE TABLE ocurrencia_adjunto (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- ocurrencia_id uuid NOT NULL, -- FK a ocurrencia(id)
- ruta_foto text,
- -- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT ocurrencia_adjunto_pk PRIMARY KEY (id),
- CONSTRAINT ocurrencia_adjunto_fk_ocurrencia FOREIGN KEY (ocurrencia_id) REFERENCES ocurrencia (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_adjunto_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT ocurrencia_adjunto_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+-- =====================
+-- Unifica la tabla incidencia_tipo y ocurrencia_tipo
+-- =====================
+CREATE TABLE evento_tipo (
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    cliente_id uuid, -- NULL = global
+    nombre text NOT NULL,
+    categoria_id text NOT NULL,
+    created_at timestamptz DEFAULT now(),
+    created_by uuid,
+    updated_at timestamptz,
+    updated_by uuid,
+    deleted_at timestamptz,
+    CONSTRAINT evento_tipo_pk PRIMARY KEY (id),
+    CONSTRAINT evento_tipo_unq UNIQUE (cliente_id, nombre, categoria_id),
+    CONSTRAINT evento_tipo_fk_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_tipo_fk_categoria FOREIGN KEY (categoria_id) REFERENCES evento_categoria (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_tipo_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_tipo_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- =====================
--- Descripción: Registra sesiones de usuario (inicio/fin), foto inicial, equipos a cargo y cierre.
+-- Unifica la tabla ocurrencia y incidencia
 -- =====================
-CREATE TABLE sesion_usuario (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- usuario_id uuid NOT NULL,
- cliente_id uuid,
- unidad_id uuid NOT NULL,
- puesto_id uuid,
- turno_id integer,
- fecha_inicio timestamp with time zone DEFAULT now(),
- ruta_foto_inicio text,
--- Cierre (único por sesión)
- fecha_fin timestamp with time zone,
- equipos_a_cargo jsonb, -- checklist consolidado
- otros_detalle text,
- descripcion_cierre text,
--- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT sesion_usuario_pk PRIMARY KEY (id),
- CONSTRAINT sesion_usuario_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_cliente FOREIGN KEY (cliente_id) REFERENCES cliente (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_unidad FOREIGN KEY (unidad_id) REFERENCES unidad (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_turno FOREIGN KEY (turno_id) REFERENCES turno (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+CREATE TABLE evento (
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    sesion_usuario_id uuid,      
+    ronda_id uuid,               
+    puesto_id uuid,              
+    tipo_evento_id uuid NOT NULL,
+    descripcion text,
+    fecha_hora timestamptz DEFAULT now(),
+    lat numeric(10,6),
+    lng numeric(10,6),
+    turno_id integer,
+    -- campos de auditoría (mantener esquema existente)
+    created_at timestamptz DEFAULT now(),
+    created_by uuid,
+    updated_at timestamptz,
+    updated_by uuid,
+    deleted_at timestamptz,
+    CONSTRAINT evento_pk PRIMARY KEY (id),
+    CONSTRAINT evento_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_fk_ronda FOREIGN KEY (ronda_id) REFERENCES ronda (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_fk_tipo FOREIGN KEY (tipo_evento_id) REFERENCES evento_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 -- =====================
--- Descripción: Evidencias (fotos) asociadas a una sesión.
+-- Unifica la tabla incidencia_adjunto y ocurrencia_adjunto 
 -- =====================
-CREATE TABLE sesion_usuario_evidencia (
- id uuid NOT NULL DEFAULT uuid_generate_v4(),
- sesion_usuario_id uuid NOT NULL,
- ruta_foto text,
--- auditoría
- created_at timestamp with time zone DEFAULT now(),
- created_by uuid,
- updated_at timestamp with time zone,
- updated_by uuid,
- deleted_at timestamp with time zone,
- CONSTRAINT sesion_usuario_evidencia_pk PRIMARY KEY (id),
- CONSTRAINT sesion_usuario_evidencia_fk_sesion FOREIGN KEY (sesion_usuario_id) REFERENCES sesion_usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_evidencia_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT sesion_usuario_evidencia_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+CREATE TABLE evento_adjunto (
+    id uuid NOT NULL DEFAULT uuid_generate_v4(),
+    evento_id uuid NOT NULL,
+    adjunto_tipo_id text NOT NULL,
+	ruta text NOT NULL,
+    created_at timestamptz DEFAULT now(),
+    created_by uuid,
+    updated_at timestamptz,
+    updated_by uuid,
+    deleted_at timestamptz,
+    CONSTRAINT evento_adjunto_pk PRIMARY KEY (id),
+    CONSTRAINT evento_adjunto_fk_evento FOREIGN KEY (evento_id) REFERENCES evento (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+    CONSTRAINT evento_adjunto_fk_adjunto_tipo FOREIGN KEY (adjunto_tipo_id) REFERENCES adjunto_tipo (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT evento_adjunto_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+	CONSTRAINT evento_adjunto_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
+
+/* Limpiar tablas (deshacer todo el script)
+
+DROP TABLE IF EXISTS evento_adjunto;
+DROP TABLE IF EXISTS evento;
+DROP TABLE IF EXISTS evento_tipo;
+DROP TABLE IF EXISTS evento_categoria;
+
+DROP TABLE IF EXISTS asignacion_evento;
+DROP TABLE IF EXISTS asignacion_evento_tipo;
+DROP TABLE IF EXISTS asignacion;
+
+DROP TABLE IF EXISTS alive_check_respuesta;
+DROP TABLE IF EXISTS alive_check;
+DROP TABLE IF EXISTS alive_check_estado;
+
+DROP TABLE IF EXISTS ronda_adjunto;
+DROP TABLE IF EXISTS ronda;
+DROP TABLE IF EXISTS control_point;
+
+DROP TABLE IF EXISTS panic_alert_recepcion;
+DROP TABLE IF EXISTS panic_alert_adjunto;
+DROP TABLE IF EXISTS adjunto_tipo;
+DROP TABLE IF EXISTS panic_alert;
+DROP TABLE IF EXISTS panic_alert_estado;
+
+DROP TABLE IF EXISTS sesion_usuario_evidencia;
+DROP TABLE IF EXISTS sesion_usuario;
+
+DROP TABLE IF EXISTS puesto_turno;
+DROP TABLE IF EXISTS turno;
+DROP TABLE IF EXISTS puesto;
+
+DROP TABLE IF EXISTS usuario_unidad;
+DROP TABLE IF EXISTS unidad;
+
+DROP TABLE IF EXISTS cliente_usuario;
+DROP TABLE IF EXISTS cliente;
+
+DROP TABLE IF EXISTS usuario_rol;
+DROP TABLE IF EXISTS usuario;
+
+DROP TABLE IF EXISTS tipo_documento;
+DROP TABLE IF EXISTS usuario_estado;
+DROP TABLE IF EXISTS rol;
+
+DROP TABLE IF EXISTS configuracion;
+DROP TABLE IF EXISTS tipo_configuracion;
+
+--Ejecutar al final
+DROP EXTENSION IF EXISTS "uuid-ossp";
+
+*/

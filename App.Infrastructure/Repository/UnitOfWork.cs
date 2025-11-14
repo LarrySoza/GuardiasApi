@@ -8,78 +8,76 @@ namespace App.Infrastructure.Repository
         public const string DefaultConnection = "DefaultConnection";
 
         public UnitOfWork(
+            IAdjuntoTipoRepository adjuntoTipos,
             IAliveCheckEstadoRepository aliveCheckEstados,
             IAliveCheckRepository aliveChecks,
             IAliveCheckRespuestaRepository aliveCheckRespuestas,
             IAsignacionEventoRepository asignacionEventos,
             IAsignacionEventoTipoRepository asignacionEventoTipos,
             IAsignacionRepository asignaciones,
-            IClienteUsuarioRepository clienteUsuarios,
             IClienteRepository clientes,
+            IClienteUsuarioRepository clienteUsuarios,
             IConfiguracionRepository configuraciones,
             IControlPointRepository controlPoints,
-            IIncidenciaAdjuntoRepository incidenciaAdjuntos,
-            IIncidenciaRepository incidencias,
-            IIncidenciaTipoRepository incidenteTipos,
-            IOcurrenciaAdjuntoRepository ocurrenciaAdjuntos,
-            IOcurrenciaRepository ocurrencias,
-            IOcurrenciaTipoRepository ocurrenciaTipos,
-            IPanicAlertAdjuntoTipoRepository panicAlertAdjuntoTipos,
+            IEventoAdjuntoRepository eventoAdjuntos,
+            IEventoRepository eventos,
+            IEventoTipoRepository eventoTipos,
             IPanicAlertAdjuntoRepository panicAlertAdjuntos,
             IPanicAlertEstadoRepository panicAlertEstados,
-            IPanicAlertRepository panicAlerts,
             IPanicAlertRecepcionRepository panicAlertRecepciones,
+            IPanicAlertRepository panicAlerts,
             IPuestoRepository puestos,
+            IRolRepository roles,
             IRondaAdjuntoRepository rondaAdjuntos,
             IRondaRepository rondas,
-            IRolRepository roles,
             ISesionUsuarioEvidenciaRepository sesionUsuarioEvidencias,
             ISesionUsuarioRepository sesionUsuarios,
             ITipoConfiguracionRepository tipoConfiguraciones,
+            ITipoDocumentoRepository tipoDocumento,
+            ITurnoRepository turnos,
             IUnidadRepository unidades,
             IUsuarioEstadoRepository usuarioEstados,
-            IUsuarioRolRepository usuarioRoles,
-            IUsuarioUnidadRepository usuarioUnidades,
+            IUsuarioPuestoRepository usuarioPuestos,
             IUsuarioRepository usuarios,
-            ITipoDocumentoRepository tipoDocumento,
-            ITurnoRepository turnos)
+            IUsuarioRolRepository usuarioRoles,
+            IUsuarioUnidadRepository usuarioUnidades)
         {
+            AdjuntoTipos = adjuntoTipos;
             AliveCheckEstados = aliveCheckEstados;
             AliveChecks = aliveChecks;
             AliveCheckRespuestas = aliveCheckRespuestas;
             AsignacionEventos = asignacionEventos;
             AsignacionEventoTipos = asignacionEventoTipos;
             Asignaciones = asignaciones;
-            ClienteUsuarios = clienteUsuarios;
             Clientes = clientes;
+            ClienteUsuarios = clienteUsuarios;
             Configuraciones = configuraciones;
             ControlPoints = controlPoints;
-            IncidenciaAdjuntos = incidenciaAdjuntos;
-            Incidencias = incidencias;
-            IncidenteTipos = incidenteTipos;
-            OcurrenciaAdjuntos = ocurrenciaAdjuntos;
-            Ocurrencias = ocurrencias;
-            OcurrenciaTipos = ocurrenciaTipos;
-            PanicAlertAdjuntoTipos = panicAlertAdjuntoTipos;
+            EventoAdjuntos = eventoAdjuntos;
+            Eventos = eventos;
+            EventoTipos = eventoTipos;
             PanicAlertAdjuntos = panicAlertAdjuntos;
             PanicAlertEstados = panicAlertEstados;
-            PanicAlerts = panicAlerts;
             PanicAlertRecepciones = panicAlertRecepciones;
+            PanicAlerts = panicAlerts;
             Puestos = puestos;
+            Roles = roles;
             RondaAdjuntos = rondaAdjuntos;
             Rondas = rondas;
-            Roles = roles;
             SesionUsuarioEvidencias = sesionUsuarioEvidencias;
             SesionUsuarios = sesionUsuarios;
             TipoConfiguraciones = tipoConfiguraciones;
-            Unidades = unidades;
-            UsuarioEstados = usuarioEstados;
-            UsuarioRoles = usuarioRoles;
-            UsuarioUnidades = usuarioUnidades;
-            Usuarios = usuarios;
             TipoDocumento = tipoDocumento;
             Turnos = turnos;
+            Unidades = unidades;
+            UsuarioEstados = usuarioEstados;
+            UsuarioPuestos = usuarioPuestos;
+            Usuarios = usuarios;
+            UsuarioRoles = usuarioRoles;
+            UsuarioUnidades = usuarioUnidades;
         }
+
+        public IAdjuntoTipoRepository AdjuntoTipos { get; }
 
         public IAliveCheckEstadoRepository AliveCheckEstados { get; }
 
@@ -93,43 +91,35 @@ namespace App.Infrastructure.Repository
 
         public IAsignacionRepository Asignaciones { get; }
 
-        public IClienteUsuarioRepository ClienteUsuarios { get; }
-
         public IClienteRepository Clientes { get; }
+
+        public IClienteUsuarioRepository ClienteUsuarios { get; }
 
         public IConfiguracionRepository Configuraciones { get; }
 
         public IControlPointRepository ControlPoints { get; }
 
-        public IIncidenciaAdjuntoRepository IncidenciaAdjuntos { get; }
+        public IEventoAdjuntoRepository EventoAdjuntos { get; }
 
-        public IIncidenciaRepository Incidencias { get; }
+        public IEventoRepository Eventos { get; }
 
-        public IIncidenciaTipoRepository IncidenteTipos { get; }
-
-        public IOcurrenciaAdjuntoRepository OcurrenciaAdjuntos { get; }
-
-        public IOcurrenciaRepository Ocurrencias { get; }
-
-        public IOcurrenciaTipoRepository OcurrenciaTipos { get; }
-
-        public IPanicAlertAdjuntoTipoRepository PanicAlertAdjuntoTipos { get; }
+        public IEventoTipoRepository EventoTipos { get; }
 
         public IPanicAlertAdjuntoRepository PanicAlertAdjuntos { get; }
 
         public IPanicAlertEstadoRepository PanicAlertEstados { get; }
 
-        public IPanicAlertRepository PanicAlerts { get; }
-
         public IPanicAlertRecepcionRepository PanicAlertRecepciones { get; }
 
+        public IPanicAlertRepository PanicAlerts { get; }
+
         public IPuestoRepository Puestos { get; }
+
+        public IRolRepository Roles { get; }
 
         public IRondaAdjuntoRepository RondaAdjuntos { get; }
 
         public IRondaRepository Rondas { get; }
-
-        public IRolRepository Roles { get; }
 
         public ISesionUsuarioEvidenciaRepository SesionUsuarioEvidencias { get; }
 
@@ -137,18 +127,20 @@ namespace App.Infrastructure.Repository
 
         public ITipoConfiguracionRepository TipoConfiguraciones { get; }
 
+        public ITipoDocumentoRepository TipoDocumento { get; }
+
+        public ITurnoRepository Turnos { get; }
+
         public IUnidadRepository Unidades { get; }
 
         public IUsuarioEstadoRepository UsuarioEstados { get; }
 
-        public IUsuarioRolRepository UsuarioRoles { get; }
-
-        public IUsuarioUnidadRepository UsuarioUnidades { get; }
+        public IUsuarioPuestoRepository UsuarioPuestos { get; }
 
         public IUsuarioRepository Usuarios { get; }
 
-        public ITipoDocumentoRepository TipoDocumento { get; }
+        public IUsuarioRolRepository UsuarioRoles { get; }
 
-        public ITurnoRepository Turnos { get; }
+        public IUsuarioUnidadRepository UsuarioUnidades { get; }
     }
 }

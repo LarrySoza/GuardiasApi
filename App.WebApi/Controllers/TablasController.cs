@@ -71,18 +71,18 @@ namespace App.WebApi.Controllers
         /// </summary>
         /// <returns>Lista de <see cref="TablaDto"/> con id y nombre.</returns>
         [ProducesResponseType(typeof(List<TablaDto>), (int)HttpStatusCode.OK)]
-        [HttpGet("panic_alert_adjunto_tipo", Name = "Tablas_ObtenerPanicAlertAdjuntoTipos")]
+        [HttpGet("adjunto_tipo", Name = "Tablas_ObtenerAdjuntoTipos")]
         public async Task<IActionResult> ObtenerPanicAlertAdjuntoTipos()
         {
             try
             {
-                var items = await _unitOfWork.PanicAlertAdjuntoTipos.GetAllAsync();
+                var items = await _unitOfWork.AdjuntoTipos.GetAllAsync();
                 var dtos = items.Select(i => new TablaDto { id = i.id, nombre = i.nombre }).ToList();
                 return Ok(dtos);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error obteniendo panic_alert_adjunto_tipo");
+                _logger.LogError(ex, "Error obteniendo adjunto_tipo");
                 throw;
             }
         }

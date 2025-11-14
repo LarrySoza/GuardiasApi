@@ -16,6 +16,9 @@ namespace App.Infrastructure
             // Registrar fábrica de conexiones (una instancia lee la cadena y la guarda)
             services.AddSingleton<IDbConnectionFactory, NpgsqlConnectionFactory>();
 
+            // Registrar repositorios core (orden alfabético por interfaz)
+            services.AddTransient<IAdjuntoTipoRepository, AdjuntoTipoRepository>();
+
             services.AddTransient<IAliveCheckEstadoRepository, AliveCheckEstadoRepository>();
             services.AddTransient<IAliveCheckRepository, AliveCheckRepository>();
             services.AddTransient<IAliveCheckRespuestaRepository, AliveCheckRespuestaRepository>();
@@ -31,16 +34,11 @@ namespace App.Infrastructure
 
             services.AddTransient<IControlPointRepository, ControlPointRepository>();
 
-            services.AddTransient<IIncidenciaAdjuntoRepository, IncidenciaAdjuntoRepository>();
-            services.AddTransient<IIncidenciaRepository, IncidenciaRepository>();
-            services.AddTransient<IIncidenciaTipoRepository, IncidenciaTipoRepository>();
-
-            services.AddTransient<IOcurrenciaAdjuntoRepository, OcurrenciaAdjuntoRepository>();
-            services.AddTransient<IOcurrenciaRepository, OcurrenciaRepository>();
-            services.AddTransient<IOcurrenciaTipoRepository, OcurrenciaTipoRepository>();
+            services.AddTransient<IEventoAdjuntoRepository, EventoAdjuntoRepository>();
+            services.AddTransient<IEventoRepository, EventoRepository>();
+            services.AddTransient<IEventoTipoRepository, EventoTipoRepository>();
 
             services.AddTransient<IPanicAlertAdjuntoRepository, PanicAlertAdjuntoRepository>();
-            services.AddTransient<IPanicAlertAdjuntoTipoRepository, PanicAlertAdjuntoTipoRepository>();
             services.AddTransient<IPanicAlertEstadoRepository, PanicAlertEstadoRepository>();
             services.AddTransient<IPanicAlertRecepcionRepository, PanicAlertRecepcionRepository>();
             services.AddTransient<IPanicAlertRepository, PanicAlertRepository>();
@@ -54,12 +52,13 @@ namespace App.Infrastructure
             services.AddTransient<ISesionUsuarioEvidenciaRepository, SesionUsuarioEvidenciaRepository>();
             services.AddTransient<ISesionUsuarioRepository, SesionUsuarioRepository>();
 
-            // Registrar repositorio para tipo_documento
+            services.AddTransient<ITipoConfiguracionRepository, TipoConfiguracionRepository>();
             services.AddTransient<ITipoDocumentoRepository, TipoDocumentoRepository>();
 
-            services.AddTransient<ITipoConfiguracionRepository, TipoConfiguracionRepository>();
             services.AddTransient<IUnidadRepository, UnidadRepository>();
+
             services.AddTransient<IUsuarioEstadoRepository, UsuarioEstadoRepository>();
+            services.AddTransient<IUsuarioPuestoRepository, UsuarioPuestoRepository>();
             services.AddTransient<IUsuarioRepository, UsuarioRepository>();
             services.AddTransient<IUsuarioRolRepository, UsuarioRolRepository>();
             services.AddTransient<IUsuarioUnidadRepository, UsuarioUnidadRepository>();

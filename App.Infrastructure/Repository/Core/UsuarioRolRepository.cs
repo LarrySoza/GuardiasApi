@@ -16,10 +16,9 @@ namespace App.Infrastructure.Repository.Core
 
         public async Task AddAsync(Guid usuario_id, string rol_id)
         {
-            const string sql = @"INSERT INTO usuario_rol (usuario_id, rol_id, created_at)
-                                 VALUES (@usuario_id, @rol_id, now())
-                                 ON CONFLICT (usuario_id, rol_id) DO UPDATE
-                                 SET deleted_at = NULL, updated_at = now();";
+            const string sql = @"INSERT INTO usuario_rol (usuario_id, rol_id)
+                                 VALUES (@usuario_id, @rol_id)
+                                 ON CONFLICT (usuario_id, rol_id) DO NOTHING;";
 
             var p = new DynamicParameters();
             p.Add("@usuario_id", usuario_id);
@@ -34,7 +33,7 @@ namespace App.Infrastructure.Repository.Core
 
         public async Task DeleteAsync(Guid usuario_id, string rol_id)
         {
-            const string sql = "UPDATE usuario_rol SET deleted_at = now() WHERE usuario_id = @usuario_id AND rol_id = @rol_id";
+            const string sql = "DELETE FROM usuario_rol WHERE usuario_id = @usuario_id AND rol_id = @rol_id";
 
             var p = new DynamicParameters();
             p.Add("@usuario_id", usuario_id);
@@ -53,7 +52,6 @@ namespace App.Infrastructure.Repository.Core
                                  FROM rol r
                                  JOIN usuario_rol ur ON ur.rol_id = r.id
                                  WHERE ur.usuario_id = @usuario_id
-                                 AND ur.deleted_at IS NULL
                                  ORDER BY r.id";
 
             var p = new DynamicParameters();

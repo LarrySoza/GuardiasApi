@@ -1,12 +1,12 @@
 namespace App.Core.Entities.Core
 {
     /// <summary>
-    /// Table: panic_alert_adjunto
-    /// Files (image/audio/text) associated with a panic_alert.
+    /// Tabla: ocurrencia_adjunto
+    /// Archivos/adjuntos (fotos, evidencias) asociados a una ocurrencia.
     /// </summary>
-    public class PanicAlertAdjunto : AuditableEntity<Guid>
+    public class EventoAdjunto : AuditableEntity<Guid>
     {
-        public Guid panic_alert_id { get; set; }
+        public Guid evento_id { get; set; }
         public string adjunto_tipo_id { get; set; } = string.Empty;
         public string ruta { get; set; } = string.Empty;
     }

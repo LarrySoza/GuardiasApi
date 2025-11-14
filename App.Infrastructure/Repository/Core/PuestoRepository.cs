@@ -46,7 +46,7 @@ namespace App.Infrastructure.Repository.Core
                     var id = await connection.ExecuteScalarAsync<Guid>(insertSql, p, tx);
 
                     // Insertar turnos relacionados en tabla puente puesto_turno
-                    const string insertRel = @"INSERT INTO puesto_turno (puesto_id, turno_id, created_at) VALUES (@puesto_id, @turno_id, now()) ON CONFLICT DO NOTHING";
+                    const string insertRel = @"INSERT INTO puesto_turno (puesto_id, turno_id) VALUES (@puesto_id, @turno_id) ON CONFLICT (puesto_id, turno_id) DO NOTHING";
                     foreach (var tId in turnosId)
                     {
                         var pr = new DynamicParameters();
@@ -115,7 +115,7 @@ namespace App.Infrastructure.Repository.Core
                     await connection.ExecuteAsync(deleteRelSql, delParams, tx);
 
                     // Insertar nuevas relaciones
-                    const string insertRel = @"INSERT INTO puesto_turno (puesto_id, turno_id, created_at) VALUES (@puesto_id, @turno_id, now()) ON CONFLICT DO NOTHING";
+                    const string insertRel = @"INSERT INTO puesto_turno (puesto_id, turno_id) VALUES (@puesto_id, @turno_id) ON CONFLICT (puesto_id, turno_id) DO NOTHING";
                     foreach (var tId in turnosId)
                     {
                         var pr = new DynamicParameters();
@@ -152,7 +152,7 @@ namespace App.Infrastructure.Repository.Core
 
             const string dataSql = @"SELECT p.id, p.unidad_id, p.nombre, p.lat, p.lng, t.id as turno_id, t.nombre as turno_nombre
                                       FROM puesto p
-                                      LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id AND pt.deleted_at IS NULL
+                                      LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id
                                       LEFT JOIN turno t ON t.id = pt.turno_id
                                       WHERE p.deleted_at IS NULL
                                       AND (@search IS NULL OR p.nombre ILIKE '%' || @search || '%')
@@ -211,7 +211,7 @@ namespace App.Infrastructure.Repository.Core
         {
             const string sql = @"SELECT p.id, p.unidad_id, p.nombre, p.lat, p.lng, t.id as turno_id, t.nombre as turno_nombre
                                  FROM puesto p
-                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id AND pt.deleted_at IS NULL
+                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id
                                  LEFT JOIN turno t ON t.id = pt.turno_id
                                  WHERE p.id = @id AND p.deleted_at IS NULL;";
 
@@ -259,7 +259,7 @@ namespace App.Infrastructure.Repository.Core
         {
             const string sql = @"SELECT p.id, p.unidad_id, p.nombre, p.lat, p.lng, t.id as turno_id, t.nombre as turno_nombre
                                  FROM puesto p
-                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id AND pt.deleted_at IS NULL
+                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id
                                  LEFT JOIN turno t ON t.id = pt.turno_id
                                  WHERE p.unidad_id = @unidadId AND p.deleted_at IS NULL
                                  ORDER BY p.nombre;";
@@ -324,7 +324,7 @@ namespace App.Infrastructure.Repository.Core
                                  )
                                  SELECT p.id, p.unidad_id, p.nombre, p.lat, p.lng, t.id as turno_id, t.nombre as turno_nombre
                                  FROM puesto p
-                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id AND pt.deleted_at IS NULL
+                                 LEFT JOIN puesto_turno pt ON pt.puesto_id = p.id
                                  LEFT JOIN turno t ON t.id = pt.turno_id
                                  WHERE p.unidad_id IN (SELECT id FROM descendants)
                                  AND p.deleted_at IS NULL

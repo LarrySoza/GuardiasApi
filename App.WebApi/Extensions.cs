@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 using System.Reflection;
 using System.Security.Claims;
 using System.Text;
@@ -50,6 +51,7 @@ namespace App.WebApi
             {
                 // No asignar obj.TokenValidationParameters aquí porque lo hace ConfigureJwtBearerOptions
                 obj.UseSecurityTokenValidators = true;
+                obj.MapInboundClaims = false;
 
                 obj.Events = new JwtBearerEvents()
                 {
@@ -195,7 +197,32 @@ namespace App.WebApi
                     return guid;
             }
 
-            throw new Exception("No se encontró el ID de usuario en la sesión");
+            throw new Exception("No se encontró el ID de usuario en el token.");
+        }
+
+        public static string UserName(this ClaimsPrincipal user)
+        {
+            var _nombreUsuario = user?.Claims?.FirstOrDefault(c => c.Type.Equals(JwtRegisteredClaimNames.Sub, StringComparison.OrdinalIgnoreCase))?.Value;
+
+            if (_nombreUsuario != null)
+            {
+                return _nombreUsuario;
+            }
+
+            throw new Exception("No se encontró el Nombre de usuario en el token.");
+        }
+
+        public static Guid SesionId(this ClaimsPrincipal user)
+        {
+            var _sesionId = user?.Claims?.FirstOrDefault(c => c.Type.Equals(JwtConfigManager.ClaimSesionId, StringComparison.OrdinalIgnoreCase))?.Value;
+
+            if (_sesionId != null)
+            {
+                if (Guid.TryParse(_sesionId, out var guid))
+                    return guid;
+            }
+
+            throw new Exception("No se encontró el ID de sesion en el token.");
         }
     }
 }

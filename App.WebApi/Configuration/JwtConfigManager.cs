@@ -7,6 +7,7 @@ namespace App.WebApi.Configuration
     {
         public const string ClaimSecurity = "stampSecurity";
         public const string ClaimUsuarioId = "usuarioId";
+        public const string ClaimSesionId = "sesionId";
 
         private readonly IConfiguration _config;
 

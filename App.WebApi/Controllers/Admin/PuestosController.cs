@@ -142,7 +142,7 @@ namespace App.WebApi.Controllers.Admin
 
                 var id = await _unitOfWork.Puestos.AddAsync(puesto, turnosId);
 
-                return CreatedAtRoute("Puestos_ObtenerPorId", new { id }, new { id });
+                return CreatedAtRoute("Admin_Puestos_ObtenerPorId", new { id }, new { id });
             }
             catch (Exception ex)
             {

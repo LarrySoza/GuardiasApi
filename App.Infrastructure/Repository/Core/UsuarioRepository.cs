@@ -323,14 +323,10 @@ namespace App.Infrastructure.Repository.Core
 
             const string sqlUsuarioRol = @"INSERT INTO usuario_rol 
                                                 (usuario_id, 
-                                                rol_id, 
-                                                created_at) 
+                                                rol_id) 
                                         VALUES 
                                                 (@usuario_id, 
-                                                @rol_id, 
-                                                now())
-                                        ON CONFLICT (usuario_id, rol_id) DO UPDATE
-                                        SET deleted_at = NULL, updated_at = now();";
+                                                @rol_id)";
 
             var p = new DynamicParameters();
             p.Add("@nombre_usuario", usuario.nombre_usuario);

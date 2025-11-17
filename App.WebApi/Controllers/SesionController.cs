@@ -2,13 +2,10 @@
 using App.Core.Entities.Core;
 using App.WebApi.Models.Auth;
 using App.WebApi.Models.Sesion;
-using App.WebApi.Models.Shared;
 using App.WebApi.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
-using System.IdentityModel.Tokens.Jwt;
 
 namespace App.WebApi.Controllers
 {

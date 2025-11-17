@@ -1,4 +1,4 @@
-using App.Application.Interfaces.Core;
+ï»¿using App.Application.Interfaces.Core;
 using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.Infrastructure.Database;
@@ -66,7 +66,7 @@ namespace App.Infrastructure.Repository.Core
             }
         }
 
-        // Implementación de la firma original heredada de ISearchRepository
+        // ImplementaciÃ³n de la firma original heredada de ISearchRepository
         public Task<PaginaDatos<Usuario>> GetPagedAsync(string? search, int page = 1, int pageSize = 20)
         {
             return GetPagedAsync(search, page, pageSize, false);
@@ -153,10 +153,11 @@ namespace App.Infrastructure.Repository.Core
                 var usuarios = new List<Usuario>();
                 foreach (var row in rows)
                 {
-                    // Mapear campos comunes a Usuario usando propiedades públicas.
+                    // Mapear campos comunes a Usuario usando propiedades pÃºblicas.
                     var usuario = new Usuario();
 
                     usuario.nombre_usuario = row.nombre_usuario;
+                    usuario.nombre_completo = row.nombre_completo;
                     usuario.email = row.email;
                     usuario.contrasena_hash = row.contrasena_hash;
                     usuario.sello_seguridad = row.sello_seguridad;
@@ -179,7 +180,7 @@ namespace App.Infrastructure.Repository.Core
                     }
                     catch
                     {
-                        // ignorar errores de deserialización y continuar
+                        // ignorar errores de deserializaciÃ³n y continuar
                     }
 
                     usuarios.Add(usuario);
@@ -213,6 +214,7 @@ namespace App.Infrastructure.Repository.Core
         {
             const string sql = @"UPDATE usuario SET
                                     nombre_usuario = @nombre_usuario,
+                                    nombre_completo = @nombre_completo,
                                     email = @email,
                                     contrasena_hash = @contrasena_hash,
                                     sello_seguridad = @sello_seguridad,
@@ -227,6 +229,7 @@ namespace App.Infrastructure.Repository.Core
             var p = new DynamicParameters();
             p.Add("@id", entity.id);
             p.Add("@nombre_usuario", entity.nombre_usuario);
+            p.Add("@nombre_completo", entity.nombre_completo);
             p.Add("@email", entity.email);
             p.Add("@contrasena_hash", entity.contrasena_hash);
             p.Add("@sello_seguridad", entity.sello_seguridad);
@@ -299,6 +302,7 @@ namespace App.Infrastructure.Repository.Core
         {
             const string sqlUser = @"INSERT INTO usuario
                                         (nombre_usuario,
+                                        nombre_completo,
                                         email, 
                                         contrasena_hash, 
                                         sello_seguridad, 
@@ -310,6 +314,7 @@ namespace App.Infrastructure.Repository.Core
                                         created_by)
                                     VALUES
                                         (@nombre_usuario, 
+                                        @nombre_completo,
                                         @email, 
                                         @contrasena_hash, 
                                         @sello_seguridad, 
@@ -330,6 +335,7 @@ namespace App.Infrastructure.Repository.Core
 
             var p = new DynamicParameters();
             p.Add("@nombre_usuario", usuario.nombre_usuario);
+            p.Add("@nombre_completo", usuario.nombre_completo);
             p.Add("@email", usuario.email);
             p.Add("@contrasena_hash", usuario.contrasena_hash);
             p.Add("@sello_seguridad", usuario.sello_seguridad == Guid.Empty ? Guid.NewGuid() : usuario.sello_seguridad);
@@ -367,6 +373,25 @@ namespace App.Infrastructure.Repository.Core
                     try { tx.Rollback(); } catch { }
                     throw;
                 }
+            }
+        }
+
+        public async Task<IReadOnlyList<Guid>> GetUsersForPanicAlertNotificacionAsync(Guid panicAlertId)
+        {
+            // Single-query implementation using joins to avoid extra repository calls
+            const string sql = @"SELECT DISTINCT u.id
+                                 FROM panic_alert p
+                                 JOIN sesion_usuario s ON p.sesion_usuario_id = s.id AND s.deleted_at IS NULL
+                                 JOIN usuario_unidad uu ON uu.unidad_id = s.unidad_id AND uu.deleted_at IS NULL
+                                 JOIN usuario_rol ur ON ur.usuario_id = uu.usuario_id AND ur.rol_id = @roleId AND ur.deleted_at IS NULL
+                                 JOIN usuario u ON u.id = uu.usuario_id AND u.deleted_at IS NULL
+                                 WHERE p.id = @panicAlertId";
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var ids = await connection.QueryAsync<Guid>(sql, new { panicAlertId, roleId = "03" });
+                return ids.AsList();
             }
         }
     }

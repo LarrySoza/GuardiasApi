@@ -40,7 +40,7 @@ namespace App.Infrastructure
 
             services.AddTransient<IPanicAlertAdjuntoRepository, PanicAlertAdjuntoRepository>();
             services.AddTransient<IPanicAlertEstadoRepository, PanicAlertEstadoRepository>();
-            services.AddTransient<IPanicAlertRecepcionRepository, PanicAlertRecepcionRepository>();
+            services.AddTransient<IPanicAlertNotificacionRepository, PanicAlertNotificacionRepository>();
             services.AddTransient<IPanicAlertRepository, PanicAlertRepository>();
 
             services.AddTransient<IPuestoRepository, PuestoRepository>();

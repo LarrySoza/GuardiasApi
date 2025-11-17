@@ -149,6 +149,7 @@ INSERT INTO adjunto_tipo (id, nombre) VALUES
 CREATE TABLE usuario (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
  nombre_usuario text NOT NULL,
+ nombre_completo text,
  email text,
  contrasena_hash text NOT NULL,
  sello_seguridad uuid NOT NULL DEFAULT uuid_generate_v4(), -- Un valor aleatorio que debería cambiar cuando se modifiquen credenciales
@@ -401,24 +402,26 @@ CREATE TABLE panic_alert_adjunto (
 );
 
 -- =====================
--- Descripción: Registra la recepción/atención de una alerta de pánico por un usuario receptor.
+-- Descripción: Registra la notificación de una alerta de pánico a un usuario receptor.
 -- =====================
-CREATE TABLE panic_alert_recepcion (
+CREATE TABLE panic_alert_notificacion (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
  panic_alert_id uuid NOT NULL, -- FK a panic_alert.id
- usuario_receptor_id uuid NOT NULL, -- FK a usuario.id
+ usuario_notificado_id uuid NOT NULL, -- FK a usuario(id)
  fecha_hora timestamp with time zone DEFAULT now(),
+ aceptada boolean DEFAULT false,
  -- auditoría
  created_at timestamp with time zone DEFAULT now(),
  created_by uuid,
  updated_at timestamp with time zone,
  updated_by uuid,
  deleted_at timestamp with time zone,
- CONSTRAINT panic_alert_recepcion_pk PRIMARY KEY (id),
- CONSTRAINT panic_alert_recepcion_fk_alert FOREIGN KEY (panic_alert_id) REFERENCES panic_alert (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT panic_alert_recepcion_fk_usuario FOREIGN KEY (usuario_receptor_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT panic_alert_recepcion_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
- CONSTRAINT panic_alert_recepcion_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+ CONSTRAINT panic_alert_notificacion_pk PRIMARY KEY (id),
+ CONSTRAINT panic_alert_notificacion_unq UNIQUE (panic_alert_id, usuario_notificado_id),
+ CONSTRAINT panic_alert_notificacion_fk_alert FOREIGN KEY (panic_alert_id) REFERENCES panic_alert (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT panic_alert_notificacion_fk_usuario_notificado FOREIGN KEY (usuario_notificado_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT panic_alert_notificacion_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT panic_alert_notificacion_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );
 
 
@@ -707,12 +710,13 @@ CREATE TABLE evento_adjunto (
 
 DROP TABLE IF EXISTS evento_adjunto;
 DROP TABLE IF EXISTS evento;
+
 DROP TABLE IF EXISTS evento_tipo;
 DROP TABLE IF EXISTS evento_categoria;
 
 DROP TABLE IF EXISTS asignacion_evento;
-DROP TABLE IF EXISTS asignacion_evento_tipo;
 DROP TABLE IF EXISTS asignacion;
+DROP TABLE IF EXISTS asignacion_evento_tipo;
 
 DROP TABLE IF EXISTS alive_check_respuesta;
 DROP TABLE IF EXISTS alive_check;
@@ -722,9 +726,8 @@ DROP TABLE IF EXISTS ronda_adjunto;
 DROP TABLE IF EXISTS ronda;
 DROP TABLE IF EXISTS control_point;
 
-DROP TABLE IF EXISTS panic_alert_recepcion;
+DROP TABLE IF EXISTS panic_alert_notificacion;
 DROP TABLE IF EXISTS panic_alert_adjunto;
-DROP TABLE IF EXISTS adjunto_tipo;
 DROP TABLE IF EXISTS panic_alert;
 DROP TABLE IF EXISTS panic_alert_estado;
 
@@ -732,7 +735,7 @@ DROP TABLE IF EXISTS sesion_usuario_evidencia;
 DROP TABLE IF EXISTS sesion_usuario;
 
 DROP TABLE IF EXISTS puesto_turno;
-DROP TABLE IF EXISTS turno;
+DROP TABLE IF EXISTS usuario_puesto;
 DROP TABLE IF EXISTS puesto;
 
 DROP TABLE IF EXISTS usuario_unidad;
@@ -744,12 +747,15 @@ DROP TABLE IF EXISTS cliente;
 DROP TABLE IF EXISTS usuario_rol;
 DROP TABLE IF EXISTS usuario;
 
+DROP TABLE IF EXISTS adjunto_tipo;
 DROP TABLE IF EXISTS tipo_documento;
 DROP TABLE IF EXISTS usuario_estado;
 DROP TABLE IF EXISTS rol;
 
 DROP TABLE IF EXISTS configuracion;
 DROP TABLE IF EXISTS tipo_configuracion;
+
+DROP TABLE IF EXISTS turno;
 
 --Ejecutar al final
 DROP EXTENSION IF EXISTS "uuid-ossp";

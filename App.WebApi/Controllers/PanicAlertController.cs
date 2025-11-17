@@ -1,4 +1,5 @@
 using App.Application.Interfaces;
+using App.Core.Entities;
 using App.Core.Entities.Core;
 using App.WebApi.Models.PanicAlert;
 using App.WebApi.Models.Shared;
@@ -55,6 +56,13 @@ namespace App.WebApi.Controllers
 
                 var id = await _unitOfWork.PanicAlerts.AddAsync(entity);
 
+                var _usuariosForNotificacion = await _unitOfWork.Usuarios.GetUsersForPanicAlertNotificacionAsync(entity.sesion_usuario_id);
+
+                if(_usuariosForNotificacion != null && _usuariosForNotificacion.Count > 0)
+                {
+                    await _unitOfWork.PanicAlertNotificaciones.AddAsync(id, _usuariosForNotificacion);
+                }
+
                 return CreatedAtRoute("PanicAlert_ObtenerPorId", new { id = id }, new { id = id });
             }
             catch (Exception ex)
@@ -64,11 +72,6 @@ namespace App.WebApi.Controllers
             }
         }
 
-        /// <summary>
-        /// Obtiene una alerta de pánico por su identificador.
-        /// </summary>
-        /// <param name="id">Identificador (GUID) de la alerta de pánico.</param>
-        /// <returns>200 OK con <see cref="PanicAlertDto"/> o404 si no existe.</returns>
         [ProducesResponseType(typeof(PanicAlertDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpGet("{id:guid}", Name = "PanicAlert_ObtenerPorId")]
@@ -107,6 +110,36 @@ namespace App.WebApi.Controllers
                 await _unitOfWork.PanicAlerts.UpdateEstadoAsync(id, "03", User.Id());
 
                 return Ok(new GenericResponseDto { success = true, message = "Alerta cancelada correctamente" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        [ProducesResponseType(typeof(PaginaDatos<PanicAlertDto>), (int)HttpStatusCode.OK)]
+        [HttpGet(Name = "PanicAlert_ObtenerPaginado")]
+        public async Task<IActionResult> ObtenerPaginado([FromQuery] string? estadoId = null, [FromQuery] int pagina = 1, [FromQuery] int tamanoPagina = 20, [FromQuery] DateOnly? date = null)
+        {
+            try
+            {
+                pagina = Math.Max(1, pagina);
+                tamanoPagina = Math.Clamp(tamanoPagina, 1, 100);
+
+                var resultado = await _unitOfWork.PanicAlerts.GetPagedByUsuarioIdAsync(User.Id(), estadoId, pagina, tamanoPagina, date);
+                var dataDto = _mapper.Map<List<PanicAlertDto>>(resultado.data);
+
+                var paginaDto = new PaginaDatos<PanicAlertDto>
+                {
+                    total = resultado.total,
+                    page = resultado.page,
+                    pageSize = resultado.pageSize,
+                    totalPages = resultado.totalPages,
+                    data = dataDto
+                };
+
+                return Ok(paginaDto);
             }
             catch (Exception ex)
             {

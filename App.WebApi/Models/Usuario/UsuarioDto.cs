@@ -9,6 +9,7 @@ namespace App.WebApi.Models.Usuario
     {
         public Guid id { get; set; }
         public string nombre_usuario { get; set; } = default!;
+        public string? nombre_completo { get; set; }
         public string? email { get; set; }
         public string? telefono { get; set; }
         public string? tipo_documento_id { get; set; }

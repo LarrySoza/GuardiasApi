@@ -6,6 +6,7 @@ namespace App.Core.Entities.Core
     public class Usuario : AuditableEntity<Guid>
     {
         public string? nombre_usuario { get; set; }
+        public string? nombre_completo { get; set; }
         public string? email { get; set; }
         public string? contrasena_hash { get; set; }
         public Guid sello_seguridad { get; set; }

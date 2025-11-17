@@ -24,7 +24,7 @@ namespace App.Infrastructure.Repository
             IEventoTipoRepository eventoTipos,
             IPanicAlertAdjuntoRepository panicAlertAdjuntos,
             IPanicAlertEstadoRepository panicAlertEstados,
-            IPanicAlertRecepcionRepository panicAlertRecepciones,
+            IPanicAlertNotificacionRepository panicAlertNotificaciones,
             IPanicAlertRepository panicAlerts,
             IPuestoRepository puestos,
             IRolRepository roles,
@@ -58,7 +58,7 @@ namespace App.Infrastructure.Repository
             EventoTipos = eventoTipos;
             PanicAlertAdjuntos = panicAlertAdjuntos;
             PanicAlertEstados = panicAlertEstados;
-            PanicAlertRecepciones = panicAlertRecepciones;
+            PanicAlertNotificaciones = panicAlertNotificaciones;
             PanicAlerts = panicAlerts;
             Puestos = puestos;
             Roles = roles;
@@ -109,7 +109,7 @@ namespace App.Infrastructure.Repository
 
         public IPanicAlertEstadoRepository PanicAlertEstados { get; }
 
-        public IPanicAlertRecepcionRepository PanicAlertRecepciones { get; }
+        public IPanicAlertNotificacionRepository PanicAlertNotificaciones { get; }
 
         public IPanicAlertRepository PanicAlerts { get; }
 

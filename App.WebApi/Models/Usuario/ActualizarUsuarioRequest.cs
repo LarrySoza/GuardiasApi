@@ -3,6 +3,7 @@
     public class ActualizarUsuarioRequest
     {
         public required string nombre_usuario { get; set; }
+        public string? nombre_completo { get; set; }
         public string? email { get; set; }
         public string? telefono { get; set; }
         public string? tipo_documento_id { get; set; }

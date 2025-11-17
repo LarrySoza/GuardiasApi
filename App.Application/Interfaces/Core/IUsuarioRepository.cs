@@ -39,5 +39,7 @@ namespace App.Application.Interfaces.Core
         /// en una única consulta adicional.
         /// </summary>
         Task<PaginaDatos<Usuario>> GetPagedAsync(string? search, int page = 1, int pageSize = 20, bool includeRoles = false);
+
+        Task<IReadOnlyList<Guid>> GetUsersForPanicAlertNotificacionAsync(Guid panicAlertId);
     }
 }

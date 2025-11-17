@@ -20,7 +20,7 @@ namespace App.Application.Interfaces
         IEventoTipoRepository EventoTipos { get; }
         IPanicAlertAdjuntoRepository PanicAlertAdjuntos { get; }
         IPanicAlertEstadoRepository PanicAlertEstados { get; }
-        IPanicAlertRecepcionRepository PanicAlertRecepciones { get; }
+        IPanicAlertNotificacionRepository PanicAlertNotificaciones { get; }
         IPanicAlertRepository PanicAlerts { get; }
         IPuestoRepository Puestos { get; }
         IRolRepository Roles { get; }

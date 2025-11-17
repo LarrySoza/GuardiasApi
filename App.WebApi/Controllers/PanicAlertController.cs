@@ -27,16 +27,24 @@ namespace App.WebApi.Controllers
         }
 
         /// <summary>
-        /// Crea una nueva alerta de pánico.
+        /// Crea una nueva alerta de pánico para la sesión del usuario autenticado.
         /// </summary>
-        /// <param name="dto">Datos para crear la alerta de pánico.</param>
-        /// <returns>Devuelve201 y el identificador del recurso creado en caso de éxito, o400 si el modelo no es válido.</returns>
+        /// <param name="dto">Datos para crear la alerta de pánico. Solo se consideran `lat` y `lng` del cuerpo de la petición.</param>
+        /// <remarks>
+        /// - El `sesion_usuario_id` se obtiene a partir del token (claim de sesión) y no puede ser enviado por el cliente.
+        /// - La fecha se establece en UTC en el servidor (`DateTimeOffset.UtcNow`).
+        /// - Se registran notificaciones para los usuarios relacionados si existen.
+        /// </remarks>
+        /// <returns>
+        /// - 201 Created con un objeto <see cref="GenericResponseIdDto{Guid}"/> que contiene el id de la alerta creada.
+        /// - 400 Bad Request si el modelo no es válido.
+        /// </returns>
         /// <response code="201">Alerta creada correctamente. Devuelve un objeto con el id creado.</response>
         /// <response code="400">Datos de entrada inválidos.</response>
-        [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(GenericResponseIdDto<Guid>), (int)HttpStatusCode.Created)]
         [ProducesResponseType((int)HttpStatusCode.BadRequest)]
         [HttpPost(Name = "PanicAlert_Crear")]
-        public async Task<IActionResult> Crear([FromForm] CrearPanicAlertRequestDto dto)
+        public async Task<IActionResult> Crear([FromBody] CrearPanicAlertRequestDto dto)
         {
             try
             {
@@ -44,10 +52,10 @@ namespace App.WebApi.Controllers
 
                 var entity = new PanicAlert
                 {
-                    sesion_usuario_id = dto.sesion_usuario_id,
+                    sesion_usuario_id = User.SesionId(),
                     lat = dto.lat,
                     lng = dto.lng,
-                    fecha_hora = dto.fecha_hora ?? DateTimeOffset.UtcNow,
+                    fecha_hora = DateTimeOffset.UtcNow,
                     // mensaje and estado_id are not provided by DTO; leave defaults (estado_id has default "01")
                 };
 
@@ -58,12 +66,12 @@ namespace App.WebApi.Controllers
 
                 var _usuariosForNotificacion = await _unitOfWork.Usuarios.GetUsersForPanicAlertNotificacionAsync(entity.sesion_usuario_id);
 
-                if(_usuariosForNotificacion != null && _usuariosForNotificacion.Count > 0)
+                if (_usuariosForNotificacion != null && _usuariosForNotificacion.Count > 0)
                 {
                     await _unitOfWork.PanicAlertNotificaciones.AddAsync(id, _usuariosForNotificacion);
                 }
 
-                return CreatedAtRoute("PanicAlert_ObtenerPorId", new { id = id }, new { id = id });
+                return CreatedAtRoute("PanicAlert_ObtenerPorId", new { id = id }, new GenericResponseIdDto<Guid>(id));
             }
             catch (Exception ex)
             {

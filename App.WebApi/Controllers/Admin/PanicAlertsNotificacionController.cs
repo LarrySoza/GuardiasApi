@@ -1,7 +1,6 @@
 ﻿using App.Application.Interfaces;
 using App.Application.Models.PanicAlert;
 using App.Core.Entities;
-using App.WebApi.Models.Shared;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

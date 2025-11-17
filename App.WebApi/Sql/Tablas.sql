@@ -298,7 +298,7 @@ CREATE TABLE puesto_turno (
 CREATE TABLE usuario_puesto (
  usuario_id uuid NOT NULL,
  puesto_id uuid NOT NULL,
- CONSTRAINT usuario_puesto_pk PRIMARY KEY (usuario_id, unidad_id),
+ CONSTRAINT usuario_puesto_pk PRIMARY KEY (usuario_id, puesto_id),
  CONSTRAINT usuario_puesto_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
  CONSTRAINT usuario_puesto_fk_puesto FOREIGN KEY (puesto_id) REFERENCES puesto (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
 );

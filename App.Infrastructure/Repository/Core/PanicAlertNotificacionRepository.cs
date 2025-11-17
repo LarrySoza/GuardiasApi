@@ -56,7 +56,14 @@ namespace App.Infrastructure.Repository.Core
 
         public async Task Confirm(Guid panicAlertNotificacionId, Guid usuarioId)
         {
-            const string sql = "UPDATE panic_alert_notificacion SET aceptada = true, updated_at = now(), updated_by = @updatedBy WHERE id = @id AND deleted_at IS NULL";
+            const string updateNotificacionSql = "UPDATE panic_alert_notificacion SET aceptada = true, updated_at = now(), updated_by = @updatedBy WHERE id = @id AND deleted_at IS NULL";
+
+            const string updatePanicSql = @"UPDATE panic_alert
+                                            SET estado_id = '02', updated_at = now(), updated_by = @updatedBy
+                                            WHERE id = (
+                                                SELECT panic_alert_id FROM panic_alert_notificacion WHERE id = @id AND deleted_at IS NULL
+                                            )";
+
             var p = new DynamicParameters();
             p.Add("@id", panicAlertNotificacionId);
             p.Add("@updatedBy", usuarioId);
@@ -64,7 +71,19 @@ namespace App.Infrastructure.Repository.Core
             using (var connection = _dbFactory.CreateConnection())
             {
                 connection.Open();
-                await connection.ExecuteAsync(sql, p);
+                using var tx = connection.BeginTransaction();
+                try
+                {
+                    await connection.ExecuteAsync(updateNotificacionSql, p, tx);
+                    await connection.ExecuteAsync(updatePanicSql, p, tx);
+
+                    tx.Commit();
+                }
+                catch
+                {
+                    try { tx.Rollback(); } catch { }
+                    throw;
+                }
             }
         }
 

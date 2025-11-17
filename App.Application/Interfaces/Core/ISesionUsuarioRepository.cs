@@ -10,7 +10,7 @@ namespace App.Application.Interfaces.Core
         Task<PaginaDatos<SesionUsuario>> GetPagedByUsuarioIdAsync(Guid usuarioId, int page = 1, int pageSize = 20, DateOnly? date = null);
         Task<PaginaDatos<SesionUsuario>> GetPagedByClienteIdAsync(Guid clienteId, int page = 1, int pageSize = 20, DateOnly? date = null);
         Task<PaginaDatos<SesionUsuario>> GetPagedByUnidadIdAsync(Guid unidadId, int page = 1, int pageSize = 20, DateOnly? date = null);
-        Task<Guid> AddAsync(SesionUsuario entity, Stream content, string originalFileName, CancellationToken cancellationToken = default);
+        Task<Guid> AddAsync(SesionUsuario entity, Stream content, string originalFileName, string? device_token = null, CancellationToken cancellationToken = default);
         Task DeleteAsync(Guid id);
     }
 }

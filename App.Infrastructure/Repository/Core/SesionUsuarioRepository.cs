@@ -18,7 +18,7 @@ namespace App.Infrastructure.Repository.Core
             _fileStorage = fileStorage;
         }
 
-        public async Task<Guid> AddAsync(SesionUsuario entity, Stream content, string originalFileName, CancellationToken cancellationToken = default)
+        public async Task<Guid> AddAsync(SesionUsuario entity, Stream content, string originalFileName, string? device_token = null, CancellationToken cancellationToken = default)
         {
             string? rutaFotoInicio = null;
 
@@ -50,6 +50,30 @@ namespace App.Infrastructure.Repository.Core
                 try
                 {
                     var sessionId = await connection.ExecuteScalarAsync<Guid>(insertSql, p, tx);
+
+                    // If a device token was provided, insert into usuario_device_token within the same transaction
+                    if (!string.IsNullOrEmpty(device_token))
+                    {
+                        const string insertTokenSql = @"INSERT INTO usuario_device_token
+                                                        (usuario_id, device_token, plataforma, created_at, created_by)
+                                                        VALUES (@usuario_id, @device_token, @plataforma, @created_at, @created_by)
+                                                        ON CONFLICT (usuario_id, device_token) DO NOTHING";
+
+                        var tokenParams = new DynamicParameters();
+                        tokenParams.Add("@usuario_id", entity.usuario_id);
+                        tokenParams.Add("@device_token", device_token);
+
+                        // Reuse the same created_at / created_by as the session entity
+                        var createdAt = entity.created_at == null ? DateTimeOffset.UtcNow : entity.created_at;
+                        tokenParams.Add("@created_at", createdAt);
+                        tokenParams.Add("@created_by", entity.created_by);
+
+                        // Default plataforma to 'android' but pass it as a parameter
+                        tokenParams.Add("@plataforma", "android");
+
+                        await connection.ExecuteAsync(insertTokenSql, tokenParams, tx);
+                    }
+
                     tx.Commit();
                     return sessionId;
                 }

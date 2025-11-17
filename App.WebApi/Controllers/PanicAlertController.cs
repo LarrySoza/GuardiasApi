@@ -10,6 +10,9 @@ using System.Net;
 
 namespace App.WebApi.Controllers
 {
+    /// <summary>
+    /// Controller para operaciones sobre alertas de pánico. Requiere autenticación.
+    /// </summary>
     [Authorize]
     [ApiController]
     [Route("[controller]")]
@@ -80,6 +83,16 @@ namespace App.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Obtiene una alerta de pánico por su identificador.
+        /// </summary>
+        /// <param name="id">Identificador (GUID) de la alerta.</param>
+        /// <returns>
+        /// - 200 OK con <see cref="PanicAlertDto"/> si se encuentra la alerta.
+        /// - 404 Not Found si no existe la alerta.
+        /// </returns>
+        /// <response code="200">Alerta encontrada y devuelta como <see cref="PanicAlertDto"/>.</response>
+        /// <response code="404">Alerta no encontrada.</response>
         [ProducesResponseType(typeof(PanicAlertDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpGet("{id:guid}", Name = "PanicAlert_ObtenerPorId")]
@@ -104,7 +117,12 @@ namespace App.WebApi.Controllers
         /// Cancela una alerta de pánico estableciendo su estado a '03' (cancelado).
         /// </summary>
         /// <param name="id">Identificador (GUID) de la alerta a cancelar.</param>
-        /// <returns>200 OK con mensaje genérico o404 si no existe.</returns>
+        /// <returns>
+        /// - 200 OK con <see cref="GenericResponseDto"/> indicando éxito.
+        /// - 404 Not Found si la alerta no existe.
+        /// </returns>
+        /// <response code="200">Alerta cancelada correctamente.</response>
+        /// <response code="404">Alerta no encontrada.</response>
         [ProducesResponseType(typeof(GenericResponseDto), (int)HttpStatusCode.OK)]
         [ProducesResponseType((int)HttpStatusCode.NotFound)]
         [HttpPost("{id:guid}/cancelar", Name = "PanicAlert_Cancelar")]
@@ -126,6 +144,15 @@ namespace App.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// Obtiene alertas de pánico del usuario autenticado con paginación y filtros opcionales.
+        /// </summary>
+        /// <param name="estadoId">Filtro por estado (por ejemplo "01", "02", "03") opcional.</param>
+        /// <param name="pagina">Número de página (mínimo 1).</param>
+        /// <param name="tamanoPagina">Tamaño de página (entre 1 y 100).</param>
+        /// <param name="date">Filtro por fecha (DateOnly). Formato esperado: yyyy-MM-dd.</param>
+        /// <returns>200 OK con un objeto <see cref="PaginaDatos{PanicAlertDto}"/> que contiene la página solicitada.</returns>
+        /// <response code="200">Resultados paginados devueltos correctamente.</response>
         [ProducesResponseType(typeof(PaginaDatos<PanicAlertDto>), (int)HttpStatusCode.OK)]
         [HttpGet(Name = "PanicAlert_ObtenerPaginado")]
         public async Task<IActionResult> ObtenerPaginado([FromQuery] string? estadoId = null, [FromQuery] int pagina = 1, [FromQuery] int tamanoPagina = 20, [FromQuery] DateOnly? date = null)

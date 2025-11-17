@@ -9,8 +9,8 @@ namespace App.WebApi.Models.Sesion
         public Guid? cliente_id { get; set; }
         public Guid? puesto_id { get; set; }
         public int? turno_id { get; set; }
-        public DateTimeOffset? fecha_inicio { get; set; }
         public string? otros_detalle { get; set; }
+        public string? device_token { get; set; }
 
         // foto enviada desde el cliente (multipart/form-data)
         public IFormFile? foto_inicio { get; set; }

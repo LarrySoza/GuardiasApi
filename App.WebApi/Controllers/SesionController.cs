@@ -70,7 +70,7 @@ namespace App.WebApi.Controllers
                 sesion.unidad_id = dto.unidad_id;
                 if (dto.puesto_id.HasValue) sesion.puesto_id = dto.puesto_id.Value;
                 if (dto.turno_id.HasValue) sesion.turno_id = dto.turno_id.Value;
-                sesion.fecha_inicio = dto.fecha_inicio ?? DateTimeOffset.UtcNow;
+                sesion.fecha_inicio = DateTimeOffset.UtcNow;
 
                 if (!string.IsNullOrEmpty(dto.otros_detalle))
                 {
@@ -88,7 +88,7 @@ namespace App.WebApi.Controllers
                     originalFileName = dto.foto_inicio.FileName ?? "foto.jpg";
                 }
 
-                var newId = await _unitOfWork.SesionUsuarios.AddAsync(sesion, fotoStream!, originalFileName);
+                var newId = await _unitOfWork.SesionUsuarios.AddAsync(sesion, fotoStream!, originalFileName, dto.device_token);
 
                 var response = await _authService.AuthenticateAsync(User.UserName(), newId);
 

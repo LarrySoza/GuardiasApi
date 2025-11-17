@@ -176,6 +176,32 @@ CREATE TABLE usuario (
 INSERT INTO usuario(nombre_usuario,contrasena_hash) VALUES('admin','ALiah/YdxclgLLhWoIw11aa8F4RcCP1b6f0l12wyENzsRmxPWYPn7I+v4pF93Bc8qg==');
 
 -- =====================
+-- Descripción: Tokens de dispositivos para notificaciones (Firebase Cloud Messaging)
+-- =====================
+CREATE TABLE usuario_device_token (
+ id uuid NOT NULL DEFAULT uuid_generate_v4(),
+ usuario_id uuid NOT NULL,
+ device_token text NOT NULL,
+ plataforma text, -- 'android','ios','web'
+ activo boolean DEFAULT true,
+ ultima_actividad timestamp with time zone,
+ -- auditoría
+ created_at timestamp with time zone DEFAULT now(),
+ created_by uuid,
+ updated_at timestamp with time zone,
+ updated_by uuid,
+ deleted_at timestamp with time zone,
+ CONSTRAINT usuario_device_token_pk PRIMARY KEY (id),
+ CONSTRAINT usuario_device_token_device_token_unq UNIQUE (usuario_id, device_token),
+ CONSTRAINT usuario_device_token_fk_usuario FOREIGN KEY (usuario_id) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE CASCADE,
+ CONSTRAINT usuario_device_token_fk_created_by FOREIGN KEY (created_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT,
+ CONSTRAINT usuario_device_token_fk_updated_by FOREIGN KEY (updated_by) REFERENCES usuario (id) MATCH SIMPLE ON UPDATE RESTRICT ON DELETE RESTRICT
+);
+
+CREATE INDEX IF NOT EXISTS usuario_device_token_usuario_id_idx ON usuario_device_token (usuario_id);
+CREATE INDEX IF NOT EXISTS usuario_device_token_active_idx ON usuario_device_token (usuario_id, activo);
+
+-- =====================
 -- Descripción: Relación N:N entre usuarios y roles.
 -- =====================
 CREATE TABLE usuario_rol (
@@ -189,7 +215,7 @@ CREATE TABLE usuario_rol (
 INSERT INTO usuario_rol SELECT id,'00' FROM usuario WHERE nombre_usuario='admin'; 
 
 -- =====================
--- Descripción: Clientes (empresas). `usuario_id` es el usuario responsable.
+-- Descripción: Clientes (empresas). `usuario_id` es el usuario responsables.
 -- =====================
 CREATE TABLE cliente (
  id uuid NOT NULL DEFAULT uuid_generate_v4(),
@@ -746,6 +772,8 @@ DROP TABLE IF EXISTS cliente;
 
 DROP TABLE IF EXISTS usuario_rol;
 DROP TABLE IF EXISTS usuario;
+
+DROP TABLE IF EXISTS usuario_device_token;
 
 DROP TABLE IF EXISTS adjunto_tipo;
 DROP TABLE IF EXISTS tipo_documento;

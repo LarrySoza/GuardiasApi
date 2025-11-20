@@ -97,8 +97,22 @@ namespace App.WebApi.Controllers
                 var usuario = await _unitOfWork.Usuarios.GetByIdAsync(User.Id());
                 if (usuario == null) return NotFound();
 
-                var unidades = await _unitOfWork.UsuarioUnidades.GetAllAsync(User.Id());
+                var unidadesAsignadas = new List<UnidadDto>();
 
+                if (User.IsSupervisor())
+                {
+                    var unidades = await _unitOfWork.UsuarioUnidades.GetAllAsync(User.Id());
+                    unidadesAsignadas = unidades.Select(u => _mapper.Map<UnidadDto>(u)).ToList();
+                }
+                else
+                {
+                    var unidades = await _unitOfWork.UsuarioPuestos.GetAllUnidadAsync(User.Id());
+                    unidadesAsignadas = unidades.Select(u => _mapper.Map<UnidadDto>(u)).ToList();
+                }
+
+                return Ok(unidadesAsignadas);
+
+                /*
                 // Mapear unidades asignadas a DTOs
                 var dtos = unidades.Select(u => _mapper.Map<UnidadDto>(u)).ToList();
 
@@ -142,6 +156,7 @@ namespace App.WebApi.Controllers
                 }
 
                 return Ok(roots);
+                */
             }
             catch (Exception ex)
             {

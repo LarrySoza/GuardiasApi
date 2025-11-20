@@ -224,5 +224,25 @@ namespace App.WebApi
 
             throw new Exception("No se encontró el ID de sesion en el token.");
         }
+
+        public static bool IsGuardia(this ClaimsPrincipal user)
+        {
+            var roles = user?.Claims?.Where(c => c.Type.Equals(ClaimTypes.Role, StringComparison.OrdinalIgnoreCase)).Select(c => c.Value).ToList();
+            if (roles != null)
+            {
+                return roles.Contains("GUARDIA");
+            }
+            return false;
+        }
+
+        public static bool IsSupervisor(this ClaimsPrincipal user)
+        {
+            var roles = user?.Claims?.Where(c => c.Type.Equals(ClaimTypes.Role, StringComparison.OrdinalIgnoreCase)).Select(c => c.Value).ToList();
+            if (roles != null)
+            {
+                return roles.Contains("SUPERVISOR");
+            }
+            return false;
+        }
     }
 }

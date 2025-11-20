@@ -7,5 +7,6 @@ namespace App.Application.Interfaces.Core
         Task AddAsync(Guid usuarioId, Guid unidadId);
         Task DeleteAsync(Guid usuarioId, Guid unidadId);
         Task<IReadOnlyList<Puesto>> GetAllAsync(Guid usuarioId);
+        Task<IReadOnlyList<Unidad>> GetAllUnidadAsync(Guid usuarioId);
     }
 }

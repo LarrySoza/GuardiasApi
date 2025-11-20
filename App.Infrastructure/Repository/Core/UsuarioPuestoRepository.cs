@@ -65,5 +65,31 @@ namespace App.Infrastructure.Repository.Core
                 return items.AsList();
             }
         }
+
+        /// <summary>
+        /// devuelve las Unidades asociadas a los puestos del usuario
+        /// </summary>
+        /// <param name="usuarioId"></param>
+        /// <returns></returns>
+        public async Task<IReadOnlyList<Unidad>> GetAllUnidadAsync(Guid usuarioId)
+        {
+            const string sql = @"SELECT DISTINCT u.*
+                                 FROM unidad u
+                                 JOIN puesto p ON p.unidad_id = u.id
+                                 JOIN usuario_puesto up ON up.puesto_id = p.id
+                                 WHERE up.usuario_id = @usuario_id
+                                   AND u.deleted_at IS NULL
+                                 ORDER BY u.nombre";
+
+            var p = new DynamicParameters();
+            p.Add("@usuario_id", usuarioId);
+
+            using (var connection = _dbFactory.CreateConnection())
+            {
+                connection.Open();
+                var items = await connection.QueryAsync<Unidad>(sql, p);
+                return items.AsList();
+            }
+        }
     }
 }

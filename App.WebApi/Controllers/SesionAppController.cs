@@ -12,14 +12,14 @@ namespace App.WebApi.Controllers
     [Authorize]
     [ApiController]
     [Route("[controller]")]
-    public class SesionController : ControllerBase
+    public class SesionAppController : ControllerBase
     {
-        private readonly ILogger<SesionController> _logger;
+        private readonly ILogger<SesionAppController> _logger;
         private readonly IConfiguration _config;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IAuthService _authService;
 
-        public SesionController(IConfiguration config, ILogger<SesionController> logger, IUnitOfWork unitOfWork, IAuthService authService)
+        public SesionAppController(IConfiguration config, ILogger<SesionAppController> logger, IUnitOfWork unitOfWork, IAuthService authService)
         {
             _config = config;
             _logger = logger;
@@ -49,6 +49,12 @@ namespace App.WebApi.Controllers
         {
             try
             {
+                if (!User.IsGuardia() && !User.IsSupervisor())
+                {
+                    // Solo guardias y supervisores pueden crear sesiones
+                    return Forbid();
+                }
+
                 // Validar dto
                 if (!ModelState.IsValid) return BadRequest(ModelState);
 
